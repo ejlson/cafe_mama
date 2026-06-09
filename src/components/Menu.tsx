@@ -1,6 +1,17 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -102,6 +113,13 @@ const DRINKS_GROUPS: Group[] = [
   {
     title: "Coffee",
     items: [
+      { name: "Espresso", price: "—" },
+      { name: "Cortado", price: "—" },
+      { name: "Macchiato", price: "—" },
+      { name: "Flat White", price: "—" },
+      { name: "Latte", price: "—" },
+      { name: "Cappuccino", price: "—" },
+      { name: "Americano", price: "—" },
       { name: "Spanish Iced Latte", price: "5.20" },
       { name: "Ube or Milo Latte", price: "6.20" },
     ],
@@ -148,6 +166,109 @@ const CATEGORIES: Category[] = [
   { key: "bakery", label: "Bakery", soon: true },
 ];
 
+// ---------------------------------------------------------------------------
+//  Cursor-tracking image preview (after demos.gsap.com/demo/
+//  cursor-tracking-image-preview). Hovering a menu row with a photo pops the
+//  image up with a white border + drop shadow; it follows the cursor with a
+//  smooth lag via gsap.quickTo. Desktop / fine-pointer only.
+// ---------------------------------------------------------------------------
+type PreviewData = { img: string; w?: number; h?: number; angle?: number };
+type PreviewApi = { show: (d: PreviewData) => void; hide: () => void };
+const PreviewCtx = createContext<PreviewApi | null>(null);
+
+function MenuImagePreview({ children }: { children: ReactNode }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const apiRef = useRef<PreviewApi | null>(null);
+  // The preview is portalled to <body> so it sits OUTSIDE ScrollSmoother's
+  // transformed #smooth-content — otherwise position:fixed is relative to that
+  // transform and the image drifts off the cursor.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  useGSAP(
+    () => {
+      if (!wrapRef.current || !imgRef.current) return;
+      const wrap = wrapRef.current;
+      const img = imgRef.current;
+    gsap.set(wrap, { xPercent: -50, yPercent: -50, autoAlpha: 0, scale: 0.8 });
+    const xTo = gsap.quickTo(wrap, "x", { duration: 0.5, ease: "power3" });
+    const yTo = gsap.quickTo(wrap, "y", { duration: 0.5, ease: "power3" });
+    const onMove = (e: PointerEvent) => {
+      xTo(e.clientX);
+      yTo(e.clientY);
+    };
+    window.addEventListener("pointermove", onMove);
+
+    apiRef.current = {
+      show: (d) => {
+        // skip on touch / coarse pointers — there's no cursor to track
+        if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+          return;
+        img.src = d.img;
+        const natW = d.w ?? 240;
+        const natH = d.h ?? 180;
+        const W = 250;
+        gsap.set(wrap, {
+          width: W,
+          height: W * (natH / natW),
+          rotate: d.angle ?? 0,
+        });
+        gsap.to(wrap, {
+          autoAlpha: 1,
+          scale: 1,
+          duration: 0.35,
+          ease: "back.out(1.6)",
+          overwrite: "auto",
+        });
+      },
+      hide: () => {
+        gsap.to(wrap, {
+          autoAlpha: 0,
+          scale: 0.8,
+          duration: 0.25,
+          ease: "power2.in",
+          overwrite: "auto",
+        });
+      },
+    };
+      return () => window.removeEventListener("pointermove", onMove);
+    },
+    { dependencies: [mounted] },
+  );
+
+  // stable api that delegates to the live handlers built inside useGSAP
+  const api = useMemo<PreviewApi>(
+    () => ({
+      show: (d) => apiRef.current?.show(d),
+      hide: () => apiRef.current?.hide(),
+    }),
+    [],
+  );
+
+  return (
+    <PreviewCtx.Provider value={api}>
+      {children}
+      {mounted &&
+        createPortal(
+          <div
+            ref={wrapRef}
+            aria-hidden
+            className="pointer-events-none fixed left-0 top-0 z-[60] will-change-transform"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={imgRef}
+              alt=""
+              className="block h-full w-full rounded-2xl border-[6px] border-cream object-cover shadow-[0_18px_44px_rgba(0,0,0,0.5)]"
+            />
+          </div>,
+          document.body,
+        )}
+    </PreviewCtx.Provider>
+  );
+}
+
 function ItemRow({
   item,
   body,
@@ -165,6 +286,7 @@ function ItemRow({
   const hasDetail = Boolean(item.desc || item.img);
   const [hover, setHover] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
+  const preview = useContext(PreviewCtx);
   // Open on desktop hover, or for the scroll-active item on mobile.
   const open = hover || Boolean(active);
 
@@ -211,8 +333,28 @@ function ItemRow({
           : undefined
       }
       className={`py-2.5 ${interactive ? "cursor-pointer" : ""}`}
-      onMouseEnter={hasDetail ? () => setHover(true) : undefined}
-      onMouseLeave={hasDetail ? () => setHover(false) : undefined}
+      onMouseEnter={
+        hasDetail
+          ? () => {
+              setHover(true);
+              if (item.img)
+                preview?.show({
+                  img: item.img,
+                  w: item.w,
+                  h: item.h,
+                  angle: item.angle,
+                });
+            }
+          : undefined
+      }
+      onMouseLeave={
+        hasDetail
+          ? () => {
+              setHover(false);
+              if (item.img) preview?.hide();
+            }
+          : undefined
+      }
     >
       {/* The row only ever shows the name · leader · price. */}
       <p
@@ -253,7 +395,9 @@ function ItemRow({
                 )}
               </p>
             )}
-            {item.img && (
+            {/* On desktop the photo is shown as the cursor-tracking preview;
+                inline image is kept only for the mobile scroll-active row. */}
+            {active && item.img && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={item.img}
@@ -659,6 +803,7 @@ export default function Menu() {
       };
 
   return (
+    <MenuImagePreview>
     <section
       ref={sectionRef}
       id="menu"
@@ -755,5 +900,6 @@ export default function Menu() {
       </div>
 
     </section>
+    </MenuImagePreview>
   );
 }

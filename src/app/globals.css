@@ -212,6 +212,12 @@ body {
   color: #ffd968;
 }
 
+/* When the custom cursor is active, hide the native one everywhere. */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
 /* Film-style subtitle bar */
 .subtitle {
   font-family: var(--font-body);

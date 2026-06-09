@@ -5,6 +5,7 @@ import Menu from "@/components/Menu";
 import Gallery from "@/components/Gallery";
 import Footer from "@/components/Footer";
 import CrtOverlay from "@/components/CrtOverlay";
+import CustomCursor from "@/components/CustomCursor";
 import MusicToggle from "@/components/MusicToggle";
 import MenuReveal from "@/components/MenuReveal";
 import Scrollbar from "@/components/Scrollbar";
@@ -29,6 +30,7 @@ export default function Home() {
       {/* Full-screen hero→menu morph transition + its bottom-centre trigger. */}
       <MenuReveal />
       <CrtOverlay />
+      <CustomCursor />
       <MusicToggle />
       <Scrollbar />
     </>

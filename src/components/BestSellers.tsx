@@ -28,6 +28,7 @@ type Drink = {
   price: string;
   full: string;
   cut: string;
+  cutRatio: number; // sticker PNG native width / height — so the box matches it
 };
 
 const DRINKS: Drink[] = [
@@ -37,6 +38,7 @@ const DRINKS: Drink[] = [
     price: "6.20",
     full: "/media/drinks/ubematcha-web.jpg",
     cut: "/media/drinks/cuts/ubematcha_sticker.png",
+    cutRatio: 620 / 864,
   },
   {
     name: "Honey Peach Mango",
@@ -44,6 +46,7 @@ const DRINKS: Drink[] = [
     price: "4.70",
     full: "/media/drinks/hpm-web.jpg",
     cut: "/media/drinks/cuts/hpm_sticker.png",
+    cutRatio: 620 / 808,
   },
   {
     name: "Spanish Iced Latte",
@@ -51,6 +54,7 @@ const DRINKS: Drink[] = [
     price: "5.20",
     full: "/media/drinks/spanishlatte-web.jpg",
     cut: "/media/drinks/cuts/spanishlatte_sticker.png",
+    cutRatio: 620 / 827,
   },
 ];
 
@@ -120,9 +124,12 @@ export default function BestSellers() {
         const fullW = gsap.utils.clamp(185, 275, w * 0.17);
         const fullH = fullW * 1.4;
 
-        // stickers (same size) that settle along the bottom of the bag
+        // stickers settle along the bottom of the bag. Uniform WIDTH so every
+        // cup body reads the same size; each box's HEIGHT follows that sticker's
+        // own aspect ratio, so tall garnishes (ube's ice peak) just rise higher
+        // instead of shrinking the cup. Bottoms are aligned below.
         const cutW = gsap.utils.clamp(120, 225, bagW * 0.18);
-        const cutH = cutW * 1.34;
+        const cutHFor = (i: number) => cutW / DRINKS[i].cutRatio;
 
         // horizontal spread of the drinks
         const amp = Math.min(w * 0.26, 360);
@@ -179,10 +186,13 @@ export default function BestSellers() {
           return { x: wp.x, y: wp.y, len: best.len };
         });
 
-        // all three stickers (same size) line up in a row along the bottom of bag
+        // all three stickers line up in a row across the bag, evenly spread but
+        // kept clear of the edges, with their BOTTOMS on one baseline (so the
+        // differing cup heights line up at the base, not by their centres).
+        const baseline = bagTopY + bagH * 0.78 + cutHFor(1) / 2;
         const slot = (i: number) => ({
-          x: cx + (i - (DRINKS.length - 1) / 2) * bagW * 0.24,
-          y: bagTopY + bagH * 0.78,
+          x: cx + (i - (DRINKS.length - 1) / 2) * cutW * 1.15,
+          y: baseline - cutHFor(i) / 2,
         });
 
         // --- place static elements ---
@@ -217,7 +227,7 @@ export default function BestSellers() {
           });
           gsap.set(cutRefs.current[i], {
             width: cutW,
-            height: cutH,
+            height: cutHFor(i),
             left: cornerX,
             top: cornerY,
             xPercent: -50,
@@ -226,19 +236,6 @@ export default function BestSellers() {
             y: 0,
           });
         });
-
-        const trail = (i: number) => {
-          const s = stations[i];
-          const pts: { x: number; y: number }[] = [];
-          const steps = 5;
-          for (let k = 0; k <= steps; k++) {
-            const len = s.len + (total - s.len) * (k / steps);
-            const p = path.getPointAtLength(len);
-            pts.push({ x: p.x - s.x, y: p.y - s.y });
-          }
-          pts.push({ x: cx - s.x, y: bagMouthY + bagH * 0.12 - s.y });
-          return pts;
-        };
 
         if (!motion) {
           gsap.set(titleRef.current, { autoAlpha: 1, y: 0 });
@@ -272,10 +269,7 @@ export default function BestSellers() {
         const popAt = (Y: number) =>
           gsap.utils.clamp(0.02, 0.72, (Y - vh / 2) / (h - vh)) * TT;
 
-        // 1) the line is DRAWN ON as the user scrolls: its leading edge tracks the
-        //    CENTRE of the screen, so you see the dots being added in view right as
-        //    each drink reaches the middle, and it keeps drawing the whole way down
-        //    into the bag.
+        // 1) draw line as user scrolls down
         const EDGE = vh * 0.66; // draw-edge sits in the lower third of the screen
         const tFull = gsap.utils.clamp(2, TT, ((lineEnd - EDGE) / (h - vh)) * TT);
         tl.fromTo(
@@ -316,27 +310,38 @@ export default function BestSellers() {
           const s = stations[i];
           const sl = slot(i);
           const at = TT * 0.82 + i * 0.45;
-          // the full photo follows the dotted path down and INTO the bag — it
-          // stays visible the whole way, shrinking, and only vanishes once it has
-          // reached the bag's mouth.
+        
+          // a) glide across to sit directly above the bag's mouth (upright)
           tl!.to(
             fullRefs.current[i],
             {
-              motionPath: { path: trail(i), curviness: 1.1 },
-              scale: 0.3,
+              x: cx - s.x,
+              y: bagTopY - bagH * 0.04 - s.y,
+              scale: 0.5,
               rotate: 0,
-              duration: 1.2,
-              ease: "power1.inOut",
+              duration: 0.55,
+              ease: "power2.inOut",
             },
             at,
           );
+          // b) then drop STRAIGHT DOWN into the bag (x held at centre)
           tl!.to(
             fullRefs.current[i],
-            { autoAlpha: 0, duration: 0.28, ease: "power1.in" },
-            at + 0.98,
+            {
+              y: bagTopY + bagH * 0.3 - s.y,
+              scale: 0.3,
+              duration: 0.65,
+              ease: "power1.in",
+            },
+            at + 0.55,
           );
-          // every corner sticker disappears as its photo flies in, then reappears
-          // in the row along the bottom of the bag
+          // c) fade out as it sinks behind the bag front
+          tl!.to(
+            fullRefs.current[i],
+            { autoAlpha: 0, duration: 0.3, ease: "power1.in" },
+            at + 0.95,
+          );
+          
           tl!.to(
             cutRefs.current[i],
             { autoAlpha: 0, scale: 0.6, duration: 0.3, ease: "power2.in" },
@@ -589,7 +594,7 @@ export default function BestSellers() {
                 src={drink.cut}
                 alt={drink.name}
                 loading="lazy"
-                className="block h-full w-full object-contain drop-shadow-[0_10px_16px_rgba(0,0,0,0.4)]"
+                className="block h-full w-full object-contain object-bottom drop-shadow-[0_10px_16px_rgba(0,0,0,0.4)]"
               />
             </div>
             <div
