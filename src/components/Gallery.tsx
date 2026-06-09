@@ -1,120 +1,124 @@
-import Image from "next/image";
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 /**
- * Retro photo-wall gallery. Images are optimized crops generated from the
- * shopfront photo and the cafe's print menus/posters. Add more by dropping
- * files in /public/media and extending PHOTOS.
+ * Bento gallery, after https://codepen.io/GreenSock/pen/vYMzKZx — a mixed-size
+ * photo grid at 80% width that scrolls vertically forever. Two identical bento
+ * blocks are stacked and the track is translated up by exactly one block on a
+ * seamless loop. Web-optimised placeholder snaps live in /media/gallery/web.
  */
-const PHOTOS: {
-  src: string;
-  alt: string;
-  caption: string;
-  w: number;
-  h: number;
-  span?: string;
-}[] = [
-  {
-    src: "/media/g-shopfront-full.jpg",
-    alt: "Cafe Mama & Sons peach shopfront with stripey chairs",
-    caption: "The corner shop · NW1",
-    w: 1000,
-    h: 1517,
-    span: "row-span-2",
-  },
-  {
-    src: "/media/g-sando-matcha.jpg",
-    alt: "A sando and an iced ube matcha",
-    caption: "Sando + ube matcha",
-    w: 1400,
-    h: 474,
-    span: "sm:col-span-2",
-  },
-  {
-    src: "/media/g-longanisa-meal.jpg",
-    alt: "Longanisa meal deal with tater-tots and a drink",
-    caption: "Longanisa meal deal · £10.75",
-    w: 1400,
-    h: 937,
-    span: "sm:col-span-2",
-  },
-  {
-    src: "/media/g-shopfront-sign.jpg",
-    alt: "Cafe Mama & Sons hand-painted sign",
-    caption: "Coffee · Sandos · Matcha",
-    w: 850,
-    h: 683,
-  },
-  {
-    src: "/media/g-mealdeals-poster.jpg",
-    alt: "Meal deals poster",
-    caption: "Meal deals from £14",
-    w: 900,
-    h: 1272,
-  },
-  {
-    src: "/media/g-longanisa-poster.jpg",
-    alt: "Longanisa meal deal poster",
-    caption: "Pinoy comfort, to go",
-    w: 900,
-    h: 1273,
-  },
+const IMAGES = [
+  "DSCF2296",
+  "DSC07056",
+  "DSCF3015",
+  "DSCF2298",
+  "DSC07722",
+  "DSCF2472",
+  "DSCF3035",
+  "DSC07739",
+  "DSCF2995",
+  "DSCF3052",
+].map((n) => `/media/gallery/web/${n}-web.jpg`);
+
+// Spans (in order) that tile a 4-column grid into a clean 5-row bento.
+const SPANS = [
+  "col-span-2 row-span-2",
+  "col-span-2 row-span-1",
+  "col-span-1 row-span-1",
+  "col-span-1 row-span-1",
+  "col-span-1 row-span-1",
+  "col-span-1 row-span-1",
+  "col-span-2 row-span-2",
+  "col-span-2 row-span-1",
+  "col-span-2 row-span-1",
+  "col-span-2 row-span-1",
 ];
 
+function Bento({ hidden }: { hidden?: boolean }) {
+  return (
+    <div
+      aria-hidden={hidden}
+      className="grid grid-cols-4 gap-3 [grid-auto-rows:11.5vw] sm:gap-4"
+    >
+      {IMAGES.map((src, i) => (
+        <div
+          key={`${src}-${hidden ? "b" : "a"}`}
+          className={`relative overflow-hidden rounded-xl border border-cream/10 ${SPANS[i]}`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Gallery() {
+  const root = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const el = track.current!;
+      const block = el.children[0] as HTMLElement;
+      const gap = parseFloat(getComputedStyle(el).rowGap) || 0;
+
+      const loop = () => {
+        gsap.killTweensOf(el);
+        const dist = block.offsetHeight + gap; // exactly one block → seamless
+        gsap.fromTo(
+          el,
+          { y: 0 },
+          { y: -dist, ease: "none", duration: dist / 45, repeat: -1 }, // ~45px/s
+        );
+      };
+      loop();
+
+      // re-measure if the layout (vw-based rows) changes on resize
+      window.addEventListener("resize", loop);
+      return () => window.removeEventListener("resize", loop);
+    },
+    { scope: root },
+  );
+
   return (
     <section
       id="gallery"
-      className="relative py-20 text-cream sm:py-28"
+      ref={root}
+      className="relative py-16 text-cream sm:py-20"
       style={{
         background:
           "radial-gradient(130% 120% at 50% 0%, #2e2114 0%, #221a12 55%, #140f08 100%)",
       }}
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="text-center">
-          <p className="font-body text-xs font-bold uppercase tracking-[0.4em] text-peach">
-            On the reel
-          </p>
-          <h2 className="mt-3 font-display text-6xl leading-[0.85] sm:text-7xl lg:text-8xl">
-            THE GALLERY
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-cream/70">
-            Snaps from the shop floor. Follow{" "}
-            <a
-              href="https://www.instagram.com/cafe_mama_sons/"
-              target="_blank"
-              rel="noreferrer"
-              className="underline decoration-peach underline-offset-4 hover:text-peach"
-            >
-              @cafe_mama_sons
-            </a>{" "}
-            for the full feed.
-          </p>
-        </div>
+      <div className="mx-auto mb-8 w-[80%] text-center">
+        <p className="font-body text-xs font-bold uppercase tracking-[0.4em] text-peach">
+          On the reel
+        </p>
+        <h2 className="mt-2 font-display text-5xl leading-[0.85] sm:text-6xl lg:text-7xl">
+          THE GALLERY
+        </h2>
+      </div>
 
-        <div className="mt-12 grid auto-rows-[200px] grid-cols-2 gap-3 sm:auto-rows-[230px] sm:grid-cols-4 sm:gap-4">
-          {PHOTOS.map((p, i) => (
-            <figure
-              key={p.src}
-              className={`group relative overflow-hidden rounded-lg border border-cream/10 bg-black ${
-                p.span ?? ""
-              }`}
-            >
-              <Image
-                src={p.src}
-                alt={p.alt}
-                width={p.w}
-                height={p.h}
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                priority={i === 0}
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              <figcaption className="absolute bottom-0 left-0 right-0 p-3 font-body text-xs font-semibold uppercase tracking-widest text-cream/90">
-                {p.caption}
-              </figcaption>
-            </figure>
-          ))}
+      {/* 80%-wide window; the bento track scrolls through it forever */}
+      <div className="mx-auto h-[82vh] w-[80%] overflow-hidden rounded-2xl">
+        <div
+          ref={track}
+          className="flex flex-col gap-3 will-change-transform sm:gap-4"
+        >
+          <Bento />
+          <Bento hidden />
         </div>
       </div>
     </section>

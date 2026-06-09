@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import TvHero from "@/components/TvHero";
 import Menu from "@/components/Menu";
-import Gallery from "@/components/Gallery";
+// import Gallery from "@/components/Gallery"; // removed for now (bento gallery kept in component)
 import Footer from "@/components/Footer";
 import CrtOverlay from "@/components/CrtOverlay";
 import CustomCursor from "@/components/CustomCursor";
@@ -22,7 +22,7 @@ export default function Home() {
         <main>
           <div className="relative z-10">
             <Menu />
-            <Gallery />
+            {/* <Gallery /> removed for now */}
           </div>
         </main>
         <Footer />

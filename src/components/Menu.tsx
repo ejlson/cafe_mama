@@ -21,11 +21,11 @@ import Location from "@/components/Location";
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
- * Poster-style menu, after the cafe's yellow "menu." flyer. A row of category
- * tabs (Sandos / Breakfast / Drinks / Bakery) switches the list below. Sandos
- * is fully populated; the meal-deal banner rides above it. Other categories
- * carry their data where we have it, or a "coming soon" placeholder.
- */
+ * 
+ * MENU SUBSECTIONS - Food, Drinks:
+ * - Food will include: sandos/sandwiches and bakery, giving it more columns so that the screen looks more busy
+ * - 
+**/
 type Item = {
   name: string;
   price: string;
@@ -105,8 +105,9 @@ const SANDOS: Item[] = [
 ];
 
 const SIDES: Item[] = [
-  { name: "Box of 20 Tater-Tots", price: "5" },
-  { name: "Box of Crisps", price: "3" },
+  { name: "Small Box of Tater-Tots", price: "5" },
+  { name: "Large Box of Tater-Tots", price: "6" },
+  { name: "Box of Crisps", price: "4" },
 ];
 
 const DRINKS_GROUPS: Group[] = [
@@ -156,9 +157,9 @@ const DRINKS_GROUPS: Group[] = [
 const CATEGORIES: Category[] = [
   {
     key: "sandos",
-    label: "Sandos",
+    label: "Sandwiches",
     groups: [
-      { title: "Sandos", items: SANDOS },
+      { title: "Sando/Sandwiches", items: SANDOS },
       { title: "Sides", items: SIDES },
     ],
   },
@@ -166,12 +167,7 @@ const CATEGORIES: Category[] = [
   { key: "bakery", label: "Bakery", soon: true },
 ];
 
-// ---------------------------------------------------------------------------
-//  Cursor-tracking image preview (after demos.gsap.com/demo/
-//  cursor-tracking-image-preview). Hovering a menu row with a photo pops the
-//  image up with a white border + drop shadow; it follows the cursor with a
-//  smooth lag via gsap.quickTo. Desktop / fine-pointer only.
-// ---------------------------------------------------------------------------
+
 type PreviewData = { img: string; w?: number; h?: number; angle?: number };
 type PreviewApi = { show: (d: PreviewData) => void; hide: () => void };
 const PreviewCtx = createContext<PreviewApi | null>(null);
@@ -237,7 +233,6 @@ function MenuImagePreview({ children }: { children: ReactNode }) {
     { dependencies: [mounted] },
   );
 
-  // stable api that delegates to the live handlers built inside useGSAP
   const api = useMemo<PreviewApi>(
     () => ({
       show: (d) => apiRef.current?.show(d),
@@ -460,21 +455,29 @@ function GroupBlock({
   );
 }
 
-// Longanisa meal-deal poster, slotted in after the sandos. The artwork already
-// carries its own headline, so we just frame it under the black-box title.
-function LonganisaDeal({ accent }: { accent: string }) {
+// Pandesal section, slotted in after the sandwiches.
+const PANDESAL: Item[] = [
+  { name: "Egg Pandesal", price: "—" },
+  { name: "Longanisa Pandesal", price: "—" },
+];
+
+function PandesalDeal({
+  accent,
+  body,
+  dot,
+}: {
+  accent: string;
+  body: string;
+  dot: string;
+}) {
   return (
     <div className="mt-10">
-      <GroupTitle accent={accent}>Longanisa</GroupTitle>
-      <div className="mt-4 flex justify-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/media/longanisa.png"
-          alt="Longanisa meal deal — available for £10.75"
-          loading="lazy"
-          className="w-full max-w-sm -rotate-1 rounded-2xl border-4 border-cream shadow-[0_14px_34px_rgba(0,0,0,0.4)]"
-        />
-      </div>
+      <GroupTitle accent={accent}>All Day Breakfast</GroupTitle>
+      <ul className="mt-3">
+        {PANDESAL.map((it) => (
+          <ItemRow key={it.name} item={it} body={body} dot={dot} />
+        ))}
+      </ul>
     </div>
   );
 }
@@ -537,21 +540,21 @@ function MealDealBanner() {
         <div className="absolute inset-0 flex flex-col items-start justify-start p-7 sm:p-10">
           <h3 className="font-arialblack text-5xl uppercase leading-[0.78] sm:text-7xl">
             <span
-              className="block -rotate-3 text-sun"
+              className="block -rotate-3 text-[#9b81c9]"
               style={{
-                WebkitTextStroke: "3px #c2452d",
+                WebkitTextStroke: "3px #4a2f6e",
                 paintOrder: "stroke fill",
-                textShadow: "0 4px 0 #14564c, 3px 7px 0 rgba(0,0,0,0.5)",
+                textShadow: "0 4px 0 #4a2f6e, 3px 7px 0 rgba(0,0,0,0.5)",
               }}
             >
               Meal
             </span>
             <span
-              className="-ml-1 block rotate-1 text-[#e23b2e]"
+              className="-ml-1 block rotate-1 text-[#9b81c9]"
               style={{
                 WebkitTextStroke: "3px #f6efdd",
                 paintOrder: "stroke fill",
-                textShadow: "0 4px 0 #14564c, 3px 7px 0 rgba(0,0,0,0.5)",
+                textShadow: "0 4px 0 #4a2f6e, 3px 7px 0 rgba(0,0,0,0.5)",
               }}
             >
               Deals!
@@ -578,8 +581,8 @@ function MealDealBanner() {
           <svg viewBox="0 0 100 100" className="h-full w-full">
             <polygon
               points={burstPoints(16, 50, 38)}
-              fill="#e23b2e"
-              stroke="#14564c"
+              fill="#9b81c9"
+              stroke="#4a2f6e"
               strokeWidth="5"
               strokeLinejoin="round"
             />
@@ -610,11 +613,50 @@ function MealDealBanner() {
 // The background gradient colours for each menu palette. Stored as CSS vars
 // (--wave-*) so the hero→menu wave matches, and so we can smoothly tween them
 // from one palette to the next when switching tabs (Mála-Project style).
-type BgVars = { f0: string; f1: string; b0: string; b1: string };
+// fa/fb are the footer gradient colours for this palette — drinks gets a
+// lighter, more vibrant violet that matches its purple wash; sandwiches/bakery
+// keep the bright orange-red.
+// lt = Location accent text colour, lc = Location card bg/border colour, and
+// ab/ay = opacity of the blue / yellow "COME FIND US" word-art tiles. Sandwiches
+// reads blue-on-gold (matching the word art); drinks flips to yellow-on-purple.
+type BgVars = {
+  f0: string;
+  f1: string;
+  b0: string;
+  b1: string;
+  fa: string;
+  fb: string;
+  lt: string;
+  lc: string;
+  ab: number;
+  ay: number;
+};
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
-    ? { f0: "#c4afe6", f1: "#9b81c9", b0: "#9b81c9", b1: "#7e63b0" }
-    : { f0: "#ffe06b", f1: "#f5b13e", b0: "#f5b13e", b1: "#e89b2b" };
+    ? {
+        f0: "#c4afe6",
+        f1: "#9b81c9",
+        b0: "#9b81c9",
+        b1: "#7e63b0",
+        fa: "#cf9bff",
+        fb: "#9d5cf0",
+        lt: "#fbd400",
+        lc: "#5b3f86",
+        ab: 0,
+        ay: 1,
+      }
+    : {
+        f0: "#ffe06b",
+        f1: "#f5b13e",
+        b0: "#f5b13e",
+        b1: "#e89b2b",
+        fa: "#ff7a2f",
+        fb: "#e8362b",
+        lt: "#9b81c9",
+        lc: "#f4c33c",
+        ab: 1,
+        ay: 0,
+      };
 
 function setBgVars(v: BgVars) {
   const s = document.documentElement.style;
@@ -622,6 +664,12 @@ function setBgVars(v: BgVars) {
   s.setProperty("--wave-f1", v.f1);
   s.setProperty("--wave-b0", v.b0);
   s.setProperty("--wave-b1", v.b1);
+  s.setProperty("--foot-a", v.fa);
+  s.setProperty("--foot-b", v.fb);
+  s.setProperty("--loc-text", v.lt);
+  s.setProperty("--loc-card", v.lc);
+  s.setProperty("--art-blue", String(v.ab));
+  s.setProperty("--art-yellow", String(v.ay));
 }
 
 export default function Menu() {
@@ -739,6 +787,12 @@ export default function Menu() {
       f1: gsap.utils.interpolate(from.f1, to.f1),
       b0: gsap.utils.interpolate(from.b0, to.b0),
       b1: gsap.utils.interpolate(from.b1, to.b1),
+      fa: gsap.utils.interpolate(from.fa, to.fa),
+      fb: gsap.utils.interpolate(from.fb, to.fb),
+      lt: gsap.utils.interpolate(from.lt, to.lt),
+      lc: gsap.utils.interpolate(from.lc, to.lc),
+      ab: gsap.utils.interpolate(from.ab, to.ab),
+      ay: gsap.utils.interpolate(from.ay, to.ay),
     };
     const o = { p: 0 };
     gsap.to(o, {
@@ -746,7 +800,18 @@ export default function Menu() {
       duration: 0.6,
       ease: "power2.inOut",
       onUpdate: () =>
-        setBgVars({ f0: li.f0(o.p), f1: li.f1(o.p), b0: li.b0(o.p), b1: li.b1(o.p) }),
+        setBgVars({
+          f0: li.f0(o.p),
+          f1: li.f1(o.p),
+          b0: li.b0(o.p),
+          b1: li.b1(o.p),
+          fa: li.fa(o.p),
+          fb: li.fb(o.p),
+          lt: li.lt(o.p),
+          lc: li.lc(o.p),
+          ab: li.ab(o.p),
+          ay: li.ay(o.p),
+        }),
     });
 
     // Cross-dissolve the list out; the swap + fade-in happens in useGSAP below.
@@ -791,15 +856,15 @@ export default function Menu() {
   const theme = drinks
     ? {
         accent: "#fbd400", // headings, tabs, title
-        body: "#f6efdd", // item names + prices
-        dot: "rgba(246,239,221,0.5)", // dotted leaders
-        line: "rgba(246,239,221,0.4)", // borders
+        body: "#fbd400", // item names + prices — yellow
+        dot: "rgba(251,212,0,0.6)", // dotted leaders — yellow
+        line: "rgba(251,212,0,0.4)", // borders — yellow
       }
     : {
-        accent: "#e23b2e",
-        body: "#221a12",
-        dot: "rgba(34,26,18,0.35)",
-        line: "rgba(226,59,46,0.2)",
+        accent: "#9b81c9", // drinks-background lavender — was poster red
+        body: "#9b81c9", // item names + prices — was dark ink
+        dot: "rgba(155,129,201,0.5)",
+        line: "rgba(155,129,201,0.3)",
       };
 
   return (
@@ -815,7 +880,7 @@ export default function Menu() {
       }}
       className="relative overflow-hidden py-10 text-pine sm:py-14"
     >
-      <div className="relative mx-auto max-w-5xl px-5 pt-6 sm:px-8 sm:pt-10">
+      <div className="relative mx-auto w-[80%] max-w-[1500px] px-5 pb-44 pt-6 sm:px-8 sm:pt-10">
         {/* Title */}
         <h2
           data-reveal
@@ -875,9 +940,13 @@ export default function Menu() {
                     activeImg={activeImg}
                     registerRow={registerRow}
                   />
-                  {/* Longanisa meal deal sits right after the sandos list. */}
-                  {active === "sandos" && g.title === "Sandos" && (
-                    <LonganisaDeal accent={theme.accent} />
+                  {/* All Day Breakfast section sits right after the sandwiches list. */}
+                  {active === "sandos" && g.title === "Sando/Sandwiches" && (
+                    <PandesalDeal
+                      accent={theme.accent}
+                      body={theme.body}
+                      dot={theme.dot}
+                    />
                   )}
                 </Fragment>
               ))

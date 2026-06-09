@@ -31,7 +31,7 @@ export default function SmoothScroll({
     ScrollSmoother.create({
       wrapper: wrapper.current!,
       content: content.current!,
-      smooth: 1.4, // seconds to "catch up" to the scroll — the floaty assist
+      smooth: 1.7, // seconds to "catch up" to the scroll — the floaty glide
       smoothTouch: 0.1, // light smoothing on touch (keep it responsive)
       effects: true, // honour data-speed / data-lag attributes
     });

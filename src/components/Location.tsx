@@ -4,8 +4,10 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { SplitText } from "gsap/SplitText";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, SplitText);
 
 const HOURS: { day: string; time: string }[] = [
   { day: "Mon – Fri", time: "8:00 – 18:00" },
@@ -31,6 +33,7 @@ const DIRECTIONS = `https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY
  * eases everything back to flat.
  */
 export default function Location() {
+  const root = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
 
@@ -60,36 +63,114 @@ export default function Location() {
         );
       });
 
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      // ---- "Where are we?" intro — horizontal pinned scroll ----
+      // The phrase scrolls horizontally across a pinned screen and each
+      // character pops up from a random offset as it crosses (nested
+      // ScrollTriggers driven by `containerAnimation`), leading you into the
+      // Location widget below.
+      const horizEl = root.current!.querySelector<HTMLElement>(
+        ".where-horizontal",
+      );
+      const trackEl = root.current!.querySelector<HTMLElement>(".where-track");
+      const lines = gsap.utils.toArray<HTMLElement>(".where-line");
+      let split: ReturnType<typeof SplitText.create> | null = null;
+      if (trackEl && horizEl) {
+        if (reduced) {
+          gsap.set(horizEl, { justifyContent: "center" });
+          gsap.set(trackEl, { paddingLeft: 0 });
+        } else {
+          split = SplitText.create(lines, { type: "chars, words" });
+          const scrollTween = gsap.to(trackEl, {
+            xPercent: -100,
+            ease: "none",
+            scrollTrigger: {
+              trigger: horizEl,
+              pin: true,
+              end: "+=2400",
+              scrub: true,
+            },
+          });
+          split.chars.forEach((char) => {
+            gsap.from(char, {
+              yPercent: "random(-200, 200)",
+              rotation: "random(-20, 20)",
+              ease: "back.out(1.2)",
+              scrollTrigger: {
+                trigger: char,
+                containerAnimation: scrollTween,
+                start: "left 100%",
+                end: "left 30%",
+                scrub: 1,
+              },
+            });
+          });
+        }
+      }
+
       // Reduced motion → leave the card flat/static (marquee stays put).
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (reduced) return;
+
+      // ---- Scroll assist ----
+      // As you arrive at the Location section, gently glide it into a full,
+      // screen-framed view. ScrollSmoother.scrollTo(target, true, ...) eases
+      // with the smoother's own inertia, so it ramps up to speed and settles
+      // softly. IntersectionObserver is the trigger (a ScrollTrigger onEnter is
+      // unreliable under ScrollSmoother here). A short scroll-velocity tracker
+      // lets a hard, fast scroll blow straight past without being grabbed.
+      let lastY = window.scrollY;
+      let lastT = performance.now();
+      let vel = 0;
+      const onScroll = () => {
+        const now = performance.now();
+        const y = window.scrollY;
+        const dt = now - lastT;
+        if (dt > 0) vel = ((y - lastY) / dt) * 1000;
+        lastY = y;
+        lastT = now;
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      let armed = true; // re-arms once you leave the zone
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) {
+              armed = true;
+              continue;
+            }
+            if (!armed) continue;
+            if (Math.abs(vel) > 3200) continue; // let fast scroll-throughs pass
+            armed = false;
+            const sm = ScrollSmoother.get();
+            if (sm) sm.scrollTo(stageEl, true, "center center");
+          }
+        },
+        // fire when the section's top reaches ~75% down the viewport
+        { rootMargin: "0px 0px -25% 0px", threshold: 0 },
+      );
+      io.observe(stageEl);
+      const cleanupAssist = () => {
+        io.disconnect();
+        split?.revert();
+        window.removeEventListener("scroll", onScroll);
+      };
 
       const MAX_ROT = 4; // degrees at the edges — gentle tilt
 
-      // Hover → ONLY the widget grows (marquee behind is untouched). Width
-      // animates to ~70vw (real reflow, no horizontal stretch); height bumps
-      // +20% via scaleY.
-      const baseW = cardEl.offsetWidth || Math.min(520, window.innerWidth * 0.9);
-      const wideW = Math.max(baseW, window.innerWidth * 0.7);
-      gsap.set(cardEl, { width: baseW });
-      // Pin the map iframe to a CONSTANT size (centred + clipped by the card)
-      // so the width tween never forces an expensive iframe relayout → the
-      // hover stays smooth instead of choppy.
-      const mapEl = cardEl.querySelector<HTMLElement>(".loc-map");
-      if (mapEl)
-        gsap.set(mapEl, {
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          xPercent: -50,
-          width: wideW,
-          height: "100%",
-        });
+      // Hover → the widget grows via a pure transform scale. Transforms are
+      // GPU-composited and never touch layout, so the page doesn't reflow (no
+      // jitter) and the full-bleed marquee behind it is left completely alone.
+      // (A width animation reflowed the page every frame, which is what was
+      // resizing the word-art and jittering the site.)
       const grow = (on: boolean) =>
         gsap.to(cardEl, {
-          width: on ? wideW : baseW,
-          scaleY: on ? 1.2 : 1,
-          duration: 0.55,
-          ease: "power2.out",
+          scale: on ? 1.14 : 1,
+          duration: 0.5,
+          ease: "power3.out",
           overwrite: "auto",
         });
 
@@ -126,7 +207,7 @@ export default function Location() {
       );
 
       const onEnter = () => {
-        grow(true); // hover → ~70vw wide, +20% tall
+        grow(true); // hover → smooth scale-up (no reflow)
         moveHead(true); // heading slides to top-right
       };
       const onMove = (e: PointerEvent) => {
@@ -158,18 +239,38 @@ export default function Location() {
         stageEl.removeEventListener("pointerenter", onEnter);
         stageEl.removeEventListener("pointermove", onMove);
         stageEl.removeEventListener("pointerleave", onLeave);
+        cleanupAssist();
       };
     },
-    { scope: stage },
+    { scope: root },
   );
 
   return (
-    <div
-      ref={stage}
-      id="location"
-      className="relative mt-32 flex w-full items-center justify-center px-6 py-28 text-ink sm:mt-44"
-      style={{ perspective: "1200px" }}
-    >
+    <div ref={root}>
+      {/* ---- "Where are we?" intro — full-bleed horizontal pinned scroll ---- */}
+      <section className="where-horizontal relative ml-[calc(50%-50vw)] flex h-screen w-screen items-center overflow-hidden">
+        <div className="where-track flex w-max flex-col items-center gap-[1.5vw] pl-[100vw]">
+          <h3
+            className="where-line nav-blackface flex w-max gap-[4vw] whitespace-nowrap text-[clamp(2rem,10vw,12rem)] leading-[1.1]"
+            style={{ color: "var(--loc-text, #2463c3)" }}
+          >
+            Where are we?
+          </h3>
+          <p
+            className="where-line nav-blackface flex w-max gap-[3vw] whitespace-nowrap text-[clamp(1rem,5vw,5.5rem)] leading-[1.1]"
+            style={{ color: "var(--loc-text, #2463c3)" }}
+          >
+            Nasaan tayo?
+          </p>
+        </div>
+      </section>
+
+      <div
+        ref={stage}
+        id="location"
+        className="relative flex w-full items-center justify-center px-6 py-28 text-ink"
+        style={{ perspective: "1200px" }}
+      >
       {/* ---- full-bleed "COME FIND US" marquee rows ---- */}
       <div
         aria-hidden
@@ -179,14 +280,26 @@ export default function Location() {
           <div key={row} className="flex-1 overflow-hidden">
             <div className="cfu-track flex h-full w-max items-center">
               {Array.from({ length: 8 }).map((_, j) => (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  key={j}
-                  src="/media/word%20art/come-find-us-tile.png"
-                  alt=""
-                  className="h-full w-auto max-w-none select-none"
-                  draggable={false}
-                />
+                // blue tile (sandwiches) + yellow tile (drinks) crossfade via
+                // --art-blue / --art-yellow, which the Menu sets per tab
+                <div key={j} className="relative h-full shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/media/word%20art/come-find-us-tile-purple.png"
+                    alt=""
+                    className="block h-full w-auto max-w-none select-none"
+                    style={{ opacity: "var(--art-blue, 1)" }}
+                    draggable={false}
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/media/word%20art/come-find-us-tile-yellow.png"
+                    alt=""
+                    className="absolute left-0 top-0 block h-full w-auto max-w-none select-none"
+                    style={{ opacity: "var(--art-yellow, 0)" }}
+                    draggable={false}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -195,11 +308,21 @@ export default function Location() {
 
       <div
         ref={card}
-        className="relative z-10 w-[min(90vw,520px)] rounded-[2rem] border-[6px] border-cream bg-cream shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
-        style={{ transformStyle: "preserve-3d" }}
+        className="relative z-10 w-[min(90vw,520px)] rounded-[2rem] border-[6px] shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        style={{
+          transformStyle: "preserve-3d",
+          // same warm/purple gradient wash as the menu (and drinks) background
+          background:
+            "radial-gradient(135% 120% at 50% -10%, var(--wave-f0, #ffe06b) 0%, var(--wave-f1, #f5b13e) 70%, var(--wave-b1, #e89b2b) 100%)",
+          borderColor: "#f6efdd",
+          color: "var(--loc-text, #2463c3)",
+        }}
       >
         {/* map face */}
-        <div className="relative h-64 overflow-hidden rounded-t-[1.4rem] border-b-[6px] border-cream sm:h-72">
+        <div
+          className="relative h-64 overflow-hidden rounded-t-[1.4rem] border-b-[6px] sm:h-72"
+          style={{ borderBottomColor: "#f6efdd" }}
+        >
           <iframe
             title="Map to Cafe Mama & Sons"
             className="loc-map pointer-events-none h-full w-full border-0"
@@ -212,17 +335,17 @@ export default function Location() {
           {/* floating heading — centred at rest, slides to the top-right on
               hover. Not a tilt-layer; GSAP owns its transform. */}
           <h2
-            className="loc-heading pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap font-arialblack text-4xl uppercase leading-none text-sun sm:text-5xl"
+            className="loc-heading pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap font-arialblack text-4xl uppercase leading-none sm:text-5xl"
             style={{ textShadow: "4px 4px 0 #221a12" }}
           >
-            We&apos;re Here
+            We&apos;re Here!!
           </h2>
         </div>
 
         {/* info face */}
         <div className="px-7 py-6 sm:px-9">
           <div className="tilt-layer" data-z="50" data-depth="-8">
-            <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] text-tomato">
+            <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] opacity-80">
               The corner spot
             </p>
             <p className="mt-1 font-arialblack text-lg uppercase leading-tight sm:text-xl">
@@ -231,16 +354,16 @@ export default function Location() {
           </div>
 
           <dl
-            className="tilt-layer mt-5 divide-y divide-ink/15 border-y border-ink/15"
+            className="tilt-layer mt-5 divide-y divide-[var(--loc-text)]/35 border-y border-[var(--loc-text)]/35"
             data-z="30"
             data-depth="-8"
           >
             {HOURS.map((h) => (
               <div key={h.day} className="flex items-center justify-between py-2.5">
-                <dt className="text-sm font-semibold uppercase tracking-widest text-ink-soft">
+                <dt className="text-sm font-semibold uppercase tracking-widest opacity-70">
                   {h.day}
                 </dt>
-                <dd className="font-arialblack text-base tracking-tight text-tomato">
+                <dd className="font-arialblack text-base tracking-tight">
                   {h.time}
                 </dd>
               </div>
@@ -252,25 +375,36 @@ export default function Location() {
             data-z="70"
             data-depth="-10"
           >
+            {/* filled in the accent colour, label in the card-base colour */}
             <a
               href={DIRECTIONS}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full bg-ink px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cream transition-opacity hover:opacity-80"
+              className="rounded-full px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-80"
+              style={{
+                backgroundColor: "var(--loc-text, #2463c3)",
+                color: "var(--loc-card, #f4c33c)",
+              }}
             >
               Get directions
             </a>
+            {/* outlined in the accent colour, matching the text */}
             <a
               href="https://www.instagram.com/cafe_mama_sons/"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border-2 border-ink px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-colors hover:bg-ink hover:text-cream"
+              className="rounded-full border-2 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-80"
+              style={{
+                borderColor: "var(--loc-text, #2463c3)",
+                color: "var(--loc-text, #2463c3)",
+              }}
             >
               @cafe_mama_sons
             </a>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

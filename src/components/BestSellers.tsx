@@ -137,7 +137,7 @@ export default function BestSellers() {
         // spread WELL APART down the section, then a LONG trailing line that runs
         // deep into the bag.
         const lineTop = vh * 0.05;
-        const wobbleStart = vh * 0.5;
+        const wobbleStart = vh * 0.26; // shorter straight lead-in before the wobble
         const bandBot = Math.min(bagTopY - fullH * 0.5, vh * 1.15);
         const lineEnd = bagTopY + bagH * 0.32;
         const span = bandBot - wobbleStart;
@@ -185,6 +185,22 @@ export default function BestSellers() {
           }
           return { x: wp.x, y: wp.y, len: best.len };
         });
+
+        // the trail each photo flies along — from its own station down the rest
+        // of the dotted path and into the bag. Sampled straight off the path
+        // (no extra end point) so it follows the line exactly and never doubles
+        // back or reappears.
+        const trail = (i: number) => {
+          const s = stations[i];
+          const pts: { x: number; y: number }[] = [];
+          const steps = 30;
+          for (let k = 0; k <= steps; k++) {
+            const len = s.len + (total - s.len) * (k / steps);
+            const p = path.getPointAtLength(len);
+            pts.push({ x: p.x - s.x, y: p.y - s.y });
+          }
+          return pts;
+        };
 
         // all three stickers line up in a row across the bag, evenly spread but
         // kept clear of the edges, with their BOTTOMS on one baseline (so the
@@ -311,35 +327,23 @@ export default function BestSellers() {
           const sl = slot(i);
           const at = TT * 0.82 + i * 0.45;
         
-          // a) glide across to sit directly above the bag's mouth (upright)
+          // photo glides along the dotted-line trail down into the bag (no
+          // spin — no autoRotate), shrinking, then fades as it sinks in
           tl!.to(
             fullRefs.current[i],
             {
-              x: cx - s.x,
-              y: bagTopY - bagH * 0.04 - s.y,
-              scale: 0.5,
+              motionPath: { path: trail(i), curviness: 1 },
+              scale: 0.3,
               rotate: 0,
-              duration: 0.55,
-              ease: "power2.inOut",
+              duration: 1.3,
+              ease: "power1.inOut",
             },
             at,
           );
-          // b) then drop STRAIGHT DOWN into the bag (x held at centre)
-          tl!.to(
-            fullRefs.current[i],
-            {
-              y: bagTopY + bagH * 0.3 - s.y,
-              scale: 0.3,
-              duration: 0.65,
-              ease: "power1.in",
-            },
-            at + 0.55,
-          );
-          // c) fade out as it sinks behind the bag front
           tl!.to(
             fullRefs.current[i],
             { autoAlpha: 0, duration: 0.3, ease: "power1.in" },
-            at + 0.95,
+            at + 1.05,
           );
           
           tl!.to(

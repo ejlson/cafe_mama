@@ -3,19 +3,21 @@
 import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, MorphSVGPlugin);
 
 /**
- * Footer with a velocity-driven elastic "bounce", after
- * https://demos.gsap.com/demo/footer-bounce/ — a curved hump on the footer's
- * top edge that bulges up when you scroll into it (read from scroll velocity)
- * and settles back with an elastic wobble. Gradient background + the navbar's
- * heavy gold "nav-blackface" type.
+ * Footer bounce — the GSAP demo (https://demos.gsap.com/demo/footer-bounce/).
+ * The footer's top edge is an SVG path that morphs from a hanging curve to flat
+ * with an elastic ease when you scroll into it; the spring's strength is read
+ * from scroll velocity. Menu-coloured gradient + the navbar's heavy gold type.
  */
-const TOP = 160; // px height of the curve band above the footer
-const MAXB = 140; // px the hump can bulge (kept < TOP so it never clips)
+// Exact demo paths: DOWN (top edge hangs to y=156) springs to CENTER (flat).
+const DOWN =
+  "M0-0.3C0-0.3,464,156,1139,156S2278-0.3,2278-0.3V683H0V-0.3z";
+const CENTER =
+  "M0-0.3C0-0.3,464,0,1139,0s1139-0.3,1139-0.3V683H0V-0.3z";
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
@@ -24,39 +26,60 @@ export default function Footer() {
   useGSAP(
     () => {
       const path = pathRef.current!;
-      const proxy = { b: 0 };
-      // a quadratic hump sitting on the footer's top edge; b=0 → flat (no hump)
-      const draw = () =>
-        path.setAttribute(
-          "d",
-          `M0,${TOP} Q600,${TOP - proxy.b} 1200,${TOP} Z`,
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        path.setAttribute("d", CENTER);
+        return;
+      }
+
+      const bounce = (velocity: number) => {
+        // exact demo: variation from velocity drives the elastic amplitude/period
+        const variation = gsap.utils.clamp(-0.9, 0.9, velocity / 10000);
+        gsap.fromTo(
+          path,
+          { morphSVG: DOWN },
+          {
+            duration: 2,
+            morphSVG: CENTER,
+            ease: `elastic.out(${1 + variation}, ${1 - variation})`,
+            overwrite: true,
+          },
         );
-      draw();
+      };
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      // Track scroll velocity so the spring strength reflects how hard you
+      // arrived (the demo reads ScrollTrigger.getVelocity, but that depends on
+      // the scroller; window scroll works under ScrollSmoother too).
+      let lastY = window.scrollY;
+      let lastT = performance.now();
+      let vel = 0;
+      const onScroll = () => {
+        const now = performance.now();
+        const y = window.scrollY;
+        const dt = now - lastT;
+        if (dt > 0) vel = ((y - lastY) / dt) * 1000;
+        lastY = y;
+        lastT = now;
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
 
-      const st = ScrollTrigger.create({
-        trigger: footerRef.current!,
-        start: "top bottom",
-        end: "bottom bottom",
-        onUpdate: (self) => {
-          // scroll velocity → instantaneous bulge, then ease back to flat with
-          // an elastic bounce
-          const v = gsap.utils.clamp(-MAXB, MAXB, self.getVelocity() / 30);
-          gsap.killTweensOf(proxy);
-          gsap.fromTo(
-            proxy,
-            { b: v },
-            {
-              b: 0,
-              duration: 1.1,
-              ease: "elastic.out(1, 0.3)",
-              onUpdate: draw,
-            },
-          );
+      // Fire the bounce whenever the footer scrolls into view — Intersection
+      // Observer works regardless of ScrollSmoother's transform/scroll proxy,
+      // which a ScrollTrigger onEnter does not reliably catch here.
+      // fire when the footer's top edge is ~120px into view, so the wobble
+      // plays where you can actually see it (not while it's still off the
+      // bottom of the screen)
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) if (e.isIntersecting) bounce(vel);
         },
-      });
-      return () => st.kill();
+        { rootMargin: "0px 0px -120px 0px", threshold: 0 },
+      );
+      io.observe(footerRef.current!);
+
+      return () => {
+        io.disconnect();
+        window.removeEventListener("scroll", onScroll);
+      };
     },
     { scope: footerRef },
   );
@@ -64,50 +87,81 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="relative text-cream"
-      style={{
-        background: "linear-gradient(180deg, #6c4a8f 0%, #221a12 100%)",
-      }}
+      // Lift the footer over the section above (z-20 + negative margin) so its
+      // morphing top edge reveals the warm menu behind it — no cream/black gap.
+      // The footer's own colour is a deeper warm (terracotta) so it's clearly
+      // distinct from the bright menu while staying in the same palette.
+      className="relative z-20 -mt-[150px] text-cream"
     >
-      {/* curved hump that lives just above the footer's top edge */}
+      {/* morphing top edge — deep-warm gradient */}
       <svg
         aria-hidden
-        className="absolute left-0 top-0 w-full -translate-y-full"
-        style={{ height: TOP }}
-        viewBox={`0 0 1200 ${TOP}`}
+        id="footer-img"
+        className="absolute inset-0 block h-full w-full"
+        style={{ overflow: "visible" }}
+        viewBox="0 0 2278 683"
         preserveAspectRatio="none"
       >
-        <path ref={pathRef} fill="#6c4a8f" d={`M0,${TOP} Q600,${TOP} 1200,${TOP} Z`} />
+        <defs>
+          <linearGradient
+            id="footGrad"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="683"
+            gradientUnits="userSpaceOnUse"
+          >
+            {/* Colours follow the active menu tab (set by Menu via --foot-*):
+                bright orange-red for sandwiches, vibrant violet for drinks. */}
+            <stop offset="0" style={{ stopColor: "var(--foot-a, #ff7a2f)" }} />
+            <stop offset="1" style={{ stopColor: "var(--foot-b, #e8362b)" }} />
+          </linearGradient>
+        </defs>
+        <path ref={pathRef} id="bouncy-path" fill="url(#footGrad)" d={DOWN} />
       </svg>
 
-      <div className="relative z-10 px-6 pb-14 pt-24 sm:pt-28">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 text-center">
-          <a href="#top" className="nav-blackface leading-[0.92] tracking-tight">
-            <span className="block text-4xl sm:text-5xl lg:text-6xl">
-              CAFE&nbsp;MAMA
-            </span>
-            <span className="block text-4xl sm:text-5xl lg:text-6xl">
-              &amp;&nbsp;SONS
-            </span>
-          </a>
+      <div className="relative z-10 px-0 pb-7 pt-44">
+        {/* Brand — two big lines that fill the width, split after MAMA */}
+        <a
+          href="#top"
+          className="nav-blackface block w-full text-center leading-[0.78] tracking-[-0.03em]"
+        >
+          <span className="block whitespace-nowrap text-[11.5vw]">
+            CAFE&nbsp;MAMA
+          </span>
+          <span className="block whitespace-nowrap text-[11.5vw]">
+            &amp;&nbsp;SONS
+          </span>
+        </a>
 
-          <nav className="nav-blackface flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-xl sm:text-2xl">
-            <a href="#menu">Menu</a>
-            <a href="#location">Location</a>
-            <a href="#gallery">Gallery</a>
-            <a
-              href="https://www.instagram.com/cafe_mama_sons/"
-              target="_blank"
-              rel="noreferrer"
+        {/* bottom strip: instagram + email, small, on the right */}
+        <div className="mt-7 flex items-center justify-end gap-2.5 px-4">
+          <a
+            href="https://www.instagram.com/cafe_mama_sons/"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram"
+            className="text-cream transition-opacity hover:opacity-70"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="h-5 w-5"
+              aria-hidden
             >
-              Instagram
-            </a>
-          </nav>
-
-          <p className="text-[11px] uppercase tracking-[0.3em] text-cream/60">
-            © {new Date().getFullYear()} Cafe Mama &amp; Sons · Broadcasting on
-            CH 03
-          </p>
+              <rect x="2" y="2" width="20" height="20" rx="5.5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
+          <a
+            href="mailto:hello@cafemamasons.com"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-cream transition-opacity hover:opacity-70"
+          >
+            hello@cafemamasons.com
+          </a>
         </div>
       </div>
     </footer>
