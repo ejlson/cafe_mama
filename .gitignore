@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling / agent scratch
+/.claude
+/.agents
+/skills-lock.json
+/_m.mjs
+
+# large media (kept out of git — source + served binaries)
+/images
+/music
+/vidoes
+/public/media

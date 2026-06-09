@@ -1,17 +1,25 @@
 {
-  "name": "cafe-mama-sons",
+  "name": "cafe-mama-sons-2",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "remotion": "remotion studio src/remotion/index.ts",
+    "remotion:render": "remotion render src/remotion/index.ts HeroBroadcast out/hero.mp4"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@remotion/cli": "^4.0.474",
+    "@remotion/media": "^4.0.474",
+    "@remotion/player": "^4.0.474",
+    "gsap": "^3.15.0",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "remotion": "^4.0.474"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

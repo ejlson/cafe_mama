@@ -1,26 +1,337 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand palette — drawn from the cream menu, peach shopfront & retro print */
+  --color-cream: #f6efdd;
+  --color-cream-deep: #efe5cc;
+  --color-ink: #221a12;
+  --color-ink-soft: #4a3f30;
+  --color-peach: #f6c6ab;
+  --color-peach-deep: #e89b76;
+  --color-ube: #6c4a8f;
+  --color-matcha: #7a8c34;
+  --color-mango: #f0a92b;
+  --color-tomato: #c2452d;
+  /* Poster menu — saturated sun yellow + deep pine for the price badges */
+  --color-sun: #fbd400;
+  --color-pine: #14564c;
+
+  --font-display: var(--font-display), "Arial Narrow", sans-serif;
+  --font-body: var(--font-body), system-ui, sans-serif;
+  --font-hand: var(--font-hand), cursive;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1a140e;
+  --foreground: #221a12;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
+  background: #120d08;
+  /* Hide the page scrollbar (still scrollable). */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- CRT / retro TV set ----------
+   Cafe_Mama_2 drops the TV casing and runs the broadcast full-bleed across the
+   entire screen. The bezel variables are zeroed so the overlay geometry
+   (screen-box / SCREEN_INSET) simply fills the viewport edge-to-edge.       */
+
+:root {
+  --bz: 0px;
+  --bz-b: 0px;
+  --scr: 0px;
+}
+
+/* Shared geometry: every overlay aligns to the screen window. */
+.screen-box {
+  position: fixed;
+  top: var(--bz);
+  left: var(--bz);
+  right: var(--bz);
+  bottom: var(--bz-b);
+  border-radius: var(--scr);
+  pointer-events: none;
+}
+
+/* Scanlines + faint live flicker.
+   The CRT layers sit ABOVE the navbar (z-70) so the whole screen — chrome
+   included — reads as one tube. They're pointer-events:none, so clicks pass
+   straight through to the nav links. */
+.crt-scanlines {
+  z-index: 80;
+  mix-blend-mode: multiply;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.035) 0px,
+    rgba(0, 0, 0, 0.035) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  animation: crt-flicker 4.5s steps(60) infinite;
+}
+
+@keyframes crt-flicker {
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.94;
+  }
+  98% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.97;
+  }
+}
+
+/* Rolling scan bar (clipped to the screen by its overflow-hidden parent) */
+.crt-rollwrap {
+  z-index: 83;
+  overflow: hidden;
+}
+.crt-rollbar {
+  position: absolute;
+  inset-inline: 0;
+  height: 30%;
+  opacity: 0.03;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.9),
+    transparent
+  );
+  animation: rollbar 7s linear infinite;
+}
+@keyframes rollbar {
+  0% {
+    top: -30%;
+  }
+  100% {
+    top: 130%;
+  }
+}
+
+/* Convex broadcast — slight bulge so the picture spills into the curved corners */
+.crt-fisheye {
+  transform: scale(1.02);
+  transform-origin: center;
+}
+
+/* Moving TV static / grain */
+.crt-static {
+  z-index: 84;
+  background-image: url("/media/noise.png");
+  background-size: 200px 200px;
+  opacity: 0.035;
+  mix-blend-mode: screen;
+  animation: static-shift 0.45s steps(5) infinite;
+}
+@keyframes static-shift {
+  0% {
+    background-position: 0 0;
+  }
+  25% {
+    background-position: -84px 44px;
+  }
+  50% {
+    background-position: 62px -72px;
+  }
+  75% {
+    background-position: -38px -28px;
+  }
+  100% {
+    background-position: 54px 64px;
+  }
+}
+
+/* Power-on sweep used when the page first loads */
+@keyframes power-on {
+  0% {
+    transform: scaleY(0.004) scaleX(1);
+    filter: brightness(6);
+    opacity: 0;
+  }
+  20% {
+    transform: scaleY(0.004) scaleX(1);
+    filter: brightness(6);
+    opacity: 1;
+  }
+  45% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(2.2);
+  }
+  100% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1);
+  }
+}
+
+.power-on {
+  animation: power-on 1.4s ease-out both;
+  transform-origin: center;
+}
+
+/* ---------- Broadcast navbar ----------
+   Heavy Arial Black set in mango gold with a hard offset shadow, so it reads
+   like an on-air channel bug over the video (and over light content below). */
+/* Heavy Arial Black — the poster face used across nav + menu headings. */
+.font-arialblack {
+  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 900;
+}
+
+.nav-blackface {
+  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 900;
+  color: #f4c33c;
+  text-shadow: 3px 3px 0 #000;
+}
+
+/* Menu poster title — red face with a hard black drop shadow, echoing the nav. */
+.menu-title {
+  color: #e23b2e;
+  text-shadow: 5px 5px 0 #000;
+}
+.nav-blackface a:hover {
+  color: #ffd968;
+}
+
+/* Film-style subtitle bar */
+.subtitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fdf6dd;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    1px 1px 0 #000,
+    -1px 1px 0 #000;
+}
+
+/* Tagalog translation line, sat just under the English subtitle */
+.subtitle-tl {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--color-peach);
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.9),
+    1px 1px 0 #000,
+    -1px 1px 0 #000;
+}
+
+/* Both subtitle lines fade/rise in together when a caption changes */
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Two music notes dancing on the player toggle — they sway side to side and
+   bob, like notes bouncing along to the music. */
+@keyframes note-dance {
+  0% {
+    transform: translateY(0) rotate(calc(var(--note-rot, 0deg) - 14deg));
+  }
+  25% {
+    transform: translateY(-4px) rotate(calc(var(--note-rot, 0deg) + 10deg));
+  }
+  50% {
+    transform: translateY(0) rotate(calc(var(--note-rot, 0deg) + 14deg));
+  }
+  75% {
+    transform: translateY(-4px) rotate(calc(var(--note-rot, 0deg) - 10deg));
+  }
+  100% {
+    transform: translateY(0) rotate(calc(var(--note-rot, 0deg) - 14deg));
+  }
+}
+.note-dance {
+  animation: note-dance 2.4s ease-in-out infinite;
+}
+
+/* Sando image popping in under the cursor on hover */
+@keyframes sando-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(calc(var(--pop-rot, -3deg) - 3deg));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(var(--pop-rot, -3deg));
+  }
+}
+.sando-pop {
+  animation: sando-pop 0.18s ease-out both;
+  transform-origin: left center;
+}
+
+/* Subtle retro grid floor — drawn in the warm brand palette so it reads as an
+   80s broadcast backdrop without leaving the cream/peach scheme. */
+.grid-floor {
+  background-image:
+    linear-gradient(rgba(246, 198, 171, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 239, 221, 0.35) 1px, transparent 1px);
+  background-size: 46px 46px;
+  background-position: center bottom;
+  transform: perspective(420px) rotateX(72deg);
+  transform-origin: center bottom;
+  animation: grid-scroll 1.6s linear infinite;
+  mask-image: linear-gradient(to top, #000 0%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 92%);
+}
+@keyframes grid-scroll {
+  0% {
+    background-position-y: 0;
+  }
+  100% {
+    background-position-y: 46px;
+  }
+}
+
+/* Hide scrollbars where we manage scroll ourselves */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-rollbar,
+  .crt-scanlines,
+  .crt-static,
+  .grid-floor,
+  .power-on {
+    animation: none !important;
+  }
+  .note-dance {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
