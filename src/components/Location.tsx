@@ -92,6 +92,9 @@ export default function Location() {
               pin: true,
               end: "+=2400",
               scrub: true,
+              // recompute positions on refresh (ScrollSmoother sets up after
+              // this mounts) so the text never gets stuck off-screen
+              invalidateOnRefresh: true,
             },
           });
           split.chars.forEach((char) => {
@@ -108,6 +111,12 @@ export default function Location() {
               },
             });
           });
+          // Force a refresh on the next frames — Location mounts before
+          // ScrollSmoother is created, so the pin's start/end can be measured
+          // against a stale layout, which left "Where are we?" parked off-screen.
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => ScrollTrigger.refresh()),
+          );
         }
       }
 

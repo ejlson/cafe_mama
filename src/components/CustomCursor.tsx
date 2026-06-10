@@ -65,15 +65,17 @@ export default function CustomCursor() {
 
   return (
     <>
+      {/* opacity-0 by default so they never show at 0,0 on coarse-pointer
+          devices (where the cursor JS bails before hiding them) */}
       <div
         ref={ringRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[9999] h-8 w-8 rounded-full border-2 border-sun"
+        className="pointer-events-none fixed left-0 top-0 z-[9999] h-8 w-8 rounded-full border-2 border-sun opacity-0"
       />
       <div
         ref={dotRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[9999] h-2 w-2 rounded-full bg-sun"
+        className="pointer-events-none fixed left-0 top-0 z-[9999] h-2 w-2 rounded-full bg-sun opacity-0"
       />
     </>
   );

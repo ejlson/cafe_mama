@@ -2,7 +2,6 @@
 
 import {
   createContext,
-  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -105,9 +104,25 @@ const SANDOS: Item[] = [
 ];
 
 const SIDES: Item[] = [
-  { name: "Small Box of Tater-Tots", price: "5" },
-  { name: "Large Box of Tater-Tots", price: "6" },
+  { name: "Box of Tater-Tots", price: "5" },
   { name: "Box of Crisps", price: "4" },
+];
+
+const PANDESAL: Item[] = [
+  { name: "Egg Pandesal", price: "—" },
+  { name: "Longanisa Pandesal", price: "—" },
+];
+
+const BAKED: Item[] = [
+  { name: "Honey Toast", price: "—" },
+  { name: "Garlic Twist", price: "—" },
+  { name: "Spanish Bread", price: "—" },
+  { name: "Croissant", price: "—" },
+  { name: "Cookie Croissant", price: "—" },
+  { name: "Miso Cookie", price: "—" },
+  { name: "Ube Bow", price: "—" },
+  { name: "Ube Cookie", price: "—" },
+  { name: "Au Chocolat", price: "—" },
 ];
 
 const DRINKS_GROUPS: Group[] = [
@@ -157,14 +172,15 @@ const DRINKS_GROUPS: Group[] = [
 const CATEGORIES: Category[] = [
   {
     key: "sandos",
-    label: "Sandwiches",
+    label: "Food",
     groups: [
       { title: "Sando/Sandwiches", items: SANDOS },
+      { title: "All-Day Breakfast", items: PANDESAL },
       { title: "Sides", items: SIDES },
+      { title: "Baked Goods", items: BAKED },
     ],
   },
   { key: "drinks", label: "Drinks", groups: DRINKS_GROUPS },
-  { key: "bakery", label: "Bakery", soon: true },
 ];
 
 
@@ -280,45 +296,7 @@ function ItemRow({
   const interactive = Boolean(item.img);
   const hasDetail = Boolean(item.desc || item.img);
   const [hover, setHover] = useState(false);
-  const detailRef = useRef<HTMLDivElement>(null);
   const preview = useContext(PreviewCtx);
-  // Open on desktop hover, or for the scroll-active item on mobile.
-  const open = hover || Boolean(active);
-
-  // Smoothly ramp the detail height 0 ↔ auto. overflow is clipped only while it
-  // animates and set back to visible when open, so the image's drop shadow
-  // isn't cropped by the collapsing container.
-  useEffect(() => {
-    const el = detailRef.current;
-    if (!el || !hasDetail) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(el, {
-        height: open ? "auto" : 0,
-        autoAlpha: open ? 1 : 0,
-        overflow: open ? "visible" : "hidden",
-      });
-      return;
-    }
-    const tween = open
-      ? gsap.to(el, {
-          height: "auto",
-          autoAlpha: 1,
-          duration: 0.5,
-          ease: "power3.out",
-          onStart: () => gsap.set(el, { overflow: "hidden" }),
-          onComplete: () => gsap.set(el, { overflow: "visible" }),
-        })
-      : gsap.to(el, {
-          height: 0,
-          autoAlpha: 0,
-          duration: 0.32,
-          ease: "power2.inOut",
-          onStart: () => gsap.set(el, { overflow: "hidden" }),
-        });
-    return () => {
-      tween.kill();
-    };
-  }, [open, hasDetail]);
 
   return (
     <li
@@ -327,7 +305,7 @@ function ItemRow({
           ? (el) => registerRow(item.name, el)
           : undefined
       }
-      className={`py-2.5 ${interactive ? "cursor-pointer" : ""}`}
+      className={`py-2 ${interactive ? "cursor-pointer" : ""}`}
       onMouseEnter={
         hasDetail
           ? () => {
@@ -351,7 +329,7 @@ function ItemRow({
           : undefined
       }
     >
-      {/* The row only ever shows the name · leader · price. */}
+      {/* name · leader · price */}
       <p
         className={`flex items-baseline gap-2 transition-transform duration-200 ease-out ${
           hover ? "translate-x-1.5" : ""
@@ -376,33 +354,27 @@ function ItemRow({
         </span>
       </p>
 
-      {hasDetail && (
-        <div ref={detailRef} className="h-0 overflow-hidden opacity-0">
-          <div className="pt-2">
-            {item.desc && (
-              <p
-                style={{ color: body }}
-                className="max-w-prose text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-[13px]"
-              >
-                {item.desc}
-                {item.allergens && (
-                  <span className="opacity-70"> ({item.allergens})</span>
-                )}
-              </p>
-            )}
-            {/* On desktop the photo is shown as the cursor-tracking preview;
-                inline image is kept only for the mobile scroll-active row. */}
-            {active && item.img && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={item.img}
-                alt={item.name}
-                loading="lazy"
-                className="mb-2 mt-3 aspect-[4/3] w-full max-w-sm rounded-2xl border-4 border-cream object-cover shadow-[0_12px_30px_rgba(0,0,0,0.4)]"
-              />
-            )}
-          </div>
-        </div>
+      {/* Description is always shown; the photo appears as the cursor-tracking
+          preview on hover (and inline for the mobile scroll-active row). */}
+      {item.desc && (
+        <p
+          style={{ color: body }}
+          className="mt-1 max-w-prose text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-[13px]"
+        >
+          {item.desc}
+          {item.allergens && (
+            <span className="opacity-70"> ({item.allergens})</span>
+          )}
+        </p>
+      )}
+      {active && item.img && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.img}
+          alt={item.name}
+          loading="lazy"
+          className="mb-2 mt-3 aspect-[4/3] w-full max-w-sm rounded-2xl border-4 border-cream object-cover shadow-[0_12px_30px_rgba(0,0,0,0.4)]"
+        />
       )}
     </li>
   );
@@ -428,6 +400,7 @@ function GroupBlock({
   dot,
   activeImg,
   registerRow,
+  twoCol,
 }: {
   group: Group;
   accent: string;
@@ -435,11 +408,12 @@ function GroupBlock({
   dot: string;
   activeImg?: string | null;
   registerRow?: (name: string, el: HTMLLIElement | null) => void;
+  twoCol?: boolean;
 }) {
   return (
     <div className="mt-10 first:mt-0">
       <GroupTitle accent={accent}>{group.title}</GroupTitle>
-      <ul className="mt-3">
+      <ul className={`mt-3 ${twoCol ? "sm:grid sm:grid-cols-2 sm:gap-x-14" : ""}`}>
         {group.items.map((it) => (
           <ItemRow
             key={it.name}
@@ -455,55 +429,12 @@ function GroupBlock({
   );
 }
 
-// Pandesal section, slotted in after the sandwiches.
-const PANDESAL: Item[] = [
-  { name: "Egg Pandesal", price: "—" },
-  { name: "Longanisa Pandesal", price: "—" },
-];
-
-function PandesalDeal({
-  accent,
-  body,
-  dot,
-}: {
-  accent: string;
-  body: string;
-  dot: string;
-}) {
-  return (
-    <div className="mt-10">
-      <GroupTitle accent={accent}>All Day Breakfast</GroupTitle>
-      <ul className="mt-3">
-        {PANDESAL.map((it) => (
-          <ItemRow key={it.name} item={it} body={body} dot={dot} />
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// Comic "sale sticker" sunburst — a spiky star polygon, like the hand-painted
-// price bursts on sari-sari signage.
-function burstPoints(spikes: number, outer: number, inner: number) {
-  const step = Math.PI / spikes;
-  let pts = "";
-  for (let i = 0; i < spikes * 2; i++) {
-    const r = i % 2 === 0 ? outer : inner;
-    const a = i * step - Math.PI / 2;
-    pts += `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)} `;
-  }
-  return pts.trim();
-}
 
 function MealDealBanner() {
   return (
-    <div className="relative mb-12">
-      {/* The rectangle IS the video. The footage dissolves into the page in a
-          soft oval vignette — the sun-yellow background bleeds over the edges,
-          exactly like a photo feathered into a solid colour. */}
-      <div className="relative aspect-[4/3] sm:aspect-[16/9]">
-        {/* The video is masked into a tall oval — its alpha fades to nothing
-            toward the edges, revealing the sun background with no hard seam. */}
+    <div className="relative mb-60 mt-12 sm:mt-16">
+      <div className="relative mx-auto aspect-[5/4] w-full sm:aspect-[16/10]">
+        {/* video oval backdrop — kept, sat in the upper-centre */}
         <video
           className="absolute inset-0 h-full w-full object-cover"
           autoPlay
@@ -514,97 +445,87 @@ function MealDealBanner() {
           poster="/media/g-mealdeals-poster.jpg"
           style={{
             WebkitMaskImage:
-              "radial-gradient(ellipse 64% 70% at 50% 48%, #000 26%, rgba(0,0,0,0.5) 50%, transparent 68%)",
+              "radial-gradient(ellipse 74% 72% at 50% 54%, #000 22%, rgba(0,0,0,0.5) 48%, transparent 66%)",
             maskImage:
-              "radial-gradient(ellipse 64% 70% at 50% 48%, #000 26%, rgba(0,0,0,0.5) 50%, transparent 68%)",
+              "radial-gradient(ellipse 74% 72% at 50% 54%, #000 22%, rgba(0,0,0,0.5) 48%, transparent 66%)",
           }}
         >
           <source src="/media/sando-adobo-mushroom.mp4" type="video/mp4" />
         </video>
 
-        {/* Soft dark scrim in the top-left so the sticker title stays legible,
-            confined inside the oval so it never touches the feathered edges */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_58%_58%_at_24%_30%,rgba(0,0,0,0.66),transparent_72%)]"
-          style={{
-            WebkitMaskImage:
-              "radial-gradient(ellipse 64% 70% at 50% 48%, #000 26%, transparent 68%)",
-            maskImage:
-              "radial-gradient(ellipse 64% 70% at 50% 48%, #000 26%, transparent 68%)",
-          }}
+        {/* product-photo collage piled in the lower half, hugging the oval */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/mealdeal/mealdeal-web.png"
+          alt="Cafe Mama meal deal tray"
+          className="pointer-events-none absolute bottom-[-60%] right-[-3%] z-10 w-[60%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)]"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/mealdeal/spanishlatte_clear-web.png"
+          alt="Spanish latte"
+          className="pointer-events-none absolute bottom-[-30%] left-[-20%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/mealdeal/jerkchicken-web.png"
+          alt="Toasted sando"
+          className="pointer-events-none absolute bottom-[-70%] left-[-5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/mealdeal/flatwhite-web.png"
+          alt="Flat white"
+          className="pointer-events-none absolute bottom-[-47.5%] left-[50%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
 
-        {/* Sticker text — top-left of the oval, loud jeepney-signage styling,
-            each line a different colour like a hand-painted store sign */}
-        <div className="absolute inset-0 flex flex-col items-start justify-start p-7 sm:p-10">
-          <h3 className="font-arialblack text-5xl uppercase leading-[0.78] sm:text-7xl">
-            <span
-              className="block -rotate-3 text-[#9b81c9]"
-              style={{
-                WebkitTextStroke: "3px #4a2f6e",
-                paintOrder: "stroke fill",
-                textShadow: "0 4px 0 #4a2f6e, 3px 7px 0 rgba(0,0,0,0.5)",
-              }}
-            >
-              Meal
-            </span>
-            <span
-              className="-ml-1 block rotate-1 text-[#9b81c9]"
-              style={{
-                WebkitTextStroke: "3px #f6efdd",
-                paintOrder: "stroke fill",
-                textShadow: "0 4px 0 #4a2f6e, 3px 7px 0 rgba(0,0,0,0.5)",
-              }}
-            >
-              Deals!
-            </span>
-          </h3>
-          <p
-            className="mt-3 max-w-xs text-xs font-arialblack uppercase tracking-wide text-cream sm:text-sm"
+        {/* curved headline + note across the top */}
+        <svg
+          aria-hidden
+          viewBox="0 0 1000 600"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-0 z-40 h-full w-full overflow-visible"
+        >
+          <defs>
+            <path id="md-top" fill="none" d="M 55 270 A 420 215 0 0 1 945 270" />
+            <path id="md-note" fill="none" d="M 215 150 A 290 80 0 0 1 785 150" />
+            <filter id="md-sh-lg" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="7" dy="7" stdDeviation="0" floodColor="#000" />
+            </filter>
+            <filter id="md-sh-sm" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="2" dy="2" stdDeviation="0" floodColor="#000" />
+            </filter>
+          </defs>
+          <text
+            textAnchor="middle"
+            fontSize="100"
+            filter="url(#md-sh-lg)"
             style={{
-              WebkitTextStroke: "1px #c2452d",
-              paintOrder: "stroke fill",
-              textShadow: "0 2px 0 rgba(0,0,0,0.5)",
+              fontFamily: '"Arial Black","Arial Bold",sans-serif',
+              fontWeight: 900,
+              fill: "#9b81c9",
             }}
           >
-            All meal deals come with crisps and a drink of your choice.
-          </p>
-        </div>
-
-      </div>
-
-      {/* Price burst — comically large comic sale sticker hugging the oval's
-          top-right. Red fill + dark pine outline so it reads loud against it. */}
-      <div className="absolute right-1 -top-12 rotate-[12deg] sm:right-10 sm:-top-16">
-        <div className="relative h-52 w-52 drop-shadow-[0_9px_0_rgba(0,0,0,0.4)] sm:h-[21rem] sm:w-[21rem]">
-          <svg viewBox="0 0 100 100" className="h-full w-full">
-            <polygon
-              points={burstPoints(16, 50, 38)}
-              fill="#9b81c9"
-              stroke="#4a2f6e"
-              strokeWidth="5"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center leading-none text-sun">
-            <span className="font-arialblack text-base uppercase sm:text-2xl">
-              Only
-            </span>
-            <span
-              className="font-arialblack text-7xl sm:text-[10rem]"
-              style={{
-                WebkitTextStroke: "2px #14564c",
-                paintOrder: "stroke fill",
-              }}
-            >
-              £14
-            </span>
-            <span className="font-arialblack text-sm uppercase sm:text-xl">
-              Sulit!
-            </span>
-          </div>
-        </div>
+            <textPath href="#md-top" startOffset="50%">
+              £14 MEAL DEAL
+            </textPath>
+          </text>
+          <text
+            textAnchor="middle"
+            fontSize="15"
+            filter="url(#md-sh-sm)"
+            style={{
+              fontFamily: '"Arial Black","Arial Bold",sans-serif',
+              fontWeight: 900,
+              fill: "#9b81c9",
+              letterSpacing: "0.5px",
+            }}
+          >
+            <textPath href="#md-note" startOffset="50%">
+              ALL MEAL DEALS COME WITH CRISPS &amp; A DRINK OF YOUR CHOICE
+            </textPath>
+          </text>
+        </svg>
       </div>
     </div>
   );
@@ -646,10 +567,11 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ay: 1,
       }
     : {
-        f0: "#ffe06b",
-        f1: "#f5b13e",
-        b0: "#f5b13e",
-        b1: "#e89b2b",
+        // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
+        f0: "#fbd400",
+        f1: "#f4c33c",
+        b0: "#f4c33c",
+        b1: "#eab92f",
         fa: "#ff7a2f",
         fb: "#e8362b",
         lt: "#9b81c9",
@@ -931,24 +853,16 @@ export default function Menu() {
               </p>
             ) : (
               current.groups?.map((g) => (
-                <Fragment key={g.title}>
-                  <GroupBlock
-                    group={g}
-                    accent={theme.accent}
-                    body={theme.body}
-                    dot={theme.dot}
-                    activeImg={activeImg}
-                    registerRow={registerRow}
-                  />
-                  {/* All Day Breakfast section sits right after the sandwiches list. */}
-                  {active === "sandos" && g.title === "Sando/Sandwiches" && (
-                    <PandesalDeal
-                      accent={theme.accent}
-                      body={theme.body}
-                      dot={theme.dot}
-                    />
-                  )}
-                </Fragment>
+                <GroupBlock
+                  key={g.title}
+                  group={g}
+                  accent={theme.accent}
+                  body={theme.body}
+                  dot={theme.dot}
+                  activeImg={activeImg}
+                  registerRow={registerRow}
+                  twoCol={active === "sandos"}
+                />
               ))
             )}
           </div>

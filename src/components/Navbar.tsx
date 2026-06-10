@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LINKS = [
   { label: "Menu", href: "#menu" },
@@ -10,6 +14,50 @@ const LINKS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [overMenu, setOverMenu] = useState(false);
+
+  // Auto-hide on scroll-down / show on scroll-up (ScrollTrigger.direction, which
+  // works under ScrollSmoother), and colour by whether the hero is showing.
+  useEffect(() => {
+    const st = ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      onUpdate: (self) => {
+        if (self.direction === 1 && self.scroll() > 90) setHidden(true);
+        else if (self.direction === -1) setHidden(false);
+      },
+    });
+
+    // The hero (#top) is a fixed layer that MenuReveal fades out (autoAlpha 0)
+    // when you enter the menu and back in when you return. While it's showing
+    // the bar must stay yellow — track its opacity rather than scroll position
+    // (the menu sits behind the hero at the top of the content).
+    const heroEl = document.getElementById("top");
+    const sync = () => {
+      const shown = heroEl
+        ? parseFloat(getComputedStyle(heroEl).opacity || "1") >= 0.5
+        : false;
+      setOverMenu(!shown);
+      if (shown) setHidden(false); // always show the bar over the hero
+    };
+    sync();
+    const mo = heroEl ? new MutationObserver(sync) : null;
+    if (heroEl)
+      mo!.observe(heroEl, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+
+    return () => {
+      st.kill();
+      mo?.disconnect();
+    };
+  }, []);
+
+  // Hero = yellow; over the menu = the active tab's text colour (lavender on
+  // food, yellow on drinks).
+  const navColor = overMenu ? "var(--loc-text, #f4c33c)" : "#f4c33c";
 
   return (
     <header
@@ -17,14 +65,18 @@ export default function Navbar() {
         top: "var(--bz)",
         left: "var(--bz)",
         right: "var(--bz)",
+        transform: hidden && !open ? "translateY(-130%)" : "translateY(0)",
+        transition: "transform 0.4s cubic-bezier(0.4,0,0.2,1)",
+        color: navColor,
       }}
-      className="fixed z-[70] text-cream"
+      className="fixed z-[70]"
     >
       <nav className="relative flex w-full items-start justify-between px-3 py-3 sm:px-4">
         {/* Brand — heavy Arial Black, two lines, left aligned */}
         <a
           href="#top"
           className="nav-blackface leading-[0.92] tracking-tight"
+          style={{ color: navColor }}
         >
           <span className="block text-2xl sm:text-3xl lg:text-[34px]">
             CAFE&nbsp;MAMA
@@ -35,7 +87,10 @@ export default function Navbar() {
         </a>
 
         {/* Right links (desktop) */}
-        <ul className="nav-blackface hidden items-center gap-5 pt-1 text-xl md:flex lg:gap-8 lg:text-2xl">
+        <ul
+          className="nav-blackface hidden items-center gap-5 pt-1 text-xl md:flex lg:gap-8 lg:text-2xl"
+          style={{ color: navColor }}
+        >
           {LINKS.map((l) => (
             <li key={l.href}>
               <a
@@ -58,19 +113,22 @@ export default function Navbar() {
         >
           <div className="space-y-[5px]">
             <span
-              className={`block h-[3px] w-6 bg-mango transition-transform ${
+              className={`block h-[3px] w-6 transition-transform ${
                 open ? "translate-y-[8px] rotate-45" : ""
               }`}
+              style={{ backgroundColor: navColor }}
             />
             <span
-              className={`block h-[3px] w-6 bg-mango transition-opacity ${
+              className={`block h-[3px] w-6 transition-opacity ${
                 open ? "opacity-0" : ""
               }`}
+              style={{ backgroundColor: navColor }}
             />
             <span
-              className={`block h-[3px] w-6 bg-mango transition-transform ${
+              className={`block h-[3px] w-6 transition-transform ${
                 open ? "-translate-y-[8px] -rotate-45" : ""
               }`}
+              style={{ backgroundColor: navColor }}
             />
           </div>
         </button>
@@ -79,7 +137,10 @@ export default function Navbar() {
       {/* Mobile drawer */}
       {open && (
         <div className="border-t border-black/10 bg-black/40 backdrop-blur-sm md:hidden">
-          <ul className="nav-blackface flex flex-col px-6 py-4 text-2xl">
+          <ul
+            className="nav-blackface flex flex-col px-6 py-4 text-2xl"
+            style={{ color: navColor }}
+          >
             {LINKS.map((l) => (
               <li key={l.href} className="border-b border-black/15 last:border-0">
                 <a
