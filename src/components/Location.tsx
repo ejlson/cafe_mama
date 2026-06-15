@@ -277,7 +277,7 @@ export default function Location() {
       <div
         ref={stage}
         id="location"
-        className="relative flex w-full items-center justify-center px-6 pb-28 pt-8 text-ink"
+        className="relative mb-52 flex w-full items-center justify-center px-6 py-10 text-ink"
         style={{ perspective: "1200px" }}
       >
 

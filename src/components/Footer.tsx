@@ -124,13 +124,13 @@ export default function Footer() {
         {/* Brand — two big lines that fill the width, split after MAMA */}
         <a
           href="#top"
-          className="nav-blackface font-cheee block w-full text-center leading-[0.78] tracking-[-0.03em]"
-          style={{ textShadow: "none" }}
+          className="nav-blackface font-cheee block w-full pl-4 text-left leading-[0.78] tracking-[-0.03em] sm:pl-8"
+          style={{ textShadow: "none", color: "var(--foot-brand, #f4c33c)" }}
         >
-          <span className="block whitespace-nowrap text-[11.5vw]">
+          <span className="block whitespace-nowrap text-[14vw]">
             CAFE&nbsp;MAMA
           </span>
-          <span className="block whitespace-nowrap text-[11.5vw]">
+          <span className="block whitespace-nowrap text-[14vw]">
             &amp;&nbsp;SONS
           </span>
         </a>

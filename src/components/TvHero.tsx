@@ -94,6 +94,7 @@ export default function TvHero({
           <video
             ref={videoRef}
             className="h-full w-full scale-[1.06] object-cover"
+            aria-label="Café Mama & Sons — Filipino-Japanese café, bakery & sandos on Kentish Town Road, London"
             autoPlay
             loop
             muted

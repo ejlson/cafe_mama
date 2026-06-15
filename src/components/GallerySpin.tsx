@@ -207,7 +207,7 @@ export default function GallerySpin() {
           <img
             key={idx}
             src={PHOTOS[idx]}
-            alt=""
+            alt="Café Mama & Sons — Filipino-Japanese café & bakery in Kentish Town, London"
             draggable={false}
             className="absolute left-1/2 top-1/2 h-[150%] w-[150%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
           />
@@ -269,7 +269,7 @@ export default function GallerySpin() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
-                  alt=""
+                  alt={`Café Mama & Sons gallery — Filipino-Japanese café in Kentish Town, London (${i + 1})`}
                   loading="lazy"
                   draggable={false}
                   className="h-full w-full object-cover"

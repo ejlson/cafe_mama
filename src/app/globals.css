@@ -372,4 +372,67 @@ body {
   }
 }
 
+/* Classic Word 97 "WordArt" — gold metallic gradient fill, dark outline and a
+   stacked 3D extrusion, with the trademark italic slant. */
+.wordart-3d {
+  /* Impact — the classic WordArt typeface (web-safe) */
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black",
+    sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  position: relative;
+  /* rainbow face */
+  background: linear-gradient(
+    90deg,
+    #ff2d2d 0%,
+    #ff8a00 17%,
+    #ffe000 34%,
+    #38d430 52%,
+    #2aa9ff 70%,
+    #6a5cff 86%,
+    #c14bff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px #1a1a1a;
+}
+/* dark 3D extrusion sits BEHIND the rainbow face (a text-shadow on the face
+   would paint over the gradient and hide it). */
+.wordart-3d::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  color: #3a3a3a;
+  -webkit-text-fill-color: #3a3a3a;
+  -webkit-text-stroke: 0;
+  background: none;
+  text-shadow:
+    1px 1px 0 #484848,
+    2px 2px 0 #3c3c3c,
+    3px 3px 0 #303030,
+    4px 4px 0 #242424;
+}
+/* shadow cast onto the "floor": same text, skewed + flattened + blurred so it
+   lies on the ground and recedes off diagonally. */
+.wordart-3d::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -2;
+  color: rgba(0, 0, 0, 0.32);
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.32);
+  -webkit-text-stroke: 0;
+  background: none;
+  transform-origin: left bottom;
+  transform: translate(10%, 14%) skewX(-62deg) scaleY(0.5);
+  filter: blur(1.5px);
+}
+
 /* cheee->arialblack revert 1781110843 */

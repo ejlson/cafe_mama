@@ -450,14 +450,21 @@ const ABOUT_IMAGES = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(
 );
 
 // Press / collab logos for the scrolling strip. Spaces are URL-encoded.
-const COLLABS: string[] = [
-  "/media/collabs/Canva-logo-PNG-large-size.png",
-  "/media/collabs/feedthelion.png",
-  "/media/collabs/London%20On%20The%20Inside.gif",
-  "/media/collabs/restaurantonline.avif",
-  "/media/collabs/hotdinners.jpeg",
-  "/media/collabs/ldn.png",
-  "/media/collabs/mamali.jpeg",
+// `alt` names each outlet for SEO / screen readers.
+const COLLABS: { src: string; alt: string }[] = [
+  { src: "/media/collabs/Canva-logo-PNG-large-size.png", alt: "Canva" },
+  { src: "/media/collabs/feedthelion.png", alt: "Café Mama & Sons featured in Feed the Lion" },
+  {
+    src: "/media/collabs/London%20On%20The%20Inside.gif",
+    alt: "Café Mama & Sons featured in London on the Inside",
+  },
+  {
+    src: "/media/collabs/restaurantonline.avif",
+    alt: "Café Mama & Sons featured in Restaurant Online",
+  },
+  { src: "/media/collabs/hotdinners.jpeg", alt: "Café Mama & Sons featured in Hot Dinners" },
+  { src: "/media/collabs/ldn.png", alt: "Café Mama & Sons featured in LDN" },
+  { src: "/media/collabs/mamali.jpeg", alt: "Café Mama & Sons featured in Mamali" },
 ];
 const LOREM = [
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -558,7 +565,7 @@ function CollabMarquee({ accent }: { accent: string }) {
           ref={track}
           className="flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
         >
-          {logos.map((src, i) => (
+          {logos.map((logo, i) => (
             <div
               key={i}
               className="h-24 w-52 shrink-0 select-none px-5 sm:h-40 sm:w-80 sm:px-10"
@@ -570,8 +577,8 @@ function CollabMarquee({ accent }: { accent: string }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   data-logo
-                  src={src}
-                  alt=""
+                  src={logo.src}
+                  alt={logo.alt}
                   loading="lazy"
                   draggable={false}
                   className="max-h-full max-w-full rounded-2xl object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
@@ -1692,6 +1699,8 @@ type BgVars = {
   lc: string;
   ab: number;
   ay: number;
+  // fbr = footer "CAFE MAMA & SONS" brand colour
+  fbr: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1707,6 +1716,8 @@ const bgVars = (isDrinks: boolean): BgVars =>
         lc: "#5b3f86",
         ab: 0,
         ay: 1,
+        // drinks: footer brand matches the drinks page (purple) background
+        fbr: "#9b81c9",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1724,6 +1735,7 @@ const bgVars = (isDrinks: boolean): BgVars =>
         lc: "#f4c33c",
         ab: 1,
         ay: 0,
+        fbr: "#f4c33c",
       };
 
 function setBgVars(v: BgVars) {
@@ -1734,6 +1746,7 @@ function setBgVars(v: BgVars) {
   s.setProperty("--wave-b1", v.b1);
   s.setProperty("--foot-a", v.fa);
   s.setProperty("--foot-b", v.fb);
+  s.setProperty("--foot-brand", v.fbr);
   s.setProperty("--loc-text", v.lt);
   s.setProperty("--loc-card", v.lc);
   s.setProperty("--art-blue", String(v.ab));
@@ -1861,6 +1874,7 @@ export default function Menu() {
       lc: gsap.utils.interpolate(from.lc, to.lc),
       ab: gsap.utils.interpolate(from.ab, to.ab),
       ay: gsap.utils.interpolate(from.ay, to.ay),
+      fbr: gsap.utils.interpolate(from.fbr, to.fbr),
     };
     const o = { p: 0 };
     gsap.to(o, {
@@ -1879,6 +1893,7 @@ export default function Menu() {
           lc: li.lc(o.p),
           ab: li.ab(o.p),
           ay: li.ay(o.p),
+          fbr: li.fbr(o.p),
         }),
     });
 
