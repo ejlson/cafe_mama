@@ -24,7 +24,9 @@ export default function Navbar() {
       start: 0,
       end: "max",
       onUpdate: (self) => {
-        if (self.direction === 1 && self.scroll() > 90) setHidden(true);
+        // Hide upward as soon as the user scrolls down (tiny buffer so it doesn't
+        // hide at the very top / on a rest bounce); show again on scroll-up.
+        if (self.direction === 1 && self.scroll() > 4) setHidden(true);
         else if (self.direction === -1) setHidden(false);
       },
     });
@@ -55,9 +57,16 @@ export default function Navbar() {
     };
   }, []);
 
-  // Hero = yellow; over the menu = the active tab's text colour (lavender on
-  // food, yellow on drinks).
   const navColor = overMenu ? "var(--loc-text, #f4c33c)" : "#f4c33c";
+
+  // The Gallery link opens the spinning-badge gallery overlay (which lives in
+  // GallerySpin) via a custom event, rather than jumping to an anchor.
+  const onLinkClick = (e: React.MouseEvent, href: string) => {
+    if (href === "#gallery") {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent("open-gallery"));
+    }
+  };
 
   return (
     <header
@@ -66,24 +75,19 @@ export default function Navbar() {
         left: "var(--bz)",
         right: "var(--bz)",
         transform: hidden && !open ? "translateY(-130%)" : "translateY(0)",
-        transition: "transform 0.4s cubic-bezier(0.4,0,0.2,1)",
+        transition: "transform 0.15s cubic-bezier(0.4,0,0.2,1)",
         color: navColor,
       }}
       className="fixed z-[70]"
     >
       <nav className="relative flex w-full items-start justify-between px-3 py-3 sm:px-4">
-        {/* Brand — heavy Arial Black, two lines, left aligned */}
+        {/* Brand — heavy Arial Black, single line, left aligned */}
         <a
           href="#top"
-          className="nav-blackface leading-[0.92] tracking-tight"
+          className="nav-blackface whitespace-nowrap text-lg leading-none tracking-tight [text-shadow:2px_2px_0_#000] sm:text-3xl sm:[text-shadow:3px_3px_0_#000] lg:text-[34px]"
           style={{ color: navColor }}
         >
-          <span className="block text-2xl sm:text-3xl lg:text-[34px]">
-            CAFE&nbsp;MAMA
-          </span>
-          <span className="block text-2xl sm:text-3xl lg:text-[34px]">
-            &amp;&nbsp;SONS
-          </span>
+          CAFE&nbsp;MAMA&nbsp;&amp;&nbsp;SONS
         </a>
 
         {/* Right links (desktop) */}
@@ -97,6 +101,7 @@ export default function Navbar() {
                 href={l.href}
                 target={l.href.startsWith("http") ? "_blank" : undefined}
                 rel={l.href.startsWith("http") ? "noreferrer" : undefined}
+                onClick={(e) => onLinkClick(e, l.href)}
                 className="transition-colors"
               >
                 {l.label}
@@ -147,7 +152,10 @@ export default function Navbar() {
                   href={l.href}
                   target={l.href.startsWith("http") ? "_blank" : undefined}
                   rel={l.href.startsWith("http") ? "noreferrer" : undefined}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => {
+                    onLinkClick(e, l.href);
+                    setOpen(false);
+                  }}
                   className="block py-3"
                 >
                   {l.label}

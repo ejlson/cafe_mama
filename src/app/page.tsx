@@ -2,13 +2,15 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import TvHero from "@/components/TvHero";
 import Menu from "@/components/Menu";
-// import Gallery from "@/components/Gallery"; // removed for now (bento gallery kept in component)
 import Footer from "@/components/Footer";
 import CrtOverlay from "@/components/CrtOverlay";
 import CustomCursor from "@/components/CustomCursor";
 import MusicToggle from "@/components/MusicToggle";
 import MenuReveal from "@/components/MenuReveal";
 import Scrollbar from "@/components/Scrollbar";
+import GallerySpin from "@/components/GallerySpin";
+import OpeningClock from "@/components/OpeningClock";
+import FocusMode from "@/components/FocusMode";
 
 export default function Home() {
   return (
@@ -22,7 +24,6 @@ export default function Home() {
         <main>
           <div className="relative z-10">
             <Menu />
-            {/* <Gallery /> removed for now */}
           </div>
         </main>
         <Footer />
@@ -33,6 +34,12 @@ export default function Home() {
       <CustomCursor />
       <MusicToggle />
       <Scrollbar />
+      {/* Spinning gallery badge + its swipe-in horizontal gallery page. */}
+      <GallerySpin />
+      {/* Opening-hours watch — drag to spin; sat above the gallery badge. */}
+      <OpeningClock className="fixed bottom-[9.5rem] right-6 z-[55] h-28 w-28 sm:bottom-[10.5rem] sm:h-32 sm:w-32" />
+      {/* Focus mode — square video bottom-left + AI-voice narration of the script. */}
+      <FocusMode />
     </>
   );
 }

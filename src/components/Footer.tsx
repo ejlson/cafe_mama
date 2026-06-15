@@ -124,12 +124,13 @@ export default function Footer() {
         {/* Brand — two big lines that fill the width, split after MAMA */}
         <a
           href="#top"
-          className="nav-blackface block w-full text-center leading-[0.78] tracking-[-0.03em]"
+          className="nav-blackface font-cheee block w-full pl-4 text-left leading-[0.78] tracking-[-0.03em] sm:pl-8"
+          style={{ textShadow: "none", color: "var(--foot-brand, #f4c33c)" }}
         >
-          <span className="block whitespace-nowrap text-[11.5vw]">
+          <span className="block whitespace-nowrap text-[14vw]">
             CAFE&nbsp;MAMA
           </span>
-          <span className="block whitespace-nowrap text-[11.5vw]">
+          <span className="block whitespace-nowrap text-[14vw]">
             &amp;&nbsp;SONS
           </span>
         </a>
@@ -141,7 +142,7 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
-            className="text-cream transition-opacity hover:opacity-70"
+            className="text-[#f4c33c] transition-opacity hover:opacity-70"
           >
             <svg
               viewBox="0 0 24 24"
@@ -158,7 +159,7 @@ export default function Footer() {
           </a>
           <a
             href="mailto:hello@cafemamasons.com"
-            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-cream transition-opacity hover:opacity-70"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
           >
             hello@cafemamasons.com
           </a>
