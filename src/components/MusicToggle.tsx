@@ -94,7 +94,7 @@ export default function MusicToggle() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = 0.35;
+    audio.volume = 0.15;
 
     const startOnGesture = () => {
       if (startedRef.current) return;

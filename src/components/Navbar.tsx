@@ -24,7 +24,9 @@ export default function Navbar() {
       start: 0,
       end: "max",
       onUpdate: (self) => {
-        if (self.direction === 1 && self.scroll() > 90) setHidden(true);
+        // Hide upward as soon as the user scrolls down (tiny buffer so it doesn't
+        // hide at the very top / on a rest bounce); show again on scroll-up.
+        if (self.direction === 1 && self.scroll() > 4) setHidden(true);
         else if (self.direction === -1) setHidden(false);
       },
     });
@@ -55,8 +57,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // Hero = yellow; over the menu = the active tab's text colour (lavender on
-  // food, yellow on drinks).
   const navColor = overMenu ? "var(--loc-text, #f4c33c)" : "#f4c33c";
 
   return (
@@ -66,7 +66,7 @@ export default function Navbar() {
         left: "var(--bz)",
         right: "var(--bz)",
         transform: hidden && !open ? "translateY(-130%)" : "translateY(0)",
-        transition: "transform 0.4s cubic-bezier(0.4,0,0.2,1)",
+        transition: "transform 0.15s cubic-bezier(0.4,0,0.2,1)",
         color: navColor,
       }}
       className="fixed z-[70]"

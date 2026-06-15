@@ -63,8 +63,13 @@ export default function MenuReveal() {
       // Start on the hero: it's shown, the menu scroll is locked behind it.
       sm()?.paused(true);
 
-      const showBtn = () => gsap.to(btnRef.current, { autoAlpha: 1, duration: 0.4 });
-      const hideBtn = () => gsap.to(btnRef.current, { autoAlpha: 0, duration: 0.2 });
+      // The hero "Menu ⌄" cue must only ever be visible on the hero. overwrite
+      // ensures the latest show/hide wins, so a rapid hero↔menu gesture (e.g.
+      // trackpad momentum firing onDown+onUp) can't leave a stale show running.
+      const showBtn = () =>
+        gsap.to(btnRef.current, { autoAlpha: 1, duration: 0.4, overwrite: true });
+      const hideBtn = () =>
+        gsap.to(btnRef.current, { autoAlpha: 0, duration: 0.2, overwrite: true });
 
       // A quick staggered sweep of every point to `target` (0 = cover, 100 =
       // uncover) — each point on its own random delay so the shape keeps morphing.
@@ -119,6 +124,7 @@ export default function MenuReveal() {
         transition(
           () => {
             gsap.set(heroEl, { autoAlpha: 0 }); // reveal the menu beneath
+            hideBtn(); // make sure the cue is gone the instant the menu appears
             sm()?.scrollTo(0, false);
             window.dispatchEvent(new Event("menu:reveal")); // play the menu's entrance
           },

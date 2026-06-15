@@ -187,7 +187,7 @@ export default function Location() {
       // glides to the top-right edge on hover (left:100% tracks the widening
       // card; xPercent:-100 + x pulls it just inside the right border).
       const headEl = cardEl.querySelector<HTMLElement>(".loc-heading");
-      if (headEl) gsap.set(headEl, { left: "50%", xPercent: -50, z: 80 });
+      if (headEl) gsap.set(headEl, { left: "50%", xPercent: -50, x: 0, z: 80 });
       const moveHead = (on: boolean) => {
         if (!headEl) return;
         gsap.to(headEl, {
@@ -260,13 +260,13 @@ export default function Location() {
       <section className="where-horizontal relative ml-[calc(50%-50vw)] flex h-screen w-screen items-center overflow-hidden">
         <div className="where-track flex w-max flex-col items-center gap-[1.5vw] pl-[100vw]">
           <h3
-            className="where-line nav-blackface flex w-max gap-[4vw] whitespace-nowrap text-[clamp(2rem,10vw,12rem)] leading-[1.1]"
+            className="where-line nav-blackface font-cheee flex w-max gap-[4vw] whitespace-nowrap text-[clamp(3rem,16vw,18rem)] leading-[1.1]"
             style={{ color: "var(--loc-text, #2463c3)" }}
           >
             Where are we?
           </h3>
           <p
-            className="where-line nav-blackface flex w-max gap-[3vw] whitespace-nowrap text-[clamp(1rem,5vw,5.5rem)] leading-[1.1]"
+            className="where-line nav-blackface font-cheee flex w-max gap-[3vw] whitespace-nowrap text-[clamp(1.5rem,8vw,9rem)] leading-[1.1]"
             style={{ color: "var(--loc-text, #2463c3)" }}
           >
             Nasaan tayo?
@@ -283,37 +283,42 @@ export default function Location() {
       {/* ---- full-bleed "COME FIND US" marquee rows ---- */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-1/2 z-0 flex w-screen -translate-x-1/2 flex-col justify-center gap-0 overflow-hidden opacity-85"
+        className="pointer-events-none absolute inset-y-0 left-1/2 z-0 flex w-screen -translate-x-1/2 flex-col justify-center gap-0 overflow-hidden py-[2.5vh] opacity-85"
       >
         {Array.from({ length: 6 }).map((_, row) => (
           <div key={row} className="flex-1 overflow-hidden">
             <div className="cfu-track flex h-full w-max items-center">
               {Array.from({ length: 8 }).map((_, j) => (
-                // blue tile (sandwiches) + yellow tile (drinks) crossfade via
-                // --art-blue / --art-yellow, which the Menu sets per tab
-                <div key={j} className="relative h-full shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/media/word%20art/come-find-us-tile-purple.png"
-                    alt=""
-                    className="block h-full w-auto max-w-none select-none"
-                    style={{ opacity: "var(--art-blue, 1)" }}
-                    draggable={false}
-                  />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/media/word%20art/come-find-us-tile-yellow.png"
-                    alt=""
-                    className="absolute left-0 top-0 block h-full w-auto max-w-none select-none"
-                    style={{ opacity: "var(--art-yellow, 0)" }}
-                    draggable={false}
-                  />
-                </div>
+                // "COME FIND US" in cheee-wowie, coloured by --loc-text (which
+                // the Menu flips per tab: pink on food, yellow on drinks)
+                <span
+                  key={j}
+                  className="font-cheee flex h-full shrink-0 items-center whitespace-nowrap pr-[3vw] uppercase leading-none"
+                  style={{
+                    color: "var(--loc-text, #2463c3)",
+                    fontSize: "clamp(3rem, 14.5vh, 11rem)",
+                    textShadow: "3px 3px 0 #000",
+                  }}
+                >
+                  Come&nbsp;find&nbsp;us&nbsp;✦
+                </span>
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      {/* full-bleed rules framing the COME FIND US word art */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 z-[1] h-[2px] w-screen -translate-x-1/2"
+        style={{ backgroundColor: "var(--loc-text, #2463c3)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-1/2 z-[1] h-[2px] w-screen -translate-x-1/2"
+        style={{ backgroundColor: "var(--loc-text, #2463c3)" }}
+      />
 
       <div
         ref={card}
@@ -344,8 +349,7 @@ export default function Location() {
           {/* floating heading — centred at rest, slides to the top-right on
               hover. Not a tilt-layer; GSAP owns its transform. */}
           <h2
-            className="loc-heading pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap font-arialblack text-4xl uppercase leading-none sm:text-5xl"
-            style={{ textShadow: "4px 4px 0 #221a12" }}
+            className="loc-heading pointer-events-none absolute left-1/2 top-5 whitespace-nowrap font-arialblack text-4xl uppercase leading-none sm:text-5xl"
           >
             We&apos;re Here!!
           </h2>
@@ -550,7 +554,6 @@ export default function Location() {
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-between py-24">
               <h2
                 className="font-arialblack text-6xl uppercase leading-[0.82] text-sun sm:text-7xl lg:text-8xl"
-                style={{ textShadow: "5px 5px 0 #221a12" }}
               >
                 <Chars text="WE'RE HERE" />
               </h2>
@@ -593,7 +596,6 @@ export default function Location() {
                   </p>
                   <h3
                     className="mt-3 font-arialblack text-6xl uppercase leading-[0.85] text-cream sm:text-7xl"
-                    style={{ textShadow: "4px 4px 0 #221a12" }}
                   >
                     <Chars text="DROP BY" />
                   </h3>

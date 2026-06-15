@@ -41,6 +41,13 @@ export default function CustomCursor() {
       rx(e.clientX);
       ry(e.clientY);
     };
+    // Hide when the pointer leaves the window so the ring/dot never get stranded
+    // at a corner (e.g. when reaching for the menu bar). `move` re-shows it on
+    // re-entry. Without this the gold-on-gold ring reads as a stray white dot.
+    const hideCursor = () => {
+      shown = false;
+      gsap.to([dot, ring], { autoAlpha: 0, duration: 0.2 });
+    };
     const isInteractive = (t: EventTarget | null) =>
       t instanceof Element && t.closest("a, button, [data-cursor]");
     const over = (e: PointerEvent) => {
@@ -55,10 +62,14 @@ export default function CustomCursor() {
     window.addEventListener("pointermove", move);
     document.addEventListener("pointerover", over);
     document.addEventListener("pointerout", out);
+    document.documentElement.addEventListener("pointerleave", hideCursor);
+    window.addEventListener("blur", hideCursor);
     return () => {
       window.removeEventListener("pointermove", move);
       document.removeEventListener("pointerover", over);
       document.removeEventListener("pointerout", out);
+      document.documentElement.removeEventListener("pointerleave", hideCursor);
+      window.removeEventListener("blur", hideCursor);
       document.documentElement.classList.remove("has-custom-cursor");
     };
   });

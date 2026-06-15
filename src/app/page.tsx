@@ -2,13 +2,13 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import TvHero from "@/components/TvHero";
 import Menu from "@/components/Menu";
-// import Gallery from "@/components/Gallery"; // removed for now (bento gallery kept in component)
 import Footer from "@/components/Footer";
 import CrtOverlay from "@/components/CrtOverlay";
 import CustomCursor from "@/components/CustomCursor";
 import MusicToggle from "@/components/MusicToggle";
 import MenuReveal from "@/components/MenuReveal";
 import Scrollbar from "@/components/Scrollbar";
+import GallerySpin from "@/components/GallerySpin";
 
 export default function Home() {
   return (
@@ -22,7 +22,6 @@ export default function Home() {
         <main>
           <div className="relative z-10">
             <Menu />
-            {/* <Gallery /> removed for now */}
           </div>
         </main>
         <Footer />
@@ -33,6 +32,8 @@ export default function Home() {
       <CustomCursor />
       <MusicToggle />
       <Scrollbar />
+      {/* Spinning gallery badge + its swipe-in horizontal gallery page. */}
+      <GallerySpin />
     </>
   );
 }

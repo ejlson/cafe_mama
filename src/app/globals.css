@@ -203,13 +203,20 @@ body {
   text-shadow: 3px 3px 0 #000;
 }
 
-/* Menu poster title — red face with a hard black drop shadow, echoing the nav. */
+/* Menu poster title — red face (drop shadow removed for a flatter look). */
 .menu-title {
   color: #e23b2e;
-  text-shadow: 5px 5px 0 #000;
 }
 .nav-blackface a:hover {
   color: #ffd968;
+}
+
+/* Big headers (menu, about-us, where-are-we, footer brand, come-find-us) —
+   Arial Black. The hard black drop shadow is applied per-element now (only the
+   navbar, "where are we?"/"nasaan tayo?" and "come find us" keep it). */
+.font-cheee {
+  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 900 !important;
 }
 
 /* When the custom cursor is active, hide the native one everywhere. */
@@ -341,3 +348,5 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* cheee->arialblack revert 1781110843 */

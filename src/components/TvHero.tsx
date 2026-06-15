@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Full-screen retro broadcast hero. There is no TV casing in Cafe_Mama_2 —
@@ -46,6 +46,8 @@ export default function TvHero({
   poster?: string;
 }) {
   const [line, setLine] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Hold each caption long enough to read both lines, then advance.
@@ -58,8 +60,28 @@ export default function TvHero({
     return () => clearTimeout(hold);
   }, [line]);
 
+  // The hero is a fixed layer that MenuReveal fades out (opacity/visibility)
+  // when you enter the menu — but a hidden <video> keeps decoding 4K frames the
+  // whole time, which is a big drain. Pause it while hidden, resume when shown.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+    const sync = () => {
+      const cs = getComputedStyle(section);
+      const hidden = cs.visibility === "hidden" || parseFloat(cs.opacity) < 0.05;
+      if (hidden) video.pause();
+      else video.play().catch(() => {});
+    };
+    sync();
+    const mo = new MutationObserver(sync);
+    mo.observe(section, { attributes: true, attributeFilter: ["style", "class"] });
+    return () => mo.disconnect();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="top"
       className="fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black"
     >
@@ -70,6 +92,7 @@ export default function TvHero({
       <div className="power-on absolute inset-0 crt-fisheye">
         {videoSrc ? (
           <video
+            ref={videoRef}
             className="h-full w-full scale-[1.06] object-cover"
             autoPlay
             loop
@@ -92,20 +115,9 @@ export default function TvHero({
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/25" />
       </div>
 
-      {/* On-screen UI, aligned to the (full-screen) window */}
+
       <div className="pointer-events-none absolute z-20" style={SCREEN_INSET}>
-        {/* Channel title */}
-        {/* <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="font-body text-[11px] font-bold uppercase tracking-[0.4em] text-cream/80">
-            Kentish Town · NW1 · CH&nbsp;03
-          </p>
-          <h1 className="mt-3 font-display text-[16vw] leading-[0.82] text-cream drop-shadow-[0_3px_0_rgba(0,0,0,0.4)] sm:text-[12vw] lg:text-[150px]">
-            CAFE&nbsp;MAMA
-          </h1>
-          <p className="font-hand -mt-2 text-4xl text-peach drop-shadow-[0_2px_0_rgba(0,0,0,0.4)] sm:text-5xl lg:text-6xl">
-            &amp; sons
-          </p>
-        </div> */}
+        
 
         {/* Film subtitles — English + Tagalog appear together, then cross-fade */}
         {/* <div

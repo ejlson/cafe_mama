@@ -14,10 +14,14 @@ import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { Draggable } from "gsap/Draggable";
+import { InertiaPlugin } from "gsap/InertiaPlugin";
+import Smooothy, { damp } from "smooothy";
 import BestSellers from "@/components/BestSellers";
 import Location from "@/components/Location";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, Draggable, InertiaPlugin);
 
 /**
  * 
@@ -35,7 +39,12 @@ type Item = {
   w?: number;
   h?: number;
 };
-type Group = { title: string; items: Item[] };
+type Group = { title: string; items: Item[]; blurb?: string };
+
+// Placeholder copy sat to the right of each food group header — swap for real
+// blurbs later.
+const LOREM_BLURB =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 type Category = {
   key: string;
   label: string;
@@ -115,14 +124,17 @@ const PANDESAL: Item[] = [
 
 const BAKED: Item[] = [
   { name: "Honey Toast", price: "—" },
-  { name: "Garlic Twist", price: "—" },
+  { name: "Honey Garlic Twist", price: "—" },
   { name: "Spanish Bread", price: "—" },
   { name: "Croissant", price: "—" },
   { name: "Cookie Croissant", price: "—" },
   { name: "Miso Cookie", price: "—" },
   { name: "Ube Bow", price: "—" },
-  { name: "Ube Cookie", price: "—" },
-  { name: "Au Chocolat", price: "—" },
+  { name: "Ube Pain Au Chocolat", price: "—" },
+  { name: "Pain Au Chocolat", price: "—" },
+  { name: "Banana Pudding", price: "—" },
+  { name: "Milo Tiramisu", price: "—" },
+
 ];
 
 const DRINKS_GROUPS: Group[] = [
@@ -133,30 +145,32 @@ const DRINKS_GROUPS: Group[] = [
       { name: "Cortado", price: "—" },
       { name: "Macchiato", price: "—" },
       { name: "Flat White", price: "—" },
-      { name: "Latte", price: "—" },
+      { name: "Latte (Iced/Hot)", price: "—" },
       { name: "Cappuccino", price: "—" },
-      { name: "Americano", price: "—" },
-      { name: "Spanish Iced Latte", price: "5.20" },
-      { name: "Ube or Milo Latte", price: "6.20" },
+      { name: "Americano (Iced/Hot)", price: "—" },
+      { name: "Spanish Latte (Iced/Hot)", price: "5.20" },
+      { name: "Ube Latte (Iced/Hot)", price: "6.20" },
+      { name: "Milo Latte (Iced/Hot)", price: "6.20" },
     ],
   },
   {
     title: "Matcha",
     items: [
-      { name: "Ube or Milo Matcha", price: "6.20" },
       { name: "Mango Matcha", price: "5.70" },
       { name: "Strawberry Matcha", price: "5.70" },
-      { name: "Spanish Iced Matcha", price: "5.20" },
+      { name: "Spanish Matcha (Iced/Hot)", price: "5.20" },
+      { name: "Ube Matcha (Iced/Hot)", price: "6.20" },
+      { name: "Milo Matcha (Iced/Hot)", price: "6.20" },
     ],
   },
   {
     title: "Tea",
     items: [
-      { name: "Calamansi Ade", price: "4.70" },
+      { name: "Calamansi Tea", price: "4.70" },
       { name: "Honey Peach Mango", price: "4.70" },
       { name: "Strawberry Black Tea", price: "4.70" },
-      { name: "Spanish Iced Hojicha", price: "6.00" },
-      { name: "Iced Milo Hojicha", price: "6.00" },
+      { name: "Spanish Hojicha (Iced/Hot)", price: "6.00" },
+      { name: "Milo Hojicha (Iced/Hot)", price: "6.00" },
     ],
   },
   {
@@ -174,10 +188,10 @@ const CATEGORIES: Category[] = [
     key: "sandos",
     label: "Food",
     groups: [
-      { title: "Sando/Sandwiches", items: SANDOS },
-      { title: "All-Day Breakfast", items: PANDESAL },
-      { title: "Sides", items: SIDES },
-      { title: "Baked Goods", items: BAKED },
+      { title: "Sando/Sandwiches", items: SANDOS, blurb: LOREM_BLURB },
+      { title: "All-Day Breakfast", items: PANDESAL, blurb: LOREM_BLURB },
+      { title: "Sides", items: SIDES, blurb: LOREM_BLURB },
+      { title: "Baked Goods", items: BAKED, blurb: LOREM_BLURB },
     ],
   },
   { key: "drinks", label: "Drinks", groups: DRINKS_GROUPS },
@@ -192,9 +206,6 @@ function MenuImagePreview({ children }: { children: ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const apiRef = useRef<PreviewApi | null>(null);
-  // The preview is portalled to <body> so it sits OUTSIDE ScrollSmoother's
-  // transformed #smooth-content — otherwise position:fixed is relative to that
-  // transform and the image drifts off the cursor.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -206,35 +217,59 @@ function MenuImagePreview({ children }: { children: ReactNode }) {
     gsap.set(wrap, { xPercent: -50, yPercent: -50, autoAlpha: 0, scale: 0.8 });
     const xTo = gsap.quickTo(wrap, "x", { duration: 0.5, ease: "power3" });
     const yTo = gsap.quickTo(wrap, "y", { duration: 0.5, ease: "power3" });
+    // Track the live pointer so a freshly-shown preview can be dropped straight
+    // onto the cursor — otherwise it flashes at 0,0 (a white box in the
+    // top-left) while quickTo eases over from its previous position.
+    let lastX = window.innerWidth / 2;
+    let lastY = window.innerHeight / 2;
     const onMove = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
       xTo(e.clientX);
       yTo(e.clientY);
     };
     window.addEventListener("pointermove", onMove);
+
+    // Bumped on every show()/hide() so a slow image's onload can't reveal the
+    // preview after the pointer has already left the row.
+    let token = 0;
 
     apiRef.current = {
       show: (d) => {
         // skip on touch / coarse pointers — there's no cursor to track
         if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
           return;
+        const my = ++token;
         img.src = d.img;
         const natW = d.w ?? 240;
         const natH = d.h ?? 180;
         const W = 250;
+        // Size it and place it ON the cursor instantly (no tween) so it can
+        // never appear in the top-left corner.
         gsap.set(wrap, {
           width: W,
           height: W * (natH / natW),
           rotate: d.angle ?? 0,
+          x: lastX,
+          y: lastY,
         });
-        gsap.to(wrap, {
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.35,
-          ease: "back.out(1.6)",
-          overwrite: "auto",
-        });
+        const reveal = () => {
+          if (my !== token) return; // superseded by a hide() / newer show()
+          gsap.to(wrap, {
+            autoAlpha: 1,
+            scale: 1,
+            duration: 0.35,
+            ease: "back.out(1.6)",
+            overwrite: "auto",
+          });
+        };
+        // Only fade in once the photo is actually decoded, so the empty cream
+        // border never shows on its own.
+        if (img.complete && img.naturalWidth > 0) reveal();
+        else img.onload = reveal;
       },
       hide: () => {
+        token++; // cancel any pending reveal
         gsap.to(wrap, {
           autoAlpha: 0,
           scale: 0.8,
@@ -305,7 +340,7 @@ function ItemRow({
           ? (el) => registerRow(item.name, el)
           : undefined
       }
-      className={`py-2 ${interactive ? "cursor-pointer" : ""}`}
+      className={`py-1 ${interactive ? "cursor-pointer" : ""}`}
       onMouseEnter={
         hasDetail
           ? () => {
@@ -380,16 +415,908 @@ function ItemRow({
   );
 }
 
-// Poster-style group heading: coloured face with a hard black offset shadow,
-// echoing the navbar and the big "menu." title.
 function GroupTitle({ children, accent }: { children: string; accent: string }) {
   return (
     <h3
-      className="font-arialblack text-4xl uppercase leading-none sm:text-5xl"
-      style={{ color: accent, textShadow: "4px 4px 0 #000" }}
+      className="font-cheee text-5xl uppercase leading-none tracking-tight sm:text-6xl"
+      style={{ color: accent }}
     >
       {children}
     </h3>
+  );
+}
+
+// A thin rule that separates blocks. Spans the content column and overhangs
+// each edge a little so it runs just past where the content starts.
+function FullRule({ color, className = "mt-12" }: { color: string; className?: string }) {
+  return (
+    <div
+      aria-hidden
+      style={{ backgroundColor: color }}
+      className={`relative left-1/2 h-px w-[calc(100%+2rem)] -translate-x-1/2 ${className}`}
+    />
+  );
+}
+
+// Vertical rules just inside each edge of the viewport — disabled (the side
+// lines were removed for a cleaner, lighter frame). Kept as a no-op so the call
+// sites still type-check and the rails can be restored by reinstating the JSX.
+function SideRails(_props: { color: string }) {
+  return null;
+}
+
+const ABOUT_IMAGES = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(
+  (n) => `/media/about%20us/web/about${n}-web.jpg`,
+);
+
+// Press / collab logos for the scrolling strip. Spaces are URL-encoded.
+const COLLABS: string[] = [
+  "/media/collabs/Canva-logo-PNG-large-size.png",
+  "/media/collabs/feedthelion.png",
+  "/media/collabs/London%20On%20The%20Inside.gif",
+  "/media/collabs/restaurantonline.avif",
+  "/media/collabs/hotdinners.jpeg",
+  "/media/collabs/ldn.png",
+  "/media/collabs/mamali.jpeg",
+];
+const LOREM = [
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+];
+
+// Full-bleed band of press / collab logos in a draggable, continuously-scrolling
+// strip. smooothy (github.com/vallafederico/smooothy) drives the infinite track;
+// we nudge its `target` every frame for the auto-scroll and skip that nudge while
+// the user is dragging, so on release it eases back to the steady cruising speed.
+function CollabMarquee({ accent }: { accent: string }) {
+  const track = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const el = track.current;
+      if (!el) return;
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      // The [data-p] inner wrappers get a velocity-driven parallax nudge
+      // (smooothy docs → Parallax and Speed). The [data-logo] images scale up
+      // as they pass through the centre of the strip, then settle back.
+      const pEls = Array.from(el.querySelectorAll<HTMLElement>("[data-p]"));
+      const imgs = Array.from(el.querySelectorAll<HTMLElement>("[data-logo]"));
+      let lspeed = 0; // smoothed scroll velocity
+
+      const FOCUS = 360; // px from centre where the scale-up begins
+      const MAX_SCALE = 1.45; // peak size at dead centre
+
+      const slider = new Smooothy(el, {
+        infinite: true,
+        snap: false,
+        lerpFactor: 0.06,
+        dragSensitivity: 0.005,
+        speedDecay: 0.9,
+        onUpdate: (s) => {
+          const pv = s.parallaxValues;
+          if (!pv) return;
+          // Frame-rate-independent smoothing of the raw velocity.
+          lspeed = damp(lspeed, s.speed, 5, s.deltaTime);
+          pEls.forEach((p, i) => {
+            const offset = (pv[i] ?? 0) * Math.abs(lspeed) * 20;
+            p.style.transform = `translateX(${offset}%)`;
+          });
+
+          if (reduce) return;
+          // Distance of each logo from the centre of the screen → proximity
+          // scale (1 at the FOCUS edge, MAX_SCALE dead centre).
+          const mid = window.innerWidth / 2;
+          imgs.forEach((img) => {
+            const b = img.getBoundingClientRect();
+            const d = Math.abs(b.left + b.width / 2 - mid);
+            const p = gsap.utils.clamp(
+              0,
+              1,
+              gsap.utils.mapRange(0, FOCUS, 1, 0, d),
+            );
+            img.style.scale = String(1 + (MAX_SCALE - 1) * p);
+          });
+        },
+      });
+
+      // Slides-per-frame drift — the steady cruising speed the strip returns to
+      // after a drag/flick settles.
+      const SPEED = 0.008;
+      const tick = () => {
+        if (!reduce && !slider.isDragging) slider.target += SPEED;
+        slider.update();
+      };
+      gsap.ticker.add(tick);
+
+      return () => {
+        gsap.ticker.remove(tick);
+        slider.destroy();
+      };
+    },
+    { dependencies: [] },
+  );
+
+  // Duplicated so the track always overflows the viewport — with only a handful
+  // of logos the infinite wrap would otherwise reveal a gap.
+  const logos = [...COLLABS, ...COLLABS];
+
+  return (
+    <>
+      <div className="relative left-1/2 mt-[24vh] w-screen -translate-x-1/2 py-5">
+        <p
+          className="mb-5 text-center font-arialblack text-[1rem] uppercase tracking-[0.35em] opacity-50"
+          style={{ color: accent }}
+        >
+          as seen in or collaborated with
+        </p>
+        {/* smooothy wrapper: flex + overflow-hidden, direct children are slides */}
+        <div
+          ref={track}
+          className="flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
+        >
+          {logos.map((src, i) => (
+            <div
+              key={i}
+              className="h-32 w-72 shrink-0 select-none px-8 sm:h-40 sm:w-80 sm:px-10"
+            >
+              <div
+                data-p
+                className="flex h-full w-full items-center justify-center will-change-transform"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  data-logo
+                  src={src}
+                  alt=""
+                  loading="lazy"
+                  draggable={false}
+                  className="max-h-full max-w-full rounded-2xl object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// "about us." — a PINNED section. The text holds still while the photos on the
+// right scroll up through a window with a velocity skew (they lean with scroll
+// speed and snap back when you stop). A counter + bar track progress; once the
+// last photo passes it releases into the "where are we?" (Location) section.
+function AboutUs({ accent }: { accent: string }) {
+  const root = useRef<HTMLDivElement>(null);
+  const win = useRef<HTMLDivElement>(null);
+  const stack = useRef<HTMLDivElement>(null);
+  const count = useRef<HTMLSpanElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
+  const N = ABOUT_IMAGES.length;
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const stackEl = stack.current!;
+      const winEl = win.current!;
+      const travel = () => stackEl.scrollHeight - winEl.clientHeight;
+
+      // velocity skew (after codepen.io/GreenSock/pen/eYpGLYL)
+      const imgs = gsap.utils.toArray<HTMLElement>(".about-img", winEl);
+      gsap.set(imgs, { transformOrigin: "center center", force3D: true });
+      const skewSet = gsap.quickSetter(imgs, "skewY", "deg");
+      const clamp = gsap.utils.clamp(-14, 14);
+      const proxy = { skew: 0 };
+
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top top",
+            end: () => "+=" + travel(),
+            pin: true,
+            scrub: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              const shown = Math.min(N, Math.floor(self.progress * N) + 1);
+              if (count.current)
+                count.current.textContent = String(shown).padStart(2, "0");
+              if (bar.current)
+                bar.current.style.transform = `scaleX(${self.progress})`;
+
+              const skew = clamp(self.getVelocity() / -260);
+              if (Math.abs(skew) > Math.abs(proxy.skew)) {
+                proxy.skew = skew;
+                gsap.to(proxy, {
+                  skew: 0,
+                  duration: 0.7,
+                  ease: "power3",
+                  overwrite: true,
+                  onUpdate: () => skewSet(proxy.skew),
+                });
+              }
+            },
+          },
+        })
+        .to(stackEl, { y: () => -travel(), ease: "none" });
+    },
+    { scope: root },
+  );
+
+  return (
+    <section ref={root} className="relative flex h-screen flex-col pt-2 sm:pt-3">
+      <SideRails color={accent} />
+
+      <h2
+        className="font-cheee font-arialblack text-[24vw] leading-[0.8] pb-[0.2em] sm:text-[25rem]"
+        style={{ color: accent }}
+      >
+        blog
+      </h2>
+
+      {/* Line under the about-us title */}
+      <FullRule color={accent} className="mt-1" />
+
+      <div className="flex min-h-0 flex-1 gap-8 sm:gap-12">
+        {/* Left — text + progress (held still) */}
+        <div className="flex w-1/2 flex-col pb-6 pt-7">
+          <div className="space-y-3" style={{ color: accent }}>
+            {LOREM.map((t, i) => (
+              <p key={i} className="max-w-2xl text-base leading-relaxed sm:text-xl">
+                {t}
+              </p>
+            ))}
+          </div>
+
+          <div className="mt-auto pt-8" style={{ color: accent }}>
+            <div className="flex items-end gap-2 font-arialblack leading-none">
+              <span ref={count} className="text-5xl sm:text-6xl">
+                01
+              </span>
+              <span className="text-xl opacity-60 sm:text-2xl">
+                / {String(N).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="mt-3 h-[3px] w-full max-w-xs bg-black/10">
+              <div
+                ref={bar}
+                className="h-full w-full origin-left"
+                style={{ transform: "scaleX(0)", backgroundColor: accent }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right — photos scroll up through this window with a velocity skew.
+            Horizontal padding gives the drop shadows room so they aren't clipped;
+            all photos are full window-width at their natural height (no crop). */}
+        <div ref={win} className="relative w-[40%] self-stretch overflow-hidden px-8">
+          <div ref={stack} className="flex flex-col gap-[5vh] will-change-transform">
+            {ABOUT_IMAGES.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={src}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                className="about-img w-full shrink-0 rounded-md shadow-[0_14px_30px_rgba(0,0,0,0.28)]"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <FullRule color={accent} className="mt-0" />
+    </section>
+  );
+}
+
+// Blog posts shown as the layered card row. Clicking a card opens the full post
+// in a fold-in modal. `body` paragraphs hold the article text; a paragraph can
+// be a plain string or an array of segments (string | inline link).
+type BlogSegment = string | { text: string; href: string };
+type BlogParagraph = string | BlogSegment[];
+type BlogPost = {
+  img: string;
+  title: string;
+  date: string;
+  r: number;
+  body?: BlogParagraph[];
+};
+const BLOG_POSTS: BlogPost[] = [
+  {
+    img: "/blog/blog1/blog1.webp",
+    title: "Featured on London on the Inside",
+    date: "7 August 2025",
+    r: -4,
+    body: [
+      "Thank you to London on the Inside for spotlighting Café Mama & Sons as part of their Camden picks. Their article focuses on the foundation of what we do: reimagining the Filipino bakery experience using freshly baked pandesal, layered with flavour-forward fillings and nostalgic desserts.",
+      "They mentioned some of our signature dishes, including the corned beef and egg mayo sandos, mushroom adobo, and our banana ensaymada pudding, which continues to be one of our most talked-about menu items. It was also great to see our sweetcorn latte and ube matcha recognised, drinks that pair well with both our savoury and sweet offerings.",
+      "We opened Mama & Sons to share the depth of Filipino flavours through a more casual, modern format. It's encouraging to see these ideas reflected in the media and recognised by the wider London food scene.",
+      [
+        "Read the full write-up on London on the Inside ",
+        {
+          text: "here",
+          href: "https://londontheinside.com/location/cafe-mama-sons/?utm_source=chatgpt.com",
+        },
+        ".",
+      ],
+      "Sallyna Do",
+    ],
+  },
+
+  { 
+    img: "/media/about%20us/web/about4-web.jpg", 
+    title: "Café Mama & Sons Featured in The Infatuation",
+    date: "7 Aug 2025", 
+    r: 3,
+    body: [
+      "We were pleased to be included in The Infatuation’s guide to London’s new restaurant openings. Their review recognised what we aim to offer: a thoughtful mix of Filipino and Japanese influences, expressed through both our savoury sandos and sweet bakes.",
+      "They highlighted our miso milk chocolate cookies, mushroom adobo, and crowd-favourite jerk chicken-stuffed sandos; all made with our signature house-baked pandesal. It was also great to see mention of our specialty drinks like ube matcha and the popular corn latte.",
+      "At the heart of the article was what we’re most proud of: showcasing flavours that are nostalgic yet inventive. One dish that embodies this perfectly is our banana ensaymada pudding, a modern take on a Filipino bakery classic; soft, custardy, and made with our fluffy ensaymada.",
+      [
+        "Read the full article on The Infatuation ",
+        {
+          text: "here",
+          href: "https://www.theinfatuation.com/london/reviews/cafe-mama-sons?utm_source=chatgpt.com",
+        },
+        ".",
+      ],
+      "Sallyna Do",
+    ]
+  },
+
+  { 
+    img: "/media/about%20us/web/about6-web.jpg", 
+    title: "Grand Opening of Cafe Mama&Sons",
+    date: "11 Mar 2025", 
+    r: -2,
+    body: [
+      "Chef Omar Shah has just unveiled Cafe Mama&Sons, the long-awaited revival of the iconic 83 Kentish Town Road. Breathing new life into this beloved space, the café brings back the community warmth and neighbourhood soul Kentish Town has been missing — all wrapped in a fresh, exciting concept.",
+      "An offshoot of the much-loved Mamasons, Cafe Mama&Sons carries the same calibre, craft, and creativity that made Mamasons a cult favourite. Expect the familiar charm and attention to detail, but with a new café-style twist.",
+      "On the drinks side, you'll find everything from the now-iconic ube latte, to vibrant creations like snake fruit soda, and a full line-up of matcha everything — teas, lattes, and specials. Whether you're after something classic or curious, there's something to suit every mood.",
+      "But this isn't just a drinks stop. Cafe Mama&Sons is also the new home of the Sando — a Japanese-style sandwich reimagined through the lens of Chef Omar’s many culinary influences across the Maginhawa Group. You’ll find bold twists like the jerk chicken sando, adobo mushroom, and other rotating favourites inspired by the menus of his restaurants like Belly, Doña, and Bintang.",
+      "Whether you’re grabbing your morning coffee, catching up with friends, or just curious to try something new, Cafe Mama&Sons is here to bring Kentish Town a fresh, flavour-packed hangout with heart.",
+      "Come down today to visit cafe mama&sons at 83 kentish town road 8am to 5pm weekdays and 9am to 5pm on weekends!",
+      "Merc Aquino",
+    ]
+  },
+
+  { 
+    img: "/media/about%20us/web/about6-web.jpg", 
+    title: "Truffle Egg Sando",
+    date: "11 Mar 2025", 
+    r:-2,
+    body: [
+      "In honour of National Sandwich Week, we're levelling up the sandwich game at Cafe Mama&Sons with a brand-new, indulgent special: the Truffle Egg Sando — a rich, flavourful twist on the Japanese classic.",
+      "This luxurious sando features a velvety egg filling blended with earthy black truffle paste, finished with generous shavings of real truffle folded into the mix. Served between perfectly soft, crustless milk bread, it’s a melt-in-your-mouth experience that’s both comforting and decadent. The result? A deep, umami-rich bite that elevates the humble egg sandwich into something truly extraordinary.",
+      "Crafted in the same spirit as all our menu offerings — with care, creativity, and inspiration from across the Maginhawa Group — the Truffle Egg Sando is only available for a limited time, exclusively at Cafe Mama&Sons in Kentish Town.",
+      "Whether you're a local, a sandwich lover, or a truffle enthusiast, this is one sando you won’t want to miss.",
+      "Sallyna Do",
+    ]
+  },
+
+  { 
+    img: "/media/about%20us/web/about8-web.jpg", 
+    title: "The Longanisa Breakfast Sandwich at Cafe Mama&Sons: A Filipino Morning Classic Reimagined",
+    date: "11 Mar 2025", 
+    r:2,
+    body: [
+      "If you're looking for a breakfast sandwich that goes beyond the usual bacon-and-egg formula, meet your new morning favourite: the Longanisa Breakfast Sandwich at Cafe Mama&Sons, now available daily from 8AM to 12PM on weekdays and 9AM to 12PM on weekends.",
+      "What is Longanisa? Longanisa is a sweet, garlicky Filipino sausage that’s beloved across the Philippines. Each region has its own version, but here at Cafe Mama&Sons, we make our longanisa entirely in-house, staying true to our roots while giving it just the right twist for the London palate. Our longanisa is a perfect balance of savory and sweet, with bold notes of garlic, brown sugar, vinegar, and a hint of pepper — a deeply flavorful bite that wakes you up and lingers just long enough to make you want another.",
+      "Made From Scratch, From Bun to Filling. At Cafe Mama&Sons, we don’t believe in shortcuts. The longanisa in your sandwich? It’s made fresh in our kitchen, using a carefully developed recipe inspired by family traditions and refined in the kitchens of the Maginhawa Group. It’s ground, seasoned, and hand-formed daily — no preservatives, no fillers, just bold, honest flavour. And the bun? That’s not store-bought either. We bake our signature pandesal buns every morning, soft, fluffy, and slightly sweet — the perfect partner to the rich, spiced sausage. This is the same fresh pandesal that supplies our sister restaurants, including Mamasons, Ramo Ramen, and Bintang. So when you bite into this sandwich, you're not just tasting one cafe’s work — you're experiencing a cornerstone of our entire restaurant group."
+    ]
+  },
+
+  { 
+    img: "/media/about%20us/web/about8-web.jpg", 
+    title: "The Long",
+    date: "11 Mar 2025", 
+    r:-1,
+    body: [
+      "If you're looking for a breakfast sandwich that goes beyond the usual bacon-and-egg formula, meet your new morning favourite: the Longanisa Breakfast Sandwich at Cafe Mama&Sons, now available daily from 8AM to 12PM on weekdays and 9AM to 12PM on weekends.",
+      "What is Longanisa? Longanisa is a sweet, garlicky Filipino sausage that’s beloved across the Philippines. Each region has its own version, but here at Cafe Mama&Sons, we make our longanisa entirely in-house, staying true to our roots while giving it just the right twist for the London palate. Our longanisa is a perfect balance of savory and sweet, with bold notes of garlic, brown sugar, vinegar, and a hint of pepper — a deeply flavorful bite that wakes you up and lingers just long enough to make you want another.",
+      "Made From Scratch, From Bun to Filling. At Cafe Mama&Sons, we don’t believe in shortcuts. The longanisa in your sandwich? It’s made fresh in our kitchen, using a carefully developed recipe inspired by family traditions and refined in the kitchens of the Maginhawa Group. It’s ground, seasoned, and hand-formed daily — no preservatives, no fillers, just bold, honest flavour. And the bun? That’s not store-bought either. We bake our signature pandesal buns every morning, soft, fluffy, and slightly sweet — the perfect partner to the rich, spiced sausage. This is the same fresh pandesal that supplies our sister restaurants, including Mamasons, Ramo Ramen, and Bintang. So when you bite into this sandwich, you're not just tasting one cafe’s work — you're experiencing a cornerstone of our entire restaurant group."
+    ]
+  },
+
+];
+
+// The full-post pop-up. It unfolds from the top edge like a sheet of paper
+// (GSAP 3D rotateX with transformPerspective), fades a dimmed backdrop in behind
+// it, locks the smooth-scroll while open, and folds back up on close.
+function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
+  const backdrop = useRef<HTMLDivElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+  const sheen = useRef<HTMLDivElement>(null);
+
+  // The sheet's curled-up "peeled" pose: pivoting from the bottom-left corner,
+  // the opposite corner lifts off the page via combined 3D rotation. Animating
+  // back to flat reads as the page peeling/laying down onto the surface.
+  const PEELED = {
+    autoAlpha: 0,
+    rotateX: 34,
+    rotateY: -48,
+    scale: 0.82,
+    xPercent: -5,
+    yPercent: 7,
+  };
+  const FLAT = { autoAlpha: 1, rotateX: 0, rotateY: 0, scale: 1, xPercent: 0, yPercent: 0 };
+
+  useGSAP(
+    () => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      ScrollSmoother.get()?.paused(true);
+
+      gsap.set(sheet.current, {
+        transformPerspective: 1600,
+        transformOrigin: "0% 100%", // bottom-left corner = the peel pivot
+      });
+      const tl = gsap.timeline();
+      tl.fromTo(
+        backdrop.current,
+        { autoAlpha: 0 },
+        { autoAlpha: 1, duration: 0.3, ease: "power1.out" },
+      );
+      tl.fromTo(
+        sheet.current,
+        reduce ? { autoAlpha: 0, y: 20 } : PEELED,
+        reduce
+          ? { autoAlpha: 1, y: 0, duration: 0.3 }
+          : { ...FLAT, duration: 1, ease: "power3.out" },
+        0.1,
+      );
+      // Light sheen rakes across the page as it flattens, then fades out.
+      if (!reduce)
+        tl.fromTo(
+          sheen.current,
+          { autoAlpha: 0.65, xPercent: -30 },
+          { autoAlpha: 0, xPercent: 30, duration: 0.9, ease: "power2.out" },
+          "<0.05",
+        );
+    },
+    { dependencies: [] },
+  );
+
+  const close = useCallback(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    gsap.to(sheet.current, {
+      ...(reduce ? { autoAlpha: 0, y: 20 } : PEELED),
+      duration: 0.5,
+      ease: "power3.in",
+    });
+    gsap.to(backdrop.current, {
+      autoAlpha: 0,
+      duration: 0.4,
+      delay: 0.1,
+      onComplete: () => {
+        ScrollSmoother.get()?.paused(false);
+        onClose();
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [close]);
+
+  return createPortal(
+    <div
+      ref={backdrop}
+      onClick={close}
+      className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-[8vh] backdrop-blur-sm"
+    >
+      <article
+        ref={sheet}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-cream text-pine shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+      >
+        {/* Sheen that rakes across the sheet as it peels flat. */}
+        <div
+          ref={sheen}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-br from-white/70 via-white/10 to-transparent"
+        />
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Close"
+          className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-lg leading-none text-cream transition-colors hover:bg-black/50"
+        >
+          ✕
+        </button>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={post.img}
+          alt={post.title}
+          className="h-64 w-full object-cover sm:h-80"
+        />
+        <div className="p-7 sm:p-10">
+          <time className="text-xs font-semibold uppercase tracking-[0.2em] opacity-60">
+            {post.date}
+          </time>
+          <h3 className="mt-2 font-arialblack text-2xl leading-tight sm:text-3xl">
+            {post.title}
+          </h3>
+          <div className="mt-5 space-y-4 text-sm leading-relaxed sm:text-base">
+            {(post.body ?? ["More on this soon."]).map((para, i) => (
+              <p key={i}>
+                {typeof para === "string"
+                  ? para
+                  : para.map((seg, j) =>
+                      typeof seg === "string" ? (
+                        seg
+                      ) : (
+                        <a
+                          key={j}
+                          href={seg.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-70"
+                        >
+                          {seg.text}
+                        </a>
+                      ),
+                    )}
+              </p>
+            ))}
+          </div>
+        </div>
+      </article>
+    </div>,
+    document.body,
+  );
+}
+
+// The giant "blog" title reveals letter-by-letter out of a clip mask (each glyph
+// slides up from behind its own overflow-hidden box, smooothy.federic.ooo-style),
+// then a layered row of post cards (image + title + date) deals in below.
+function Blog({ accent }: { accent: string }) {
+  const root = useRef<HTMLDivElement>(null);
+  const [openPost, setOpenPost] = useState<BlogPost | null>(null);
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      // Cards deal in, layered, with a little stagger + tilt.
+      const cards = gsap.utils.toArray<HTMLElement>(".blog-card", root.current);
+      gsap.from(cards, {
+        yPercent: 25,
+        autoAlpha: 0,
+        scale: 0.9,
+        ease: "power3.out",
+        duration: 0.8,
+        stagger: 0.12,
+        scrollTrigger: { trigger: ".blog-cards", start: "top 75%" },
+      });
+    },
+    { scope: root },
+  );
+
+  return (
+    <section ref={root} className="relative mt-[20vh]">
+      <FullRule color={accent} className="mb-2" />
+      {/* Title — line-box trimmed to cap height + baseline so the gap above and
+          below is purely the symmetric py, not the font's whitespace. */}
+      <h2
+        style={{ color: accent }}
+        className="mx-auto block w-fit text-center font-cheee font-arialblack text-[20vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+      >
+        BLOG
+      </h2>
+
+      <FullRule color={accent} className="mt-0" />
+
+      {/* Layered post-card row */}
+      <div className="blog-cards mt-[8vh] flex w-full flex-wrap items-start justify-between gap-y-10">
+        {BLOG_POSTS.map((p) => (
+          <button
+            type="button"
+            key={p.title}
+            onClick={() => setOpenPost(p)}
+            className="blog-card group flex w-44 shrink-0 flex-col text-left sm:w-56"
+          >
+            <div className="aspect-square w-full overflow-hidden rounded-xl shadow-[0_16px_34px_rgba(0,0,0,0.28)] transition-transform duration-300 group-hover:-translate-y-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.img}
+                alt={p.title}
+                loading="lazy"
+                draggable={false}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <h3
+              className="mt-3 line-clamp-2 font-arialblack text-sm uppercase tracking-tight"
+              style={{ color: accent }}
+            >
+              {p.title}
+            </h3>
+            <time
+              className="text-xs font-semibold uppercase tracking-wide opacity-60"
+              style={{ color: accent }}
+            >
+              {p.date}
+            </time>
+          </button>
+        ))}
+      </div>
+
+      <FullRule color={accent} className="mt-1" />
+
+      {openPost && (
+        <BlogModal post={openPost} onClose={() => setOpenPost(null)} />
+      )}
+    </section>
+  );
+}
+
+
+const CAFE_DESC =
+  "Cafe Mama & Sons is a Filipino-Japanese café serving freshly made sandos, all-day pandesal breakfast meals, unique drinks, and baked goods.";
+
+function CafeDescription({ accent }: { accent: string }) {
+  const root = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const words = gsap.utils.toArray<HTMLElement>(".cafe-word", root.current);
+      const chars = gsap.utils.toArray<HTMLElement>(".cafe-char", root.current);
+
+      // Entrance: characters fly up + flip in on scroll (after
+      // codepen.io/GreenSock/poZaJQa).
+      if (!reduce)
+        gsap.from(chars, {
+          duration: 1,
+          opacity: 0,
+          scale: 0,
+          y: 80,
+          rotationX: 180,
+          transformOrigin: "0% 50% -50",
+          ease: "back",
+          stagger: 0.01,
+          scrollTrigger: { trigger: root.current, start: "top 80%", once: true },
+        });
+
+      // Interactive physics: motion is horizontal-only. The cursor shoves words
+      // left/right and they collide with each other (resolved along x) so they
+      // slide their neighbours aside instead of overlapping, then spring back
+      // home. Words can also be dragged left/right. Skip on touch / reduced.
+      const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const box = root.current?.querySelector<HTMLElement>(".cafe-box");
+      if (reduce || !fine || !words.length || !box) return;
+
+      const n = words.length;
+      const dispX = new Array(n).fill(0); // current offset from home
+      const dispY = new Array(n).fill(0);
+      const velX = new Array(n).fill(0);
+      const velY = new Array(n).fill(0);
+      const lastTouch = new Array(n).fill(-1e9); // time of last interaction (s)
+      const cx = new Array(n).fill(0); // home centre (relative to the h3 box)
+      const cy = new Array(n).fill(0);
+      const hw = new Array(n).fill(0); // half extents
+      const hh = new Array(n).fill(0);
+      const setX = words.map((w) => gsap.quickSetter(w, "x", "px"));
+      const setY = words.map((w) => gsap.quickSetter(w, "y", "px"));
+
+      // The bounded box (between the top & bottom rules) — words bounce off its
+      // four walls. Measured each layout so it survives page scroll / resize.
+      let boxW = 0;
+      const measure = () => {
+        const base = box.getBoundingClientRect();
+        boxW = base.width;
+        words.forEach((w, i) => {
+          const dx = Number(gsap.getProperty(w, "x")) || 0;
+          const dy = Number(gsap.getProperty(w, "y")) || 0;
+          const r = w.getBoundingClientRect();
+          cx[i] = r.left - base.left - dx + r.width / 2;
+          cy[i] = r.top - base.top - dy + r.height / 2;
+          hw[i] = r.width / 2;
+          hh[i] = r.height / 2;
+        });
+      };
+      measure();
+
+      const dragging = new Set<HTMLElement>();
+      let clientX = -9999;
+      let clientY = -9999;
+      let hot = false;
+
+      const SPRING = 0.05; // pull back home — gentle, so the return glides
+      const DRIFT_FRICTION = 0.91; // decay while drifting → long, smooth float
+      const HOME_FRICTION = 0.78; // strong damping while homing → no overshoot
+      const R = 160; // cursor influence radius (px)
+      const PUSH = 2.4; // cursor shove strength (accumulates, so keep it small)
+      const RETURN_DELAY = 0.6; // seconds adrift before a word heads home
+      const MAX_VEL = 8; // px/frame speed cap — keeps the slide unhurried
+      const MAX_DISP = 600; // px — words may slide far enough to fill line gaps
+      const BOUNCE = 0; // no rebound off the walls — they just glide to a stop
+      const ITER = 5; // collision solver passes
+      const GAP = 0.2; // min horizontal gap between words
+      const VFACT = 0.72; // shrink collision box vertically so lines don't touch
+
+      const tick = (time: number) => {
+        const base = box.getBoundingClientRect();
+        const lx = clientX - base.left;
+        const ly = clientY - base.top;
+
+        for (let i = 0; i < n; i++) {
+          if (dragging.has(words[i])) {
+            // Draggable owns this word — read its offset so it acts as a moving
+            // obstacle for the others, and keep its return timer fresh.
+            dispX[i] = Number(gsap.getProperty(words[i], "x")) || 0;
+            dispY[i] = Number(gsap.getProperty(words[i], "y")) || 0;
+            velX[i] = 0;
+            velY[i] = 0;
+            lastTouch[i] = time;
+            continue;
+          }
+          let touched = false;
+          if (hot) {
+            const ddx = cx[i] + dispX[i] - lx;
+            const ddy = cy[i] + dispY[i] - ly;
+            const dd = Math.hypot(ddx, ddy) || 1;
+            if (dd < R) {
+              const f = 1 - dd / R;
+              // shove horizontally away from the cursor (sign of ddx), strength
+              // by proximity — pure left/right, never vertical.
+              velX[i] += (ddx >= 0 ? 1 : -1) * f * PUSH;
+              touched = true;
+            }
+          }
+          if (touched) lastTouch[i] = time;
+
+          // Drift freely just after a knock; only start springing home — and
+          // shoving neighbours on the way — once it's been adrift a while.
+          const homing = time - lastTouch[i] > RETURN_DELAY;
+          if (homing) {
+            velX[i] += -dispX[i] * SPRING;
+          }
+          const fr = homing ? HOME_FRICTION : DRIFT_FRICTION;
+          velX[i] *= fr;
+          velY[i] *= fr;
+
+          // Cap speed so a knock can't fling a word.
+          const sp = Math.hypot(velX[i], velY[i]);
+          if (sp > MAX_VEL) {
+            velX[i] *= MAX_VEL / sp;
+            velY[i] *= MAX_VEL / sp;
+          }
+          dispX[i] += velX[i];
+          dispY[i] += velY[i];
+
+          // Cap distance from home so it never drifts off — bleed the outward
+          // velocity when it hits the limit.
+          const dm = Math.hypot(dispX[i], dispY[i]);
+          if (dm > MAX_DISP) {
+            const k = MAX_DISP / dm;
+            dispX[i] *= k;
+            dispY[i] *= k;
+            velX[i] *= 0.4;
+            velY[i] *= 0.4;
+          }
+
+          // Bounce off the left & right walls of the box (motion is horizontal).
+          const lft = cx[i] + dispX[i] - hw[i];
+          if (lft < 0) {
+            dispX[i] -= lft;
+            if (velX[i] < 0) velX[i] = -velX[i] * BOUNCE;
+          }
+          const rgt = cx[i] + dispX[i] + hw[i];
+          if (rgt > boxW) {
+            dispX[i] -= rgt - boxW;
+            if (velX[i] > 0) velX[i] = -velX[i] * BOUNCE;
+          }
+        }
+
+        // Resolve word-vs-word overlaps along the axis of least penetration.
+        for (let it = 0; it < ITER; it++) {
+          for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+              const ax = cx[i] + dispX[i];
+              const ay = cy[i] + dispY[i];
+              const bx = cx[j] + dispX[j];
+              const by = cy[j] + dispY[j];
+              const ox = hw[i] + hw[j] + GAP - Math.abs(ax - bx);
+              const oy = (hh[i] + hh[j]) * VFACT - Math.abs(ay - by);
+              if (ox <= 0 || oy <= 0) continue;
+              const di = dragging.has(words[i]);
+              const dj = dragging.has(words[j]);
+              if (di && dj) continue;
+              const mi = di ? 0 : dj ? 1 : 0.5;
+              const mj = dj ? 0 : di ? 1 : 0.5;
+              // resolve overlaps horizontally only — words stay on their line.
+              const sgn = ax < bx ? 1 : -1;
+              dispX[i] -= sgn * ox * mi;
+              dispX[j] += sgn * ox * mj;
+              velX[i] -= sgn * ox * 0.06 * mi;
+              velX[j] += sgn * ox * 0.06 * mj;
+            }
+          }
+        }
+
+        for (let i = 0; i < n; i++) {
+          if (dragging.has(words[i])) continue;
+          setX[i](dispX[i]);
+          setY[i](dispY[i]);
+        }
+      };
+      gsap.ticker.add(tick);
+
+      const el = root.current!;
+      const onMove = (e: PointerEvent) => {
+        clientX = e.clientX;
+        clientY = e.clientY;
+        hot = true;
+      };
+      const onLeave = () => {
+        hot = false;
+      };
+      el.addEventListener("pointermove", onMove);
+      el.addEventListener("pointerleave", onLeave);
+      window.addEventListener("resize", measure);
+
+      // Drag: grab a word and slide it left/right through the others; on release
+      // the sim springs it back home.
+      const draggables = words.flatMap((w) =>
+        Draggable.create(w, {
+          type: "x",
+          inertia: false,
+          onPress() {
+            dragging.add(w);
+          },
+          onRelease() {
+            dragging.delete(w);
+          },
+        }),
+      );
+
+      return () => {
+        gsap.ticker.remove(tick);
+        el.removeEventListener("pointermove", onMove);
+        el.removeEventListener("pointerleave", onLeave);
+        window.removeEventListener("resize", measure);
+        draggables.forEach((d) => d.kill());
+      };
+    },
+    { scope: root },
+  );
+
+  return (
+    <div ref={root} className="mt-[10vh]">
+      {/* Bounded box — words bounce off its top & bottom edges (and the sides).
+          The vertical padding gives them room to drift before they hit an edge. */}
+      <div className="cafe-box py-[5vh]">
+        <h3
+          aria-label={CAFE_DESC}
+          style={{ color: accent }}
+          className="font-cheee w-full text-justify uppercase [text-align-last:justify] text-3xl leading-[1.12] sm:text-[4.2vw]"
+        >
+          {CAFE_DESC.split(" ").map((word, wi) => (
+            <span key={wi} aria-hidden>
+              <span className="cafe-word inline-block cursor-grab touch-none select-none whitespace-nowrap will-change-transform active:cursor-grabbing">
+                {word.split("").map((ch, ci) => (
+                  <span key={ci} className="cafe-char inline-block">
+                    {ch}
+                  </span>
+                ))}
+              </span>{" "}
+            </span>
+          ))}
+        </h3>
+      </div>
+    </div>
   );
 }
 
@@ -411,8 +1338,20 @@ function GroupBlock({
   twoCol?: boolean;
 }) {
   return (
-    <div className="mt-10 first:mt-0">
-      <GroupTitle accent={accent}>{group.title}</GroupTitle>
+    <div className="mt-1">
+      <div className="flex flex-wrap items-start gap-x-6 gap-y-1">
+        <GroupTitle accent={accent}>{group.title}</GroupTitle>
+        {group.blurb && (
+          <p
+            style={{ color: body }}
+            className="min-w-0 flex-1 basis-64 pt-1.5 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-xs"
+          >
+            {group.blurb}
+          </p>
+        )}
+      </div>
+      {/* rule under the header + blurb */}
+      <FullRule color={accent} className="mt-1" />
       <ul className={`mt-3 ${twoCol ? "sm:grid sm:grid-cols-2 sm:gap-x-14" : ""}`}>
         {group.items.map((it) => (
           <ItemRow
@@ -430,9 +1369,111 @@ function GroupBlock({
 }
 
 
+
 function MealDealBanner() {
+  const root = useRef<HTMLDivElement>(null);
+  const sfx = useRef<HTMLAudioElement>(null);
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const items = gsap.utils.toArray<HTMLElement>("[data-md-item]", root.current);
+
+      // zoom in/out: from their normal size, the pieces punch out BIG and snap
+      // back to normal with a jumpy overshoot (back.out → yoyo back).
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(
+        items,
+        { scale: 1 },
+        {
+          scale: 1.1,
+          duration: 0.5,
+          ease: "back.out(3)",
+          stagger: 0,
+          yoyo: true,
+          repeat: 1,
+        },
+      );
+
+      // The hero (#top) is a fixed layer that covers the menu on load and fades
+      // out on entry; only react once it's actually hidden.
+      const heroEl = document.getElementById("top");
+      const heroHidden = () =>
+        !heroEl || parseFloat(getComputedStyle(heroEl).opacity || "1") < 0.5;
+
+      // The banner's centre, in viewport coordinates.
+      const centreY = () => {
+        const r = root.current!.getBoundingClientRect();
+        return (r.top + r.bottom) / 2;
+      };
+
+      // Entering the menu from the hero lands at the menu title (scroll top),
+      // where the banner sits LOW — below the giant title. We deliberately do
+      // NOT fire on entry: the user scrolls down, and only once they've brought
+      // the banner's centre up to the trigger line does the pop + sfx play —
+      // in place, with no scroll assist (the user keeps control of the scroll).
+      // `userScrolled` guards the entry frame so a pre-centred layout can never
+      // auto-fire without a deliberate scroll.
+      const TRIGGER = () => window.innerHeight * 0.6; // centre must rise past here
+      let armed = true; // re-arms once the banner leaves the viewport
+      let userScrolled = false;
+
+      const fire = () => {
+        if (!armed || !userScrolled || !heroHidden()) return;
+        if (centreY() > TRIGGER()) return; // not scrolled up to it yet
+        armed = false;
+        // Play the size pop + rizz right where it is — no scrollTo.
+        tl.restart();
+        const a = sfx.current;
+        if (a) {
+          a.currentTime = 0;
+          a.volume = 0.6;
+          a.play().catch(() => {});
+        }
+      };
+
+      // Scroll-driven (reliable under ScrollSmoother, where a ScrollTrigger
+      // onEnter is not): fire when the user scrolls the banner up to the trigger
+      // line; re-arm once it has fully left the viewport.
+      let raf = 0;
+      const onScroll = () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          userScrolled = true;
+          if (armed) {
+            fire();
+          } else {
+            // Re-arm only once the banner sits fully BELOW the viewport again
+            // (i.e. the user scrolled back UP above it) — never when it's above
+            // the viewport, or scrolling further down would snap them back to it.
+            const r = root.current!.getBoundingClientRect();
+            if (r.top > window.innerHeight) armed = true;
+          }
+        });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // Re-entering the menu from the hero: reset so it waits for a fresh
+      // scroll-down rather than firing on arrival.
+      const onReveal = () => {
+        armed = true;
+        userScrolled = false;
+      };
+      window.addEventListener("menu:reveal", onReveal);
+
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("menu:reveal", onReveal);
+        if (raf) cancelAnimationFrame(raf);
+      };
+    },
+    { scope: root },
+  );
+
   return (
-    <div className="relative mb-60 mt-12 sm:mt-16">
+    <div ref={root} className="relative mb-60 mt-12 sm:mt-16">
+      <audio ref={sfx} src="/sfx/rizz.mp3" preload="auto" />
       <div className="relative mx-auto aspect-[5/4] w-full sm:aspect-[16/10]">
         {/* video oval backdrop — kept, sat in the upper-centre */}
         <video
@@ -453,79 +1494,44 @@ function MealDealBanner() {
           <source src="/media/sando-adobo-mushroom.mp4" type="video/mp4" />
         </video>
 
-        {/* product-photo collage piled in the lower half, hugging the oval */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-md-item
           src="/media/mealdeal/mealdeal-web.png"
           alt="Cafe Mama meal deal tray"
-          className="pointer-events-none absolute bottom-[-60%] right-[-3%] z-10 w-[60%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-60%] right-[-12.5%] z-10 w-[62.5%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)]"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-md-item
           src="/media/mealdeal/spanishlatte_clear-web.png"
           alt="Spanish latte"
-          className="pointer-events-none absolute bottom-[-30%] left-[-20%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-32.5%] left-[-17.5%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-md-item
+          src="/media/mealdeal/jonas.jpg"
+          alt="Spanish latte"
+          className="pointer-events-none absolute bottom-[-27.5%] left-[55%] z-50 aspect-square w-[15%] rounded-full object-cover -rotate-[-8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+        />
+        <img
+          data-md-item
           src="/media/mealdeal/jerkchicken-web.png"
           alt="Toasted sando"
-          className="pointer-events-none absolute bottom-[-70%] left-[-5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-70%] left-[-2.5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-md-item
           src="/media/mealdeal/flatwhite-web.png"
           alt="Flat white"
-          className="pointer-events-none absolute bottom-[-47.5%] left-[50%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-47.5%] left-[52.5%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
 
-        {/* curved headline + note across the top */}
-        <svg
-          aria-hidden
-          viewBox="0 0 1000 600"
-          preserveAspectRatio="none"
-          className="pointer-events-none absolute inset-0 z-40 h-full w-full overflow-visible"
-        >
-          <defs>
-            <path id="md-top" fill="none" d="M 55 270 A 420 215 0 0 1 945 270" />
-            <path id="md-note" fill="none" d="M 215 150 A 290 80 0 0 1 785 150" />
-            <filter id="md-sh-lg" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="7" dy="7" stdDeviation="0" floodColor="#000" />
-            </filter>
-            <filter id="md-sh-sm" x="-60%" y="-60%" width="220%" height="220%">
-              <feDropShadow dx="2" dy="2" stdDeviation="0" floodColor="#000" />
-            </filter>
-          </defs>
-          <text
-            textAnchor="middle"
-            fontSize="100"
-            filter="url(#md-sh-lg)"
-            style={{
-              fontFamily: '"Arial Black","Arial Bold",sans-serif',
-              fontWeight: 900,
-              fill: "#9b81c9",
-            }}
-          >
-            <textPath href="#md-top" startOffset="50%">
-              £14 MEAL DEAL
-            </textPath>
-          </text>
-          <text
-            textAnchor="middle"
-            fontSize="15"
-            filter="url(#md-sh-sm)"
-            style={{
-              fontFamily: '"Arial Black","Arial Bold",sans-serif',
-              fontWeight: 900,
-              fill: "#9b81c9",
-              letterSpacing: "0.5px",
-            }}
-          >
-            <textPath href="#md-note" startOffset="50%">
-              ALL MEAL DEALS COME WITH CRISPS &amp; A DRINK OF YOUR CHOICE
-            </textPath>
-          </text>
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-md-item
+          src="/media/word%20art/14%20MEAL%20DEAL.svg"
+          alt="£14 meal deal — all meal deals come with house-made nori crisps & a drink of your choice, available all day"
+          className="pointer-events-none absolute -top-[3%] -bottom-[40%] -left-[0%] -right-[10%] z-40 object-contain"
+        />
       </div>
     </div>
   );
@@ -559,8 +1565,9 @@ const bgVars = (isDrinks: boolean): BgVars =>
         f1: "#9b81c9",
         b0: "#9b81c9",
         b1: "#7e63b0",
-        fa: "#cf9bff",
-        fb: "#9d5cf0",
+        // drinks footer now uses the food-menu gold background
+        fa: "#fbd400",
+        fb: "#f4c33c",
         lt: "#fbd400",
         lc: "#5b3f86",
         ab: 0,
@@ -572,9 +1579,13 @@ const bgVars = (isDrinks: boolean): BgVars =>
         f1: "#f4c33c",
         b0: "#f4c33c",
         b1: "#eab92f",
-        fa: "#ff7a2f",
-        fb: "#e8362b",
-        lt: "#9b81c9",
+        // food footer matches the food-menu text colour (lavender)
+        // fa: "#9b81c9",
+        // fb: "#9b81c9",
+        // lt: "#9b81c9",
+        fa: "#FF1353",
+        fb: "#FF1353",
+        lt: "#FF1353",
         lc: "#f4c33c",
         ab: 1,
         ay: 0,
@@ -783,10 +1794,10 @@ export default function Menu() {
         line: "rgba(251,212,0,0.4)", // borders — yellow
       }
     : {
-        accent: "#9b81c9", // drinks-background lavender — was poster red
-        body: "#9b81c9", // item names + prices — was dark ink
-        dot: "rgba(155,129,201,0.5)",
-        line: "rgba(155,129,201,0.3)",
+        accent: "#FF1353", // food text — was lavender #9b81c9
+        body: "#FF1353", // item names + prices — was lavender #9b81c9
+        dot: "rgba(255,19,83,0.5)",
+        line: "rgba(255,19,83,0.3)",
       };
 
   return (
@@ -803,40 +1814,66 @@ export default function Menu() {
       className="relative overflow-hidden py-10 text-pine sm:py-14"
     >
       <div className="relative mx-auto w-[80%] max-w-[1500px] px-5 pb-44 pt-6 sm:px-8 sm:pt-10">
-        {/* Title */}
-        <h2
-          data-reveal
-          style={{ color: theme.accent }}
-          className="menu-title font-arialblack text-[30vw] leading-[0.78] sm:text-[12rem]"
-        >
-          menu<span>.</span>
-        </h2>
+        {/* Framed menu — a vertical rule down each side, full-bleed rules across.
+            Side rules are food-only (the drinks animation section omits them). */}
+        <div className="relative">
+          {/* Header rail — title + tabs framed with side rules (both tabs) */}
+          <div className="relative">
+            <SideRails color={theme.accent} />
 
-        {/* Category tabs */}
-        <nav
-          data-reveal
-          style={{ borderColor: theme.line }}
-          className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-b-2 pb-1 sm:mt-10"
-        >
-          {CATEGORIES.map((c) => {
+          {/* Line above the title */}
+          <FullRule color={theme.accent} className="mb-0" />
+
+          {/* Title — line-box trimmed to cap height + baseline so the gap above
+              and below is purely the symmetric py, not the font's whitespace. */}
+          <h2
+            data-reveal
+            style={{ color: theme.accent }}
+            className="menu-title mx-auto block w-fit text-center font-cheee font-arialblack text-[20vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+          >
+            MENU
+            {/* menu<span>.</span> */}
+          </h2>
+
+          {/* Line under the title, above the Food / Drinks tabs */}
+          <FullRule color={theme.accent} className="mt-0" />
+
+          {/* Category tabs */}
+          <nav
+            data-reveal
+            className="mt-1 flex flex-wrap items-baseline gap-x-10 gap-y-1"
+          >
+          {CATEGORIES.map((c, i) => {
             const isActive = active === c.key;
             return (
-              <button
-                key={c.key}
-                onClick={() => switchCategory(c.key)}
-                style={{
-                  color: theme.accent,
-                  boxShadow: isActive ? `0 3px 0 0 ${theme.accent}` : undefined,
-                }}
-                className={`font-arialblack pb-2 text-lg uppercase tracking-tight transition-opacity sm:text-2xl ${
-                  isActive ? "opacity-100" : "opacity-40 hover:opacity-70"
-                }`}
-              >
-                {c.label}
-              </button>
+              <span key={c.key} className="flex items-baseline gap-x-10">
+                {i > 0 && (
+                  <span
+                    aria-hidden
+                    className="font-cheee text-5xl leading-none opacity-100 sm:text-6xl"
+                    style={{ color: theme.accent }}
+                  >
+                    •
+                  </span>
+                )}
+                <button
+                  onClick={() => switchCategory(c.key)}
+                  style={{ color: theme.accent }}
+                  className={`font-cheee text-5xl uppercase leading-none tracking-tight transition-opacity sm:text-6xl ${
+                    isActive ? "opacity-100" : "opacity-40 hover:opacity-70"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              </span>
             );
           })}
         </nav>
+
+          {/* Line under the Food / Drinks tabs */}
+          <FullRule color={theme.accent} className="mt-1" />
+          </div>
+          {/* end header rail */}
 
         {/* Active category */}
         <div data-reveal className="mt-8">
@@ -852,33 +1889,55 @@ export default function Menu() {
                 {current.label} menu — coming soon
               </p>
             ) : (
-              current.groups?.map((g) => (
-                <GroupBlock
-                  key={g.title}
-                  group={g}
-                  accent={theme.accent}
-                  body={theme.body}
-                  dot={theme.dot}
-                  activeImg={activeImg}
-                  registerRow={registerRow}
-                  twoCol={active === "sandos"}
-                />
-              ))
+              // List rail — the menu items framed with side rules (both tabs)
+              <div className="relative">
+                <SideRails color={theme.accent} />
+                {current.groups?.map((g) => (
+                  <div key={g.title}>
+                    <FullRule color={theme.accent} className="mt-3" />
+                    <GroupBlock
+                      group={g}
+                      accent={theme.accent}
+                      body={theme.body}
+                      dot={theme.dot}
+                      activeImg={activeImg}
+                      registerRow={registerRow}
+                      twoCol={active === "sandos" || active === "drinks"}
+                    />
+                  </div>
+                ))}
+
+                {/* Allergen note — inside the rail so the side rules run through it */}
+                <FullRule color={theme.accent} className="mt-3" />
+                <p
+                  style={{ color: theme.accent }}
+                  className="mt-1 text-xs font-semibold uppercase tracking-wide opacity-70"
+                >
+                  Allergens listed in brackets. Alternative milks, such as oat and coconut milk, are available for an additional 50p. Please
+                  tell us about any allergies before ordering.
+                </p>
+                <FullRule color={theme.accent} className="mt-1" />
+
+              </div>
             )}
           </div>
         </div>
+        </div>
+        {/* end framed menu */}
 
-        {/* Allergen note */}
-        <p
-          style={{ color: theme.accent, borderColor: theme.line }}
-          className="mt-12 border-t-2 pt-5 text-xs font-semibold uppercase tracking-wide opacity-70"
-        >
-          Allergens listed in brackets. Alternative milks +30p. Please tell us
-          about any allergies before ordering.
-        </p>
+        {/* Press / collab logos — draggable, continuously-scrolling strip */}
+        <CollabMarquee accent={theme.accent} />
 
-        {/* Location widget — lives at the end of the menu so it shares this
-            section's gradient background. */}
+        {/* About us */}
+        {/* <AboutUs accent={theme.accent} /> */}
+
+        {/* Blog */}
+        <Blog accent={theme.accent} />
+
+        {/* Cafe Mama Description */}
+        <CafeDescription accent={theme.accent} />
+
+        {/* Location widget — lives at the end of the menu so it shares this section's gradient background. */}
         <Location />
       </div>
 
