@@ -28,13 +28,19 @@ export default function SmoothScroll({
 
   useGSAP(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    ScrollSmoother.create({
+    // Touch devices use NATIVE scrolling. ScrollSmoother's touch handling
+    // intercepts touch events (preventDefault) to smooth them, which on phones
+    // swallows taps and can trap you on the hero. ScrollTrigger still works with
+    // native scroll, so animations are unaffected; we just skip the smoothing.
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+    const smoother = ScrollSmoother.create({
       wrapper: wrapper.current!,
       content: content.current!,
       smooth: 1.7, // seconds to "catch up" to the scroll — the floaty glide
-      smoothTouch: 0.1, // light smoothing on touch (keep it responsive)
       effects: true, // honour data-speed / data-lag attributes
     });
+    // Kill it on teardown so it doesn't linger (e.g. across hot-reloads).
+    return () => smoother.kill();
   });
 
   return (

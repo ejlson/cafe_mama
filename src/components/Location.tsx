@@ -11,7 +11,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, SplitText);
 
 const HOURS: { day: string; time: string }[] = [
   { day: "Mon – Fri", time: "8:00 – 18:00" },
-  { day: "Saturday", time: "9:00 – 18:00" },
+  { day: "Saturday", time: "9:00 – 17:00" },
   { day: "Sunday", time: "9:00 – 17:00" },
 ];
 
@@ -277,65 +277,54 @@ export default function Location() {
       <div
         ref={stage}
         id="location"
-        className="relative flex w-full items-center justify-center px-6 py-28 text-ink"
+        className="relative flex w-full items-center justify-center px-6 pb-28 pt-8 text-ink"
         style={{ perspective: "1200px" }}
       >
-      {/* ---- full-bleed "COME FIND US" marquee rows ---- */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-1/2 z-0 flex w-screen -translate-x-1/2 flex-col justify-center gap-0 overflow-hidden py-[2.5vh] opacity-85"
-      >
-        {Array.from({ length: 6 }).map((_, row) => (
-          <div key={row} className="flex-1 overflow-hidden">
-            <div className="cfu-track flex h-full w-max items-center">
-              {Array.from({ length: 8 }).map((_, j) => (
-                // "COME FIND US" in cheee-wowie, coloured by --loc-text (which
-                // the Menu flips per tab: pink on food, yellow on drinks)
-                <span
-                  key={j}
-                  className="font-cheee flex h-full shrink-0 items-center whitespace-nowrap pr-[3vw] uppercase leading-none"
-                  style={{
-                    color: "var(--loc-text, #2463c3)",
-                    fontSize: "clamp(3rem, 14.5vh, 11rem)",
-                    textShadow: "3px 3px 0 #000",
-                  }}
-                >
-                  Come&nbsp;find&nbsp;us&nbsp;✦
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {/* full-bleed rules framing the COME FIND US word art */}
+      {/* Centred COME FIND US word-art behind the card. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 z-[1] h-[2px] w-screen -translate-x-1/2"
-        style={{ backgroundColor: "var(--loc-text, #2463c3)" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-1/2 z-[1] h-[2px] w-screen -translate-x-1/2"
-        style={{ backgroundColor: "var(--loc-text, #2463c3)" }}
-      />
+        className="pointer-events-none absolute left-1/2 top-1/2 z-0 flex w-screen -translate-x-1/2 -translate-y-1/2 flex-col opacity-85"
+      >
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 8 }).map((_, row) => (
+            <div key={row} className="-my-[2vh] overflow-hidden">
+              <div className="cfu-track flex w-max items-center">
+                {Array.from({ length: 8 }).map((_, j) => (
+                  // "COME FIND US" in cheee-wowie, coloured by --loc-text (which
+                  // the Menu flips per tab: pink on food, yellow on drinks)
+                  <span
+                    key={j}
+                    className="font-cheee block shrink-0 whitespace-nowrap pr-[3vw] uppercase leading-none"
+                    style={{
+                      color: "var(--loc-text, #2463c3)",
+                      fontSize: "clamp(3rem, 14.5vh, 11rem)",
+                      textShadow: "3px 3px 0 #000",
+                    }}
+                  >
+                    Come&nbsp;find&nbsp;us&nbsp;•
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div
         ref={card}
-        className="relative z-10 w-[min(90vw,520px)] rounded-[2rem] border-[6px] shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="relative z-10 w-[min(90vw,520px)] rounded-[2rem] shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
         style={{
           transformStyle: "preserve-3d",
           // same warm/purple gradient wash as the menu (and drinks) background
           background:
             "radial-gradient(135% 120% at 50% -10%, var(--wave-f0, #ffe06b) 0%, var(--wave-f1, #f5b13e) 70%, var(--wave-b1, #e89b2b) 100%)",
-          borderColor: "#f6efdd",
           color: "var(--loc-text, #2463c3)",
         }}
       >
         {/* map face */}
         <div
-          className="relative h-64 overflow-hidden rounded-t-[1.4rem] border-b-[6px] sm:h-72"
-          style={{ borderBottomColor: "#f6efdd" }}
+          className="relative h-64 overflow-hidden rounded-t-[1.4rem] sm:h-72"
         >
           <iframe
             title="Map to Cafe Mama & Sons"
@@ -358,9 +347,9 @@ export default function Location() {
         {/* info face */}
         <div className="px-7 py-6 sm:px-9">
           <div className="tilt-layer" data-z="50" data-depth="-8">
-            <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] opacity-80">
+            {/* <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] opacity-80">
               The corner spot
-            </p>
+            </p> */}
             <p className="mt-1 font-arialblack text-lg uppercase leading-tight sm:text-xl">
               {ADDRESS}
             </p>

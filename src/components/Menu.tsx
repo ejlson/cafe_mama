@@ -141,13 +141,13 @@ const DRINKS_GROUPS: Group[] = [
   {
     title: "Coffee",
     items: [
-      { name: "Espresso", price: "—" },
-      { name: "Cortado", price: "—" },
-      { name: "Macchiato", price: "—" },
-      { name: "Flat White", price: "—" },
-      { name: "Latte (Iced/Hot)", price: "—" },
-      { name: "Cappuccino", price: "—" },
-      { name: "Americano (Iced/Hot)", price: "—" },
+      { name: "Espresso", price: "3.20" },
+      { name: "Cortado", price: "3.50" },
+      { name: "Macchiato", price: "3.50" },
+      { name: "Flat White", price: "3.70" },
+      { name: "Latte (Iced/Hot)", price: "3.90" },
+      { name: "Cappuccino", price: "3.90" },
+      { name: "Americano (Iced/Hot)", price: "3.5" },
       { name: "Spanish Latte (Iced/Hot)", price: "5.20" },
       { name: "Ube Latte (Iced/Hot)", price: "6.20" },
       { name: "Milo Latte (Iced/Hot)", price: "6.20" },
@@ -166,9 +166,9 @@ const DRINKS_GROUPS: Group[] = [
   {
     title: "Tea",
     items: [
-      { name: "Calamansi Tea", price: "4.70" },
+      { name: "Calamansi Ade/Tea", price: "4.70" },
       { name: "Honey Peach Mango", price: "4.70" },
-      { name: "Strawberry Black Tea", price: "4.70" },
+      { name: "Strawberry Tea", price: "4.70" },
       { name: "Spanish Hojicha (Iced/Hot)", price: "6.00" },
       { name: "Milo Hojicha (Iced/Hot)", price: "6.00" },
     ],
@@ -408,7 +408,7 @@ function ItemRow({
           src={item.img}
           alt={item.name}
           loading="lazy"
-          className="mb-2 mt-3 aspect-[4/3] w-full max-w-sm rounded-2xl border-4 border-cream object-cover shadow-[0_12px_30px_rgba(0,0,0,0.4)]"
+          className="animate-item-pop mb-2 mt-3 aspect-[4/3] w-full max-w-sm rounded-2xl border-4 border-cream object-cover shadow-[0_12px_30px_rgba(0,0,0,0.4)]"
         />
       )}
     </li>
@@ -418,7 +418,7 @@ function ItemRow({
 function GroupTitle({ children, accent }: { children: string; accent: string }) {
   return (
     <h3
-      className="font-cheee text-5xl uppercase leading-none tracking-tight sm:text-6xl"
+      className="font-cheee min-w-0 text-3xl uppercase leading-none tracking-tight [overflow-wrap:anywhere] sm:text-6xl"
       style={{ color: accent }}
     >
       {children}
@@ -546,7 +546,7 @@ function CollabMarquee({ accent }: { accent: string }) {
 
   return (
     <>
-      <div className="relative left-1/2 mt-[24vh] w-screen -translate-x-1/2 py-5">
+      <div className="relative left-1/2 -mt-[3vh] w-screen -translate-x-1/2 py-5">
         <p
           className="mb-5 text-center font-arialblack text-[1rem] uppercase tracking-[0.35em] opacity-50"
           style={{ color: accent }}
@@ -561,7 +561,7 @@ function CollabMarquee({ accent }: { accent: string }) {
           {logos.map((src, i) => (
             <div
               key={i}
-              className="h-32 w-72 shrink-0 select-none px-8 sm:h-40 sm:w-80 sm:px-10"
+              className="h-24 w-52 shrink-0 select-none px-5 sm:h-40 sm:w-80 sm:px-10"
             >
               <div
                 data-p
@@ -982,6 +982,7 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
 // then a layered row of post cards (image + title + date) deals in below.
 function Blog({ accent }: { accent: string }) {
   const root = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const [openPost, setOpenPost] = useState<BlogPost | null>(null);
 
   useGSAP(
@@ -991,42 +992,111 @@ function Blog({ accent }: { accent: string }) {
       // Cards deal in, layered, with a little stagger + tilt.
       const cards = gsap.utils.toArray<HTMLElement>(".blog-card", root.current);
       gsap.from(cards, {
-        yPercent: 25,
         autoAlpha: 0,
         scale: 0.9,
         ease: "power3.out",
         duration: 0.8,
         stagger: 0.12,
-        scrollTrigger: { trigger: ".blog-cards", start: "top 75%" },
+        scrollTrigger: { trigger: ".blog-cards", start: "top 80%" },
       });
+
+      // If the row overflows, give it a gentle "peek" nudge on first entry to
+      // hint that it scrolls, then settle back.
+      const row = root.current?.querySelector<HTMLElement>(".blog-cards");
+      if (row && row.scrollWidth > row.clientWidth + 8) {
+        gsap.to(row, {
+          scrollLeft: 56,
+          duration: 0.7,
+          ease: "power2.inOut",
+          yoyo: true,
+          repeat: 1,
+          delay: 0.5,
+          scrollTrigger: { trigger: ".blog-cards", start: "top 80%", once: true },
+        });
+      }
     },
     { scope: root },
   );
 
+  // The newest post is featured (image left, text right); the rest sit below
+  // as the square card row.
+  const [featured, ...rest] = BLOG_POSTS;
+  const featuredExcerpt =
+    typeof featured?.body?.[0] === "string" ? featured.body[0] : undefined;
+
   return (
-    <section ref={root} className="relative mt-[20vh]">
+    <section ref={root} id="blog" className="relative mt-[20vh]">
       <FullRule color={accent} className="mb-2" />
       {/* Title — line-box trimmed to cap height + baseline so the gap above and
           below is purely the symmetric py, not the font's whitespace. */}
       <h2
         style={{ color: accent }}
-        className="mx-auto block w-fit text-center font-cheee font-arialblack text-[20vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+        className="block w-full text-center font-cheee font-arialblack text-[26vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
       >
         BLOG
       </h2>
 
       <FullRule color={accent} className="mt-0" />
 
-      {/* Layered post-card row */}
-      <div className="blog-cards mt-[8vh] flex w-full flex-wrap items-start justify-between gap-y-10">
-        {BLOG_POSTS.map((p) => (
+      {/* Featured (latest) entry — image left, text right */}
+      {featured && (
+        <button
+          type="button"
+          onClick={() => setOpenPost(featured)}
+          className="group mt-[8vh] flex w-full flex-col gap-6 text-left sm:flex-row sm:items-center sm:gap-10"
+        >
+          <div className="w-full shrink-0 overflow-hidden rounded-2xl shadow-[0_16px_34px_rgba(0,0,0,0.28)] sm:w-1/2">
+            <div className="aspect-[4/3] w-full overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={featured.img}
+                alt={featured.title}
+                loading="lazy"
+                draggable={false}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+          </div>
+          <div className="sm:w-1/2" style={{ color: accent }}>
+            <time className="text-xs font-semibold uppercase tracking-wide opacity-60">
+              {featured.date}
+            </time>
+            <h3 className="mt-2 font-arialblack text-2xl uppercase leading-tight tracking-tight sm:text-4xl">
+              {featured.title}
+            </h3>
+            {featuredExcerpt && (
+              <p className="mt-3 line-clamp-4 text-sm leading-relaxed opacity-80 sm:text-base">
+                {featuredExcerpt}
+              </p>
+            )}
+            <span className="mt-4 inline-block font-arialblack text-sm uppercase tracking-wide underline-offset-4 group-hover:underline">
+              Read more →
+            </span>
+          </div>
+        </button>
+      )}
+
+      {/* Remaining posts — horizontally-scrolling square card row */}
+      <div className="relative mt-[3vh] sm:mt-[8vh]">
+      {/* Negative-margin bleed + matching padding so the cards' drop shadows
+          have room and aren't clipped by the scroll container's overflow. */}
+      <div
+        ref={cardsRef}
+        className="blog-cards -mx-8 flex w-[calc(100%+4rem)] items-start gap-6 overflow-x-auto px-8 pb-10 pt-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-current [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1"
+        style={{
+          color: accent,
+          scrollbarWidth: "thin",
+          scrollbarColor: `${accent} transparent`,
+        }}
+      >
+        {rest.map((p) => (
           <button
             type="button"
             key={p.title}
             onClick={() => setOpenPost(p)}
             className="blog-card group flex w-44 shrink-0 flex-col text-left sm:w-56"
           >
-            <div className="aspect-square w-full overflow-hidden rounded-xl shadow-[0_16px_34px_rgba(0,0,0,0.28)] transition-transform duration-300 group-hover:-translate-y-1">
+            <div className="aspect-square w-full overflow-hidden rounded-xl shadow-[0_18px_26px_-12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:-translate-y-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.img}
@@ -1050,6 +1120,25 @@ function Blog({ accent }: { accent: string }) {
             </time>
           </button>
         ))}
+      </div>
+
+      {/* Right-edge arrow overlay — always visible, hints at more entries and
+          scrolls the row right on click. Centred on the square image height. */}
+      <button
+        type="button"
+        aria-label="More blog entries"
+        onClick={() =>
+          cardsRef.current?.scrollBy({ left: 280, behavior: "smooth" })
+        }
+        className="group/arrow absolute right-0 top-4 flex h-44 items-center sm:h-56"
+      >
+        <span
+          className="grid h-12 w-12 place-items-center rounded-full text-2xl leading-none text-cream shadow-[0_6px_16px_rgba(0,0,0,0.35)] transition-transform duration-300 group-hover/arrow:translate-x-1"
+          style={{ backgroundColor: accent }}
+        >
+          →
+        </span>
+      </button>
       </div>
 
       <FullRule color={accent} className="mt-1" />
@@ -1098,8 +1187,9 @@ function CafeDescription({ accent }: { accent: string }) {
       if (reduce || !fine || !words.length || !box) return;
 
       const n = words.length;
-      const dispX = new Array(n).fill(0); // current offset from home
+      const dispX = new Array(n).fill(0); // physics target offset from home
       const dispY = new Array(n).fill(0);
+      const renderX = new Array(n).fill(0); // smoothed offset actually drawn
       const velX = new Array(n).fill(0);
       const velY = new Array(n).fill(0);
       const lastTouch = new Array(n).fill(-1e9); // time of last interaction (s)
@@ -1134,7 +1224,7 @@ function CafeDescription({ accent }: { accent: string }) {
       let hot = false;
 
       const SPRING = 0.05; // pull back home — gentle, so the return glides
-      const DRIFT_FRICTION = 0.91; // decay while drifting → long, smooth float
+      const DRIFT_FRICTION = 0.93; // decay while drifting → long, smooth float
       const HOME_FRICTION = 0.78; // strong damping while homing → no overshoot
       const R = 160; // cursor influence radius (px)
       const PUSH = 2.4; // cursor shove strength (accumulates, so keep it small)
@@ -1143,13 +1233,50 @@ function CafeDescription({ accent }: { accent: string }) {
       const MAX_DISP = 600; // px — words may slide far enough to fill line gaps
       const BOUNCE = 0; // no rebound off the walls — they just glide to a stop
       const ITER = 5; // collision solver passes
-      const GAP = 0.2; // min horizontal gap between words
+      const GAP = 18; // min horizontal gap between words — keeps them legible
       const VFACT = 0.72; // shrink collision box vertically so lines don't touch
+      const SMOOTH = 0.14; // render lerp toward the physics target → silky glide
+
+      // --- Autonomous + scroll-driven sliding ---
+      // Each word gets a fixed left/right bias. Scrolling shoves words along
+      // that bias (an organic scatter, not a uniform shift), and a random timer
+      // also nudges a random word every so often so they drift on their own.
+      // Both just inject horizontal velocity — the existing drift + spring-home
+      // then carries the slide out and eases the word back to its place.
+      const slideBias = words.map(() => Math.random() * 2 - 1);
+      let scrollDelta = 0;
+      let lastSY = window.scrollY;
+      const onScrollSlide = () => {
+        scrollDelta += window.scrollY - lastSY;
+        lastSY = window.scrollY;
+      };
+      window.addEventListener("scroll", onScrollSlide, { passive: true });
+      let nextNudge = 2; // seconds — first self-slide fires ~2s in
 
       const tick = (time: number) => {
         const base = box.getBoundingClientRect();
         const lx = clientX - base.left;
         const ly = clientY - base.top;
+
+        // scroll shove — each word drifts by its own bias as you scroll
+        if (scrollDelta !== 0) {
+          for (let i = 0; i < n; i++) {
+            if (dragging.has(words[i])) continue;
+            velX[i] += scrollDelta * 0.06 * slideBias[i];
+            lastTouch[i] = time; // let it drift before homing
+          }
+          scrollDelta = 0;
+        }
+
+        // random self-slide — shove one random word at random intervals
+        if (time >= nextNudge) {
+          nextNudge = time + 1.4 + Math.random() * 3.2; // 1.4–4.6s apart
+          const k = Math.floor(Math.random() * n);
+          if (!dragging.has(words[k])) {
+            velX[k] += (Math.random() < 0.5 ? -1 : 1) * (2.5 + Math.random() * 3.5);
+            lastTouch[k] = time;
+          }
+        }
 
         for (let i = 0; i < n; i++) {
           if (dragging.has(words[i])) {
@@ -1157,6 +1284,7 @@ function CafeDescription({ accent }: { accent: string }) {
             // obstacle for the others, and keep its return timer fresh.
             dispX[i] = Number(gsap.getProperty(words[i], "x")) || 0;
             dispY[i] = Number(gsap.getProperty(words[i], "y")) || 0;
+            renderX[i] = dispX[i]; // track the drag so release glides on smoothly
             velX[i] = 0;
             velY[i] = 0;
             lastTouch[i] = time;
@@ -1248,7 +1376,10 @@ function CafeDescription({ accent }: { accent: string }) {
 
         for (let i = 0; i < n; i++) {
           if (dragging.has(words[i])) continue;
-          setX[i](dispX[i]);
+          // ease the drawn position toward the physics target — smooths the
+          // start of every slide and any collision correction.
+          renderX[i] += (dispX[i] - renderX[i]) * SMOOTH;
+          setX[i](renderX[i]);
           setY[i](dispY[i]);
         }
       };
@@ -1287,6 +1418,7 @@ function CafeDescription({ accent }: { accent: string }) {
         el.removeEventListener("pointermove", onMove);
         el.removeEventListener("pointerleave", onLeave);
         window.removeEventListener("resize", measure);
+        window.removeEventListener("scroll", onScrollSlide);
         draggables.forEach((d) => d.kill());
       };
     },
@@ -1294,14 +1426,17 @@ function CafeDescription({ accent }: { accent: string }) {
   );
 
   return (
-    <div ref={root} className="mt-[10vh]">
+    <div
+      ref={root}
+      className="relative left-1/2 mt-[10vh] w-screen -translate-x-1/2 px-[3vw]"
+    >
       {/* Bounded box — words bounce off its top & bottom edges (and the sides).
           The vertical padding gives them room to drift before they hit an edge. */}
       <div className="cafe-box py-[5vh]">
         <h3
           aria-label={CAFE_DESC}
           style={{ color: accent }}
-          className="font-cheee w-full text-justify uppercase [text-align-last:justify] text-3xl leading-[1.12] sm:text-[4.2vw]"
+          className="font-cheee w-full text-justify uppercase [text-align-last:justify] text-3xl leading-[0.95] sm:text-[6vw]"
         >
           {CAFE_DESC.split(" ").map((word, wi) => (
             <span key={wi} aria-hidden>
@@ -1472,7 +1607,7 @@ function MealDealBanner() {
   );
 
   return (
-    <div ref={root} className="relative mb-60 mt-12 sm:mt-16">
+    <div ref={root} className="relative mb-40 mt-12 sm:mb-60 sm:mt-16">
       <audio ref={sfx} src="/sfx/rizz.mp3" preload="auto" />
       <div className="relative mx-auto aspect-[5/4] w-full sm:aspect-[16/10]">
         {/* video oval backdrop — kept, sat in the upper-centre */}
@@ -1813,7 +1948,7 @@ export default function Menu() {
       }}
       className="relative overflow-hidden py-10 text-pine sm:py-14"
     >
-      <div className="relative mx-auto w-[80%] max-w-[1500px] px-5 pb-44 pt-6 sm:px-8 sm:pt-10">
+      <div className="relative mx-auto w-full max-w-[1500px] px-4 pb-44 pt-6 sm:w-[80%] sm:px-8 sm:pt-10">
         {/* Framed menu — a vertical rule down each side, full-bleed rules across.
             Side rules are food-only (the drinks animation section omits them). */}
         <div className="relative">
@@ -1829,7 +1964,7 @@ export default function Menu() {
           <h2
             data-reveal
             style={{ color: theme.accent }}
-            className="menu-title mx-auto block w-fit text-center font-cheee font-arialblack text-[20vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+            className="menu-title block w-full text-center font-cheee font-arialblack text-[26vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
           >
             MENU
             {/* menu<span>.</span> */}
@@ -1841,16 +1976,16 @@ export default function Menu() {
           {/* Category tabs */}
           <nav
             data-reveal
-            className="mt-1 flex flex-wrap items-baseline gap-x-10 gap-y-1"
+            className="mt-1 flex flex-wrap items-baseline gap-x-5 gap-y-1 sm:gap-x-10"
           >
           {CATEGORIES.map((c, i) => {
             const isActive = active === c.key;
             return (
-              <span key={c.key} className="flex items-baseline gap-x-10">
+              <span key={c.key} className="flex items-baseline gap-x-5 sm:gap-x-10">
                 {i > 0 && (
                   <span
                     aria-hidden
-                    className="font-cheee text-5xl leading-none opacity-100 sm:text-6xl"
+                    className="font-cheee text-2xl leading-none opacity-100 sm:text-6xl"
                     style={{ color: theme.accent }}
                   >
                     •
@@ -1859,7 +1994,7 @@ export default function Menu() {
                 <button
                   onClick={() => switchCategory(c.key)}
                   style={{ color: theme.accent }}
-                  className={`font-cheee text-5xl uppercase leading-none tracking-tight transition-opacity sm:text-6xl ${
+                  className={`font-cheee text-2xl uppercase leading-none tracking-tight transition-opacity sm:text-6xl ${
                     isActive ? "opacity-100" : "opacity-40 hover:opacity-70"
                   }`}
                 >
@@ -1925,6 +2060,9 @@ export default function Menu() {
         </div>
         {/* end framed menu */}
 
+        {/* Cafe Mama Description */}
+        <CafeDescription accent={theme.accent} />
+
         {/* Press / collab logos — draggable, continuously-scrolling strip */}
         <CollabMarquee accent={theme.accent} />
 
@@ -1933,9 +2071,6 @@ export default function Menu() {
 
         {/* Blog */}
         <Blog accent={theme.accent} />
-
-        {/* Cafe Mama Description */}
-        <CafeDescription accent={theme.accent} />
 
         {/* Location widget — lives at the end of the menu so it shares this section's gradient background. */}
         <Location />

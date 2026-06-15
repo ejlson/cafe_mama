@@ -52,6 +52,13 @@ export default function GallerySpin() {
     return () => clearInterval(t);
   }, []);
 
+  // the navbar "Gallery" link opens the overlay via this event
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("open-gallery", onOpen);
+    return () => window.removeEventListener("open-gallery", onOpen);
+  }, []);
+
   const activate = () => {
     const a = sfx.current;
     if (a) {

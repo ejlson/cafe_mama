@@ -56,12 +56,39 @@ export default function MenuReveal() {
       render();
 
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // Touch devices skip the wave morph entirely — that transition leans on
+      // ScrollSmoother (absent on touch) and is fragile on phones. They get a
+      // plain instant hide/show with native scroll instead. `simple` covers both.
+      const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+      const simple = reduce || isTouch;
       const sm = () => ScrollSmoother.get();
       let at: "hero" | "menu" = "hero";
       let busy = false;
 
+      // On touch there's no ScrollSmoother (native scroll), so the hero lock and
+      // scroll-resets fall back to plain CSS / window scrolling.
+      const setLocked = (on: boolean) => {
+        const s = sm();
+        if (s) s.paused(on);
+        else document.documentElement.style.overflow = on ? "hidden" : "";
+      };
+      const scrollTop0 = () => {
+        const s = sm();
+        if (s) s.scrollTo(0, false);
+        else window.scrollTo(0, 0);
+      };
+      const scrollTopVal = () => {
+        const s = sm();
+        return s ? s.scrollTop() : window.scrollY;
+      };
+      const scrollToEl = (target: HTMLElement) => {
+        const s = sm();
+        if (s) s.scrollTo(target, true, "top top");
+        else target.scrollIntoView({ behavior: "smooth" });
+      };
+
       // Start on the hero: it's shown, the menu scroll is locked behind it.
-      sm()?.paused(true);
+      setLocked(true);
 
       // The hero "Menu ⌄" cue must only ever be visible on the hero. overwrite
       // ensures the latest show/hide wins, so a rapid hero↔menu gesture (e.g.
@@ -96,7 +123,7 @@ export default function MenuReveal() {
       const transition = (swap: () => void, done: () => void) => {
         busy = true;
         if (rootRef.current) rootRef.current.style.pointerEvents = "auto";
-        sm()?.paused(true);
+        setLocked(true);
         gsap
           .timeline({
             onComplete: () => {
@@ -114,10 +141,18 @@ export default function MenuReveal() {
       const goToMenu = (after?: () => void) => {
         if (busy || at !== "hero") return;
         hideBtn();
-        if (reduce) {
-          gsap.set(heroEl, { autoAlpha: 0 });
-          sm()?.paused(false);
+        if (simple) {
           at = "menu";
+          gsap.set(heroEl, { autoAlpha: 0 });
+          scrollTop0();
+          setLocked(false);
+          window.dispatchEvent(new Event("menu:reveal"));
+          // Native scroll (no ScrollSmoother on touch): recompute ScrollTrigger
+          // start/end positions now the menu is laid out, so the scroll-driven
+          // animations fire at the right spots.
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => ScrollTrigger.refresh()),
+          );
           after?.();
           return;
         }
@@ -125,12 +160,12 @@ export default function MenuReveal() {
           () => {
             gsap.set(heroEl, { autoAlpha: 0 }); // reveal the menu beneath
             hideBtn(); // make sure the cue is gone the instant the menu appears
-            sm()?.scrollTo(0, false);
+            scrollTop0();
             window.dispatchEvent(new Event("menu:reveal")); // play the menu's entrance
           },
           () => {
             at = "menu";
-            sm()?.paused(false); // unlock menu scrolling
+            setLocked(false); // unlock menu scrolling
             after?.();
           },
         );
@@ -138,22 +173,22 @@ export default function MenuReveal() {
 
       const goToHero = () => {
         if (busy || at !== "menu") return;
-        if (reduce) {
-          sm()?.scrollTo(0, false);
+        if (simple) {
+          scrollTop0();
           gsap.set(heroEl, { autoAlpha: 1 });
-          sm()?.paused(true);
+          setLocked(true);
           at = "hero";
           showBtn();
           return;
         }
         transition(
           () => {
-            sm()?.scrollTo(0, false);
+            scrollTop0();
             gsap.set(heroEl, { autoAlpha: 1 }); // bring the hero back
           },
           () => {
             at = "hero";
-            sm()?.paused(true); // lock behind the hero again
+            setLocked(true); // lock behind the hero again
             showBtn();
           },
         );
@@ -168,10 +203,22 @@ export default function MenuReveal() {
           if (at === "hero" && !busy) goToMenu();
         },
         onUp: () => {
-          const top = (sm()?.scrollTop() ?? 0) <= 4;
+          // On touch, don't snap back to the hero from a top overscroll — too
+          // easy to trigger by accident. The brand "#top" link still goes back.
+          if (isTouch) return;
+          const top = scrollTopVal() <= 4;
           if (at === "menu" && !busy && top) goToHero();
         },
       });
+
+      // Touch fallback — on mobile (native scroll, no ScrollSmoother) the hero
+      // is locked via overflow:hidden, so a swipe can't scroll. A direct
+      // touchmove reliably reveals the menu. Guarded by `at`, so it does nothing
+      // once you're already in the menu.
+      const onTouchMove = () => {
+        if (at === "hero" && !busy) goToMenu();
+      };
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
 
       // Button + any in-page nav link route through the same transition.
       const onClick = () => goToMenu();
@@ -190,14 +237,15 @@ export default function MenuReveal() {
           const target = document.querySelector<HTMLElement>(href);
           if (!target) return;
           e.preventDefault();
-          if (at === "hero") goToMenu(() => sm()?.scrollTo(target, true, "top top"));
-          else sm()?.scrollTo(target, true, "top top");
+          if (at === "hero") goToMenu(() => scrollToEl(target));
+          else scrollToEl(target);
         }
       };
       document.addEventListener("click", onAnchor);
 
       return () => {
         obs.kill();
+        window.removeEventListener("touchmove", onTouchMove);
         btnRef.current?.removeEventListener("click", onClick);
         document.removeEventListener("click", onAnchor);
       };
