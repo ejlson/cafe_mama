@@ -192,12 +192,12 @@ body {
    like an on-air channel bug over the video (and over light content below). */
 /* Heavy Arial Black — the poster face used across nav + menu headings. */
 .font-arialblack {
-  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-black), "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-weight: 900;
 }
 
 .nav-blackface {
-  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-black), "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-weight: 900;
   color: #f4c33c;
   text-shadow: 3px 3px 0 #000;
@@ -215,7 +215,7 @@ body {
    Arial Black. The hard black drop shadow is applied per-element now (only the
    navbar, "where are we?"/"nasaan tayo?" and "come find us" keep it). */
 .font-cheee {
-  font-family: "Arial Black", "Arial Bold", "Helvetica Neue", Arial, sans-serif !important;
+  font-family: var(--font-black), "Arial Black", "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 900 !important;
 }
 
@@ -379,7 +379,7 @@ body {
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black",
     sans-serif;
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: 0.02em;
   display: inline-block;
   position: relative;
@@ -413,10 +413,10 @@ body {
   -webkit-text-stroke: 0;
   background: none;
   text-shadow:
-    1px 1px 0 #484848,
-    2px 2px 0 #3c3c3c,
-    3px 3px 0 #303030,
-    4px 4px 0 #242424;
+    -1px 1px 0 #484848,
+    -2px 2px 0 #3c3c3c,
+    -3px 3px 0 #303030,
+    -4px 4px 0 #242424;
 }
 /* shadow cast onto the "floor": same text, skewed + flattened + blurred so it
    lies on the ground and recedes off diagonally. */
@@ -430,8 +430,8 @@ body {
   -webkit-text-fill-color: rgba(0, 0, 0, 0.32);
   -webkit-text-stroke: 0;
   background: none;
-  transform-origin: left bottom;
-  transform: translate(10%, 14%) skewX(-62deg) scaleY(0.5);
+  transform-origin: right bottom;
+  transform: translate(-10%, 14%) skewX(62deg) scaleY(0.5);
   filter: blur(1.5px);
 }
 

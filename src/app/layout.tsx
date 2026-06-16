@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
-import { Anton, Archivo, Caveat } from "next/font/google";
+import { Anton, Archivo, Caveat, Archivo_Black } from "next/font/google";
 import "./globals.css";
+
+// Web-loaded Arial Black equivalent — Arial Black is a system font that isn't
+// present everywhere, so the poster headings/nav could fall back to a thinner
+// Arial. Archivo Black guarantees the heavy look across devices.
+const archivoBlack = Archivo_Black({
+  variable: "--font-black",
+  weight: "400",
+  subsets: ["latin"],
+});
 
 const anton = Anton({
   variable: "--font-display",
@@ -39,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${anton.variable} ${archivo.variable} ${caveat.variable} h-full antialiased`}
+      className={`${anton.variable} ${archivo.variable} ${caveat.variable} ${archivoBlack.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>
