@@ -138,12 +138,19 @@ export default function MenuReveal() {
           .add(sweep(100));
       };
 
+      // The hero stack is expensive (autoplaying TV video + animated
+      // `filter: brightness` + mix-blend-mode static). When we leave it,
+      // hiding it with autoAlpha alone keeps that compositor pipeline live
+      // behind the menu — which is what made the transition stutter. Pair
+      // every autoAlpha flip with display:none/"" so the video decoder
+      // and filter animations halt the instant the hero is off, and resume
+      // only when we swing back to it.
       const goToMenu = (after?: () => void) => {
         if (busy || at !== "hero") return;
         hideBtn();
         if (simple) {
           at = "menu";
-          gsap.set(heroEl, { autoAlpha: 0 });
+          gsap.set(heroEl, { autoAlpha: 0, display: "none" });
           scrollTop0();
           setLocked(false);
           window.dispatchEvent(new Event("menu:reveal"));
@@ -158,7 +165,7 @@ export default function MenuReveal() {
         }
         transition(
           () => {
-            gsap.set(heroEl, { autoAlpha: 0 }); // reveal the menu beneath
+            gsap.set(heroEl, { autoAlpha: 0, display: "none" }); // reveal the menu beneath
             hideBtn(); // make sure the cue is gone the instant the menu appears
             scrollTop0();
             window.dispatchEvent(new Event("menu:reveal")); // play the menu's entrance
@@ -175,7 +182,7 @@ export default function MenuReveal() {
         if (busy || at !== "menu") return;
         if (simple) {
           scrollTop0();
-          gsap.set(heroEl, { autoAlpha: 1 });
+          gsap.set(heroEl, { display: "", autoAlpha: 1 });
           setLocked(true);
           at = "hero";
           showBtn();
@@ -184,7 +191,9 @@ export default function MenuReveal() {
         transition(
           () => {
             scrollTop0();
-            gsap.set(heroEl, { autoAlpha: 1 }); // bring the hero back
+            // Bring the hero back into the layout BEFORE the cover sweeps
+            // so its compositor pipeline has a frame to warm up.
+            gsap.set(heroEl, { display: "", autoAlpha: 1 });
           },
           () => {
             at = "hero";

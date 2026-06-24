@@ -1,412 +1,168 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { SplitText } from "gsap/SplitText";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, SplitText);
-
-const HOURS: { day: string; time: string }[] = [
-  { day: "Mon – Fri", time: "8:00 – 18:00" },
-  { day: "Saturday", time: "9:00 – 17:00" },
-  { day: "Sunday", time: "9:00 – 17:00" },
-];
 
 const ADDRESS = "83 Kentish Town Rd, London NW1 8NY";
 const MAPS_QUERY = encodeURIComponent(
   "Cafe Mama & Sons, 83 Kentish Town Rd, London NW1 8NY",
 );
 const DIRECTIONS = `https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY}`;
+// TODO: replace with the exact write-review link once the Google Business
+// Profile place ID is to hand:
+//   https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID
+// Until then, the search-by-name URL lands users on our Business panel where
+// "Write a review" is one tap away.
+const REVIEW_URL = `https://www.google.com/search?q=${MAPS_QUERY}#lrd=`;
+const INSTAGRAM_URL = "https://www.instagram.com/cafe_mama_sons/";
+
+// Section palette — driven by the same --loc-* CSS variables the menu uses
+// for its per-tab theme, so the LOCATION panel re-tints smoothly with the
+// active tab (food = yellow + red, drinks = purple + yellow). The fallbacks
+// are the food-tab values so the panel renders correctly before Menu's
+// useGSAP effect installs the live values on first mount.
+const YELLOW = "var(--loc-card, #f4c33c)";
+const RED = "var(--loc-text, #FF1353)";
+const BLUE = "#2463C3";
 
 /**
- * Location section — a single centred widget that tilts in 3D toward the
- * cursor, after GSAP's "cursor-driven perspective tilt" demo
- * (https://demos.gsap.com/demo/cursor-driven-perspective-tilt/).
+ * Location section — Japanese magazine / manga-inspired layout. A red strap
+ * carries the LOCATION title across the top of a vertically-striped yellow
+ * field, with a two-column body underneath: map on the left, headline +
+ * description + CTAs on the right.
  *
- * A `perspective` stage holds one `preserve-3d` card; pointer position is
- * normalised to -0.5…0.5 and mapped to rotationX / rotationY via gsap.quickTo
- * for smooth, GPU-friendly updates. Inner layers carry a translateZ depth plus
- * a parallax offset so they pop off the card as it tilts. Leaving the stage
- * eases everything back to flat.
+ * TODO: swap the embed iframe for Google Maps JavaScript API's photorealistic
+ * 3D view once an API key is in place
+ * (developers.google.com/maps/documentation/javascript/3d-maps-overview).
+ * The 2D embed below is the visual fallback.
  */
 export default function Location() {
   const root = useRef<HTMLDivElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
-  const card = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const stageEl = stage.current!;
-      const cardEl = card.current!;
-      const layers = gsap.utils.toArray<HTMLElement>(".tilt-layer");
-
-      // Push each layer out along Z so it floats above the card face.
-      layers.forEach((l) =>
-        gsap.set(l, { z: Number(l.dataset.z ?? 0) }),
-      );
-
-      // ---- "COME FIND US" marquee rows — each scrolls forever at its own
-      // speed/direction so the rows are continuously offset, like a carousel.
-      const tracks = gsap.utils.toArray<HTMLElement>(".cfu-track");
-      tracks.forEach((t, i) => {
-        const ltr = i % 2 === 0; // two directions, alternating per row
-        const dur = ltr ? 60 : 46; // two speeds (slow)
-        // Duplicated content + xPercent 0↔-50 wraps seamlessly, so text
-        // re-enters from the opposite side forever.
-        gsap.fromTo(
-          t,
-          { xPercent: ltr ? 0 : -50 },
-          { xPercent: ltr ? -50 : 0, ease: "none", duration: dur, repeat: -1 },
-        );
-      });
-
-      const reduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-
-      // ---- "Where are we?" intro — horizontal pinned scroll ----
-      // The phrase scrolls horizontally across a pinned screen and each
-      // character pops up from a random offset as it crosses (nested
-      // ScrollTriggers driven by `containerAnimation`), leading you into the
-      // Location widget below.
-      const horizEl = root.current!.querySelector<HTMLElement>(
-        ".where-horizontal",
-      );
-      const trackEl = root.current!.querySelector<HTMLElement>(".where-track");
-      const lines = gsap.utils.toArray<HTMLElement>(".where-line");
-      let split: ReturnType<typeof SplitText.create> | null = null;
-      if (trackEl && horizEl) {
-        if (reduced) {
-          gsap.set(horizEl, { justifyContent: "center" });
-          gsap.set(trackEl, { paddingLeft: 0 });
-        } else {
-          split = SplitText.create(lines, { type: "chars, words" });
-          const scrollTween = gsap.to(trackEl, {
-            xPercent: -100,
-            ease: "none",
-            scrollTrigger: {
-              trigger: horizEl,
-              pin: true,
-              end: "+=2400",
-              scrub: true,
-              // recompute positions on refresh (ScrollSmoother sets up after
-              // this mounts) so the text never gets stuck off-screen
-              invalidateOnRefresh: true,
-            },
-          });
-          split.chars.forEach((char) => {
-            gsap.from(char, {
-              yPercent: "random(-200, 200)",
-              rotation: "random(-20, 20)",
-              ease: "back.out(1.2)",
-              scrollTrigger: {
-                trigger: char,
-                containerAnimation: scrollTween,
-                start: "left 100%",
-                end: "left 30%",
-                scrub: 1,
-              },
-            });
-          });
-          // Force a refresh on the next frames — Location mounts before
-          // ScrollSmoother is created, so the pin's start/end can be measured
-          // against a stale layout, which left "Where are we?" parked off-screen.
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() => ScrollTrigger.refresh()),
-          );
-        }
-      }
-
-      // Reduced motion → leave the card flat/static (marquee stays put).
-      if (reduced) return;
-
-      // ---- Scroll assist ----
-      // As you arrive at the Location section, gently glide it into a full,
-      // screen-framed view. ScrollSmoother.scrollTo(target, true, ...) eases
-      // with the smoother's own inertia, so it ramps up to speed and settles
-      // softly. IntersectionObserver is the trigger (a ScrollTrigger onEnter is
-      // unreliable under ScrollSmoother here). A short scroll-velocity tracker
-      // lets a hard, fast scroll blow straight past without being grabbed.
-      let lastY = window.scrollY;
-      let lastT = performance.now();
-      let vel = 0;
-      const onScroll = () => {
-        const now = performance.now();
-        const y = window.scrollY;
-        const dt = now - lastT;
-        if (dt > 0) vel = ((y - lastY) / dt) * 1000;
-        lastY = y;
-        lastT = now;
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-
-      let armed = true; // re-arms once you leave the zone
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) {
-              armed = true;
-              continue;
-            }
-            if (!armed) continue;
-            if (Math.abs(vel) > 3200) continue; // let fast scroll-throughs pass
-            armed = false;
-            const sm = ScrollSmoother.get();
-            if (sm) sm.scrollTo(stageEl, true, "center center");
-          }
-        },
-        // fire when the section's top reaches ~75% down the viewport
-        { rootMargin: "0px 0px -25% 0px", threshold: 0 },
-      );
-      io.observe(stageEl);
-      const cleanupAssist = () => {
-        io.disconnect();
-        split?.revert();
-        window.removeEventListener("scroll", onScroll);
-      };
-
-      const MAX_ROT = 4; // degrees at the edges — gentle tilt
-
-      // Hover → the widget grows via a pure transform scale. Transforms are
-      // GPU-composited and never touch layout, so the page doesn't reflow (no
-      // jitter) and the full-bleed marquee behind it is left completely alone.
-      // (A width animation reflowed the page every frame, which is what was
-      // resizing the word-art and jittering the site.)
-      const grow = (on: boolean) =>
-        gsap.to(cardEl, {
-          scale: on ? 1.14 : 1,
-          duration: 0.5,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-
-      // "WE'RE HERE" heading: GSAP-controlled so it stays centred at rest and
-      // glides to the top-right edge on hover (left:100% tracks the widening
-      // card; xPercent:-100 + x pulls it just inside the right border).
-      const headEl = cardEl.querySelector<HTMLElement>(".loc-heading");
-      if (headEl) gsap.set(headEl, { left: "50%", xPercent: -50, x: 0, z: 80 });
-      const moveHead = (on: boolean) => {
-        if (!headEl) return;
-        gsap.to(headEl, {
-          left: on ? "100%" : "50%",
-          xPercent: on ? -100 : -50,
-          x: on ? -22 : 0,
-          duration: 0.55,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      };
-
-      const rotX = gsap.quickTo(cardEl, "rotationX", {
-        duration: 0.6,
-        ease: "power3",
-      });
-      const rotY = gsap.quickTo(cardEl, "rotationY", {
-        duration: 0.6,
-        ease: "power3",
-      });
-      const moveX = layers.map((l) =>
-        gsap.quickTo(l, "x", { duration: 0.7, ease: "power3" }),
-      );
-      const moveY = layers.map((l) =>
-        gsap.quickTo(l, "y", { duration: 0.7, ease: "power3" }),
-      );
-
-      const onEnter = () => {
-        grow(true); // hover → smooth scale-up (no reflow)
-        moveHead(true); // heading slides to top-right
-      };
-      const onMove = (e: PointerEvent) => {
-        const r = stageEl.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width - 0.5; // -0.5 … 0.5
-        const py = (e.clientY - r.top) / r.height - 0.5;
-        rotY(px * MAX_ROT * 2);
-        rotX(-py * MAX_ROT * 2);
-        layers.forEach((l, i) => {
-          const depth = Number(l.dataset.depth ?? 0);
-          moveX[i](px * depth);
-          moveY[i](py * depth);
-        });
-      };
-
-      const onLeave = () => {
-        rotX(0);
-        rotY(0);
-        grow(false);
-        moveHead(false); // heading back to centre
-        moveX.forEach((f) => f(0));
-        moveY.forEach((f) => f(0));
-      };
-
-      stageEl.addEventListener("pointerenter", onEnter);
-      stageEl.addEventListener("pointermove", onMove);
-      stageEl.addEventListener("pointerleave", onLeave);
-      return () => {
-        stageEl.removeEventListener("pointerenter", onEnter);
-        stageEl.removeEventListener("pointermove", onMove);
-        stageEl.removeEventListener("pointerleave", onLeave);
-        cleanupAssist();
-      };
-    },
-    { scope: root },
-  );
 
   return (
-    <div ref={root}>
-      {/* ---- "Where are we?" intro — full-bleed horizontal pinned scroll ---- */}
-      <section className="where-horizontal relative ml-[calc(50%-50vw)] flex h-screen w-screen items-center overflow-hidden">
-        <div className="where-track flex w-max flex-col items-center gap-[1.5vw] pl-[100vw]">
-          <h3
-            className="where-line nav-blackface font-cheee flex w-max gap-[4vw] whitespace-nowrap text-[clamp(3rem,16vw,18rem)] leading-[1.1]"
-            style={{ color: "var(--loc-text, #2463c3)" }}
-          >
-            Where are we?
-          </h3>
-          <p
-            className="where-line nav-blackface font-cheee flex w-max gap-[3vw] whitespace-nowrap text-[clamp(1.5rem,8vw,9rem)] leading-[1.1]"
-            style={{ color: "var(--loc-text, #2463c3)" }}
-          >
-            Nasaan tayo?
-          </p>
-        </div>
-      </section>
-
-      <div
-        ref={stage}
-        id="location"
-        className="relative mb-52 flex w-full items-center justify-center px-6 py-10 text-ink"
-        style={{ perspective: "1200px" }}
+    <div ref={root} id="location" className="relative">
+      {/* LOCATION title — same poster treatment as MENU and BLOG: the title
+          in the accent colour on the menu section's natural gradient, with
+          a single horizontal rule below. The line ABOVE comes from the
+          FullRule rendered under CollabMarquee in Menu.tsx, so we don't
+          repeat one here (a double rule was reading as a heavy bar). */}
+      <h2
+        style={{ color: RED }}
+        // Breaks out of the menu wrapper (left-1/2 + w-screen + -translate-x-1/2)
+        // so the title can scale up past the wrapper rails into the full
+        // viewport. The horizontal rules above and below stay at wrapper
+        // width — magazine-headline-over-frame.
+        className="relative left-1/2 block w-screen -translate-x-1/2 text-center font-poster leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] text-[clamp(3rem,14vw,20rem)]"
       >
-
-      {/* Centred COME FIND US word-art behind the card. */}
+        LOCATION
+      </h2>
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 z-0 flex w-screen -translate-x-1/2 -translate-y-1/2 flex-col opacity-85"
-      >
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 8 }).map((_, row) => (
-            <div key={row} className="-my-[2vh] overflow-hidden">
-              <div className="cfu-track flex w-max items-center">
-                {Array.from({ length: 8 }).map((_, j) => (
-                  // "COME FIND US" in cheee-wowie, coloured by --loc-text (which
-                  // the Menu flips per tab: pink on food, yellow on drinks)
-                  <span
-                    key={j}
-                    className="font-cheee block shrink-0 whitespace-nowrap pr-[3vw] uppercase leading-none"
-                    style={{
-                      color: "var(--loc-text, #2463c3)",
-                      fontSize: "clamp(3rem, 14.5vh, 11rem)",
-                      textShadow: "3px 3px 0 #000",
-                    }}
-                  >
-                    Come&nbsp;find&nbsp;us&nbsp;•
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        style={{ backgroundColor: RED }}
+        className="relative left-1/2 h-px w-[calc(100%+2rem)] -translate-x-1/2"
+      />
 
-      <div
-        ref={card}
-        className="relative z-10 w-[min(90vw,520px)] rounded-[2rem] shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
-        style={{
-          transformStyle: "preserve-3d",
-          // same warm/purple gradient wash as the menu (and drinks) background
-          background:
-            "radial-gradient(135% 120% at 50% -10%, var(--wave-f0, #ffe06b) 0%, var(--wave-f1, #f5b13e) 70%, var(--wave-b1, #e89b2b) 100%)",
-          color: "var(--loc-text, #2463c3)",
-        }}
-      >
-        {/* map face */}
+      {/* Two-column body — map on the left, content (headline + 2-col
+          description + CTAs) on the right. Map stretches to the right
+          column's height so its bottom edge lines up with the last CTA. */}
+      <div className="grid items-stretch gap-6 pb-8 pt-3 sm:grid-cols-[42%_1fr] sm:gap-10 sm:pb-12 sm:pt-4">
+        {/* Map — TODO: swap for the Google Maps JS 3D photorealistic view.
+            Aspect-square on mobile, stretched to grid row height on desktop
+            (sm:!aspect-auto forces the override). */}
         <div
-          className="relative h-64 overflow-hidden rounded-t-[1.4rem] sm:h-72"
+          className="relative aspect-square overflow-hidden rounded-2xl bg-[#dcd5cf] sm:!aspect-auto sm:h-full sm:min-h-[480px]"
         >
           <iframe
             title="Map to Cafe Mama & Sons"
-            className="loc-map pointer-events-none h-full w-full border-0"
+            className="h-full w-full border-0"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            src={`https://maps.google.com/maps?q=${MAPS_QUERY}&z=16&output=embed`}
-            style={{ filter: "saturate(1.08) sepia(0.12) brightness(1.01)" }}
+            src={`https://maps.google.com/maps?q=${MAPS_QUERY}&z=17&output=embed`}
           />
-
-          {/* floating heading — centred at rest, slides to the top-right on
-              hover. Not a tilt-layer; GSAP owns its transform. */}
-          <h2
-            className="loc-heading pointer-events-none absolute left-1/2 top-5 whitespace-nowrap font-arialblack text-4xl uppercase leading-none sm:text-5xl"
-          >
-            We&apos;re Here!!
-          </h2>
+          {/* Inset-shadow overlay — pointer-events-none so the iframe stays
+              interactive underneath. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-2xl"
+            style={{ boxShadow: "inset 0 0 36px rgba(0,0,0,0.45)" }}
+          />
         </div>
 
-        {/* info face */}
-        <div className="px-7 py-6 sm:px-9">
-          <div className="tilt-layer" data-z="50" data-depth="-8">
-            {/* <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] opacity-80">
-              The corner spot
-            </p> */}
-            <p className="mt-1 font-arialblack text-lg uppercase leading-tight sm:text-xl">
-              {ADDRESS}
-            </p>
+        {/* Right column — headline, two-column description, CTAs */}
+        <div className="flex flex-col" style={{ color: RED }}>
+          <h3 className="font-cheee font-arialblack uppercase leading-[0.92] text-right">
+            <span className="block text-[12vw] sm:text-[7rem]">Where</span>
+            <span className="block text-[12vw] sm:text-[7rem]">are we?</span>
+          </h3>
+
+          {/* Two-column description — left col is the address + hours, right
+              col opens with NASAAN TAYO? as a subhead. Body type matches the
+              menu's allergen / category-blurb pattern: Archivo (the page
+              body font), text-[11px] sm:text-xs, font-semibold, uppercase,
+              tracking-wide, opacity-70. */}
+          <div className="mt-8 grid gap-5 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:grid-cols-2 sm:gap-7 sm:text-xs">
+            <div className="space-y-4">
+              <p>
+                {ADDRESS}. A corner spot between Camden Lock and Kentish Town
+                Station — the bright shopfront is hard to miss.
+              </p>
+              <p>
+                Open Monday to Friday from 8am, Saturday and Sunday from 9am.
+                Kitchen serves all-day breakfast meals and sandos until close.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <p className="font-cheee text-base uppercase tracking-tight sm:text-lg">
+                Nasaan tayo?
+              </p>
+              <p>
+                Filipino-Japanese sandos, all-day pandesal breakfast meals,
+                house drinks, and freshly-baked goods. Made by mama, served
+                by the sons.
+              </p>
+              <p>
+                Drop in for a quick coffee or stay the morning — there&apos;s
+                always a corner seat with your name on it.
+              </p>
+            </div>
           </div>
 
-          <dl
-            className="tilt-layer mt-5 divide-y divide-[var(--loc-text)]/35 border-y border-[var(--loc-text)]/35"
-            data-z="30"
-            data-depth="-8"
-          >
-            {HOURS.map((h) => (
-              <div key={h.day} className="flex items-center justify-between py-2.5">
-                <dt className="text-sm font-semibold uppercase tracking-widest opacity-70">
-                  {h.day}
-                </dt>
-                <dd className="font-arialblack text-base tracking-tight">
-                  {h.time}
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          <div
-            className="tilt-layer mt-6 flex flex-wrap gap-3"
-            data-z="70"
-            data-depth="-10"
-          >
-            {/* filled in the accent colour, label in the card-base colour */}
+          {/* CTAs — Get Directions (outlined, narrower) + Instagram (filled,
+              wider) on top, Leave a Review spans the row below. */}
+          <div className="mt-8 grid grid-cols-[1fr_1.5fr] gap-3 sm:mt-10 sm:gap-4">
             <a
               href={DIRECTIONS}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-80"
-              style={{
-                backgroundColor: "var(--loc-text, #2463c3)",
-                color: "var(--loc-card, #f4c33c)",
-              }}
+              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
+              style={{ borderColor: RED, color: RED }}
             >
-              Get directions
+              Get Directions
             </a>
-            {/* outlined in the accent colour, matching the text */}
             <a
-              href="https://www.instagram.com/cafe_mama_sons/"
+              href={INSTAGRAM_URL}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border-2 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-80"
+              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
               style={{
-                borderColor: "var(--loc-text, #2463c3)",
-                color: "var(--loc-text, #2463c3)",
+                backgroundColor: RED,
+                borderColor: BLUE,
+                color: YELLOW,
               }}
             >
               @cafe_mama_sons
             </a>
+            <a
+              href={REVIEW_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="col-span-2 rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
+              style={{ borderColor: RED, color: RED }}
+            >
+              Leave a Review on Google
+            </a>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }

@@ -42,6 +42,20 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  /* No text or image selection anywhere — drag/swipe gestures (focus mode
+     drag, cafe-description physics, blog strip scroll) used to leave the
+     viewport with a half-selected paragraph or image. */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img,
+video {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ---------- CRT / retro TV set ----------
@@ -217,6 +231,13 @@ body {
 .font-cheee {
   font-family: var(--font-black), "Arial Black", "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 900 !important;
+}
+
+/* Poster display face — Cheee T-Bone, loaded from Adobe Fonts via the
+   Typekit <link> in layout.tsx. The kit publishes the family under the
+   exact name "cheee-tbone". */
+.font-poster {
+  font-family: "cheee-tbone", cheee, "Arial Black", "Helvetica Neue", Arial, sans-serif !important;
 }
 
 /* When the custom cursor is active, hide the native one everywhere. */
@@ -433,6 +454,79 @@ body {
   transform-origin: right bottom;
   transform: translate(-10%, 14%) skewX(62deg) scaleY(0.5);
   filter: blur(1.5px);
+}
+
+/* Focus mode — instructions overlay fade-in on first open */
+@keyframes focus-instructions-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.focus-instructions {
+  animation: focus-instructions-in 0.32s ease-out both;
+}
+
+/* Focus mode — Cafe Mama reply appearing under a user comment. Slides in
+   from below and fades up. */
+@keyframes cm-reply-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.cm-reply-in {
+  animation: cm-reply-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Focus mode — play/pause icon flash on tap (TikTok-style). The element is
+   centered by its flex parent, so the animation only needs to handle scale
+   and opacity. */
+@keyframes focus-icon-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  20% {
+    opacity: 0.95;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+.focus-icon-flash {
+  animation: focus-icon-flash 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Focus mode — TikTok-style heart burst on double-tap */
+@keyframes focus-heart-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(-18deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.35) rotate(-6deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2) rotate(6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 30px)) scale(1.6) rotate(0deg);
+  }
+}
+.focus-heart-burst {
+  animation: focus-heart-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* cheee->arialblack revert 1781110843 */

@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 const LINKS = [
   { label: "Menu", href: "#menu" },
   { label: "Gallery", href: "#gallery" },
+  { label: "Location", href: "#location" },
   { label: "Blog", href: "#blog" },
 ];
 
@@ -81,13 +82,42 @@ export default function Navbar() {
       className="fixed z-[70]"
     >
       <nav className="relative flex w-full items-start justify-between px-3 py-3 sm:px-4">
-        {/* Brand — heavy Arial Black, single line, left aligned */}
+        {/* Brand — two-layer masked logo: a black silhouette offset down-right
+            behind a yellow silhouette in front, so it carries the same
+            hard-shadow-on-yellow look as the rest of the navbar text. */}
         <a
           href="#top"
-          className="nav-blackface whitespace-nowrap text-lg leading-none tracking-tight [text-shadow:2px_2px_0_#000] sm:text-3xl sm:[text-shadow:3px_3px_0_#000] lg:text-[34px]"
-          style={{ color: navColor }}
+          aria-label="Cafe Mama & Sons"
+          className="relative block leading-none"
         >
-          CAFE&nbsp;MAMA&nbsp;&amp;&nbsp;SONS
+          {/* black backdrop (behind, offset 2px / 3px down-right) */}
+          <span
+            aria-hidden
+            className="absolute left-[2px] top-[2px] block aspect-[7024/970] h-6 sm:left-[3px] sm:top-[3px] sm:h-8 lg:h-10"
+            style={{
+              backgroundColor: "#000",
+              WebkitMaskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
+              maskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
+              WebkitMaskSize: "100% 100%",
+              maskSize: "100% 100%",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+            }}
+          />
+          {/* yellow foreground */}
+          <span
+            aria-hidden
+            className="relative block aspect-[7024/970] h-6 sm:h-8 lg:h-10"
+            style={{
+              backgroundColor: navColor,
+              WebkitMaskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
+              maskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
+              WebkitMaskSize: "100% 100%",
+              maskSize: "100% 100%",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+            }}
+          />
         </a>
 
         {/* Right links (desktop) */}

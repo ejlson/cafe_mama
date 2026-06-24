@@ -135,8 +135,26 @@ export default function Footer() {
           </span>
         </a>
 
-        {/* bottom strip: instagram + email, small, on the right */}
-        <div className="mt-7 flex items-center justify-end gap-2.5 px-4">
+        {/* bottom strip: review CTA + instagram + email */}
+        <div className="mt-7 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 px-4">
+          <a
+            href={`https://www.google.com/search?q=${encodeURIComponent(
+              "Cafe Mama & Sons, 83 Kentish Town Rd, London NW1 8NY",
+            )}#lrd=`}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Leave us a Google review"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
+          >
+            <span aria-hidden className="text-sm leading-none">★★★★★</span>
+            Review us on Google
+          </a>
+          <a
+            href="#blog"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
+          >
+            Blog
+          </a>
           <a
             href="https://www.instagram.com/cafe_mama_sons/"
             target="_blank"

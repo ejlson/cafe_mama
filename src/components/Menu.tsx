@@ -18,8 +18,9 @@ import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
 import Smooothy, { damp } from "smooothy";
-import BestSellers from "@/components/BestSellers";
 import Location from "@/components/Location";
+import { BLOG_POSTS as SHARED_BLOG_POSTS, type BlogPost as SharedBlogPost } from "@/lib/blog";
+import BestSellers from "@/components/BestSellers";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, Draggable, InertiaPlugin);
 
@@ -41,10 +42,17 @@ type Item = {
 };
 type Group = { title: string; items: Item[]; blurb?: string };
 
-// Placeholder copy sat to the right of each food group header — swap for real
-// blurbs later.
-const LOREM_BLURB =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+// Short, descriptive blurbs sat to the right of each food group header — these
+// are the first menu copy Google sees on the page, so each one names what the
+// section is and the standout item in it.
+const BLURB_SANDOS =
+  "Japanese-style milk-bread sandos built around Filipino flavours — adobo, longanisa, jerk chicken — all on house-baked pandesal.";
+const BLURB_BREAKFAST =
+  "All-day pandesal breakfast: longanisa, egg mayo and Filipino classics, served from open to close.";
+const BLURB_SIDES =
+  "Quick bites to round the meal deal out — crisp nori-dusted tater-tots and a rotating box of crisps.";
+const BLURB_BAKED =
+  "Daily bakes from our Kentish Town counter: ube mochi croissant, cookie croissant, milo tiramisu, ensaymada and more.";
 type Category = {
   key: string;
   label: string;
@@ -188,10 +196,10 @@ const CATEGORIES: Category[] = [
     key: "sandos",
     label: "Food",
     groups: [
-      { title: "Sando/Sandwiches", items: SANDOS, blurb: LOREM_BLURB },
-      { title: "All-Day Breakfast", items: PANDESAL, blurb: LOREM_BLURB },
-      { title: "Sides", items: SIDES, blurb: LOREM_BLURB },
-      { title: "Baked Goods", items: BAKED, blurb: LOREM_BLURB },
+      { title: "Sando/Sandwiches", items: SANDOS, blurb: BLURB_SANDOS },
+      { title: "All-Day Breakfast", items: PANDESAL, blurb: BLURB_BREAKFAST },
+      { title: "Sides", items: SIDES, blurb: BLURB_SIDES },
+      { title: "Baked Goods", items: BAKED, blurb: BLURB_BAKED },
     ],
   },
   { key: "drinks", label: "Drinks", groups: DRINKS_GROUPS },
@@ -553,9 +561,9 @@ function CollabMarquee({ accent }: { accent: string }) {
 
   return (
     <>
-      <div className="relative left-1/2 -mt-[3vh] w-screen -translate-x-1/2 py-5">
+      <div className="relative left-1/2 w-screen -translate-x-1/2 pb-2 pt-1">
         <p
-          className="mb-5 text-center font-arialblack text-[1rem] uppercase tracking-[0.35em] opacity-50"
+          className="mb-1 text-center font-arialblack text-[0.85rem] uppercase tracking-[0.35em] opacity-50"
           style={{ color: accent }}
         >
           as seen in or collaborated with
@@ -563,12 +571,12 @@ function CollabMarquee({ accent }: { accent: string }) {
         {/* smooothy wrapper: flex + overflow-hidden, direct children are slides */}
         <div
           ref={track}
-          className="flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
+          className="flex cursor-grab overflow-x-clip overflow-y-visible py-6 active:cursor-grabbing"
         >
           {logos.map((logo, i) => (
             <div
               key={i}
-              className="h-24 w-52 shrink-0 select-none px-5 sm:h-40 sm:w-80 sm:px-10"
+              className="h-16 w-36 shrink-0 select-none px-3 sm:h-24 sm:w-56 sm:px-6"
             >
               <div
                 data-p
@@ -723,115 +731,10 @@ function AboutUs({ accent }: { accent: string }) {
 }
 
 // Blog posts shown as the layered card row. Clicking a card opens the full post
-// in a fold-in modal. `body` paragraphs hold the article text; a paragraph can
-// be a plain string or an array of segments (string | inline link).
-type BlogSegment = string | { text: string; href: string };
-type BlogParagraph = string | BlogSegment[];
-type BlogPost = {
-  img: string;
-  title: string;
-  date: string;
-  r: number;
-  body?: BlogParagraph[];
-};
-const BLOG_POSTS: BlogPost[] = [
-  {
-    img: "/blog/blog1/blog1.webp",
-    title: "Featured on London on the Inside",
-    date: "7 August 2025",
-    r: -4,
-    body: [
-      "Thank you to London on the Inside for spotlighting Café Mama & Sons as part of their Camden picks. Their article focuses on the foundation of what we do: reimagining the Filipino bakery experience using freshly baked pandesal, layered with flavour-forward fillings and nostalgic desserts.",
-      "They mentioned some of our signature dishes, including the corned beef and egg mayo sandos, mushroom adobo, and our banana ensaymada pudding, which continues to be one of our most talked-about menu items. It was also great to see our sweetcorn latte and ube matcha recognised, drinks that pair well with both our savoury and sweet offerings.",
-      "We opened Mama & Sons to share the depth of Filipino flavours through a more casual, modern format. It's encouraging to see these ideas reflected in the media and recognised by the wider London food scene.",
-      [
-        "Read the full write-up on London on the Inside ",
-        {
-          text: "here",
-          href: "https://londontheinside.com/location/cafe-mama-sons/?utm_source=chatgpt.com",
-        },
-        ".",
-      ],
-      "Sallyna Do",
-    ],
-  },
-
-  { 
-    img: "/media/about%20us/web/about4-web.jpg", 
-    title: "Café Mama & Sons Featured in The Infatuation",
-    date: "7 Aug 2025", 
-    r: 3,
-    body: [
-      "We were pleased to be included in The Infatuation’s guide to London’s new restaurant openings. Their review recognised what we aim to offer: a thoughtful mix of Filipino and Japanese influences, expressed through both our savoury sandos and sweet bakes.",
-      "They highlighted our miso milk chocolate cookies, mushroom adobo, and crowd-favourite jerk chicken-stuffed sandos; all made with our signature house-baked pandesal. It was also great to see mention of our specialty drinks like ube matcha and the popular corn latte.",
-      "At the heart of the article was what we’re most proud of: showcasing flavours that are nostalgic yet inventive. One dish that embodies this perfectly is our banana ensaymada pudding, a modern take on a Filipino bakery classic; soft, custardy, and made with our fluffy ensaymada.",
-      [
-        "Read the full article on The Infatuation ",
-        {
-          text: "here",
-          href: "https://www.theinfatuation.com/london/reviews/cafe-mama-sons?utm_source=chatgpt.com",
-        },
-        ".",
-      ],
-      "Sallyna Do",
-    ]
-  },
-
-  { 
-    img: "/media/about%20us/web/about6-web.jpg", 
-    title: "Grand Opening of Cafe Mama&Sons",
-    date: "11 Mar 2025", 
-    r: -2,
-    body: [
-      "Chef Omar Shah has just unveiled Cafe Mama&Sons, the long-awaited revival of the iconic 83 Kentish Town Road. Breathing new life into this beloved space, the café brings back the community warmth and neighbourhood soul Kentish Town has been missing — all wrapped in a fresh, exciting concept.",
-      "An offshoot of the much-loved Mamasons, Cafe Mama&Sons carries the same calibre, craft, and creativity that made Mamasons a cult favourite. Expect the familiar charm and attention to detail, but with a new café-style twist.",
-      "On the drinks side, you'll find everything from the now-iconic ube latte, to vibrant creations like snake fruit soda, and a full line-up of matcha everything — teas, lattes, and specials. Whether you're after something classic or curious, there's something to suit every mood.",
-      "But this isn't just a drinks stop. Cafe Mama&Sons is also the new home of the Sando — a Japanese-style sandwich reimagined through the lens of Chef Omar’s many culinary influences across the Maginhawa Group. You’ll find bold twists like the jerk chicken sando, adobo mushroom, and other rotating favourites inspired by the menus of his restaurants like Belly, Doña, and Bintang.",
-      "Whether you’re grabbing your morning coffee, catching up with friends, or just curious to try something new, Cafe Mama&Sons is here to bring Kentish Town a fresh, flavour-packed hangout with heart.",
-      "Come down today to visit cafe mama&sons at 83 kentish town road 8am to 5pm weekdays and 9am to 5pm on weekends!",
-      "Merc Aquino",
-    ]
-  },
-
-  { 
-    img: "/media/about%20us/web/about6-web.jpg", 
-    title: "Truffle Egg Sando",
-    date: "11 Mar 2025", 
-    r:-2,
-    body: [
-      "In honour of National Sandwich Week, we're levelling up the sandwich game at Cafe Mama&Sons with a brand-new, indulgent special: the Truffle Egg Sando — a rich, flavourful twist on the Japanese classic.",
-      "This luxurious sando features a velvety egg filling blended with earthy black truffle paste, finished with generous shavings of real truffle folded into the mix. Served between perfectly soft, crustless milk bread, it’s a melt-in-your-mouth experience that’s both comforting and decadent. The result? A deep, umami-rich bite that elevates the humble egg sandwich into something truly extraordinary.",
-      "Crafted in the same spirit as all our menu offerings — with care, creativity, and inspiration from across the Maginhawa Group — the Truffle Egg Sando is only available for a limited time, exclusively at Cafe Mama&Sons in Kentish Town.",
-      "Whether you're a local, a sandwich lover, or a truffle enthusiast, this is one sando you won’t want to miss.",
-      "Sallyna Do",
-    ]
-  },
-
-  { 
-    img: "/media/about%20us/web/about8-web.jpg", 
-    title: "The Longanisa Breakfast Sandwich at Cafe Mama&Sons: A Filipino Morning Classic Reimagined",
-    date: "11 Mar 2025", 
-    r:2,
-    body: [
-      "If you're looking for a breakfast sandwich that goes beyond the usual bacon-and-egg formula, meet your new morning favourite: the Longanisa Breakfast Sandwich at Cafe Mama&Sons, now available daily from 8AM to 12PM on weekdays and 9AM to 12PM on weekends.",
-      "What is Longanisa? Longanisa is a sweet, garlicky Filipino sausage that’s beloved across the Philippines. Each region has its own version, but here at Cafe Mama&Sons, we make our longanisa entirely in-house, staying true to our roots while giving it just the right twist for the London palate. Our longanisa is a perfect balance of savory and sweet, with bold notes of garlic, brown sugar, vinegar, and a hint of pepper — a deeply flavorful bite that wakes you up and lingers just long enough to make you want another.",
-      "Made From Scratch, From Bun to Filling. At Cafe Mama&Sons, we don’t believe in shortcuts. The longanisa in your sandwich? It’s made fresh in our kitchen, using a carefully developed recipe inspired by family traditions and refined in the kitchens of the Maginhawa Group. It’s ground, seasoned, and hand-formed daily — no preservatives, no fillers, just bold, honest flavour. And the bun? That’s not store-bought either. We bake our signature pandesal buns every morning, soft, fluffy, and slightly sweet — the perfect partner to the rich, spiced sausage. This is the same fresh pandesal that supplies our sister restaurants, including Mamasons, Ramo Ramen, and Bintang. So when you bite into this sandwich, you're not just tasting one cafe’s work — you're experiencing a cornerstone of our entire restaurant group."
-    ]
-  },
-
-  { 
-    img: "/media/about%20us/web/about8-web.jpg", 
-    title: "The Long",
-    date: "11 Mar 2025", 
-    r:-1,
-    body: [
-      "If you're looking for a breakfast sandwich that goes beyond the usual bacon-and-egg formula, meet your new morning favourite: the Longanisa Breakfast Sandwich at Cafe Mama&Sons, now available daily from 8AM to 12PM on weekdays and 9AM to 12PM on weekends.",
-      "What is Longanisa? Longanisa is a sweet, garlicky Filipino sausage that’s beloved across the Philippines. Each region has its own version, but here at Cafe Mama&Sons, we make our longanisa entirely in-house, staying true to our roots while giving it just the right twist for the London palate. Our longanisa is a perfect balance of savory and sweet, with bold notes of garlic, brown sugar, vinegar, and a hint of pepper — a deeply flavorful bite that wakes you up and lingers just long enough to make you want another.",
-      "Made From Scratch, From Bun to Filling. At Cafe Mama&Sons, we don’t believe in shortcuts. The longanisa in your sandwich? It’s made fresh in our kitchen, using a carefully developed recipe inspired by family traditions and refined in the kitchens of the Maginhawa Group. It’s ground, seasoned, and hand-formed daily — no preservatives, no fillers, just bold, honest flavour. And the bun? That’s not store-bought either. We bake our signature pandesal buns every morning, soft, fluffy, and slightly sweet — the perfect partner to the rich, spiced sausage. This is the same fresh pandesal that supplies our sister restaurants, including Mamasons, Ramo Ramen, and Bintang. So when you bite into this sandwich, you're not just tasting one cafe’s work — you're experiencing a cornerstone of our entire restaurant group."
-    ]
-  },
-
-];
+// in a fold-in modal. Data lives in src/lib/blog.ts so the indexable /blog and
+// /blog/[slug] routes render the same articles.
+type BlogPost = SharedBlogPost;
+const BLOG_POSTS: BlogPost[] = SHARED_BLOG_POSTS;
 
 // The full-post pop-up. It unfolds from the top edge like a sheet of paper
 // (GSAP 3D rotateX with transformPerspective), fades a dimmed backdrop in behind
@@ -955,25 +858,26 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
             {post.title}
           </h3>
           <div className="mt-5 space-y-4 text-sm leading-relaxed sm:text-base">
-            {(post.body ?? ["More on this soon."]).map((para, i) => (
+            {post.body.map((para, i) => (
               <p key={i}>
                 {typeof para === "string"
                   ? para
-                  : para.map((seg, j) =>
-                      typeof seg === "string" ? (
-                        seg
-                      ) : (
+                  : para.map((seg, j) => {
+                      if (typeof seg === "string") return seg;
+                      const internal =
+                        seg.href.startsWith("/") || seg.href.startsWith("#");
+                      return (
                         <a
                           key={j}
                           href={seg.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          target={internal ? undefined : "_blank"}
+                          rel={internal ? undefined : "noopener noreferrer"}
                           className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-70"
                         >
                           {seg.text}
                         </a>
-                      ),
-                    )}
+                      );
+                    })}
               </p>
             ))}
           </div>
@@ -984,171 +888,135 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
   );
 }
 
-// The giant "blog" title reveals letter-by-letter out of a clip mask (each glyph
-// slides up from behind its own overflow-hidden box, smooothy.federic.ooo-style),
-// then a layered row of post cards (image + title + date) deals in below.
+// Blog — featured-first layout. The newest post sits big up top; everything
+// older drops into a horizontally-scrollable strip beneath it. Lives inside
+// the same menu wrapper width as the rest of the page (no pinned scroll, no
+// full-bleed breakout).
 function Blog({ accent }: { accent: string }) {
-  const root = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
   const [openPost, setOpenPost] = useState<BlogPost | null>(null);
 
-  useGSAP(
-    () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-      // Cards deal in, layered, with a little stagger + tilt.
-      const cards = gsap.utils.toArray<HTMLElement>(".blog-card", root.current);
-      gsap.from(cards, {
-        autoAlpha: 0,
-        scale: 0.9,
-        ease: "power3.out",
-        duration: 0.8,
-        stagger: 0.12,
-        scrollTrigger: { trigger: ".blog-cards", start: "top 80%" },
-      });
-
-      // If the row overflows, give it a gentle "peek" nudge on first entry to
-      // hint that it scrolls, then settle back.
-      const row = root.current?.querySelector<HTMLElement>(".blog-cards");
-      if (row && row.scrollWidth > row.clientWidth + 8) {
-        gsap.to(row, {
-          scrollLeft: 56,
-          duration: 0.7,
-          ease: "power2.inOut",
-          yoyo: true,
-          repeat: 1,
-          delay: 0.5,
-          scrollTrigger: { trigger: ".blog-cards", start: "top 80%", once: true },
-        });
-      }
-    },
-    { scope: root },
-  );
-
-  // The newest post is featured (image left, text right); the rest sit below
-  // as the square card row.
-  const [featured, ...rest] = BLOG_POSTS;
-  const featuredExcerpt =
-    typeof featured?.body?.[0] === "string" ? featured.body[0] : undefined;
+  // BLOG_POSTS is sorted newest-first in src/lib/blog.ts.
+  const [featured, ...older] = BLOG_POSTS;
 
   return (
-    <section ref={root} id="blog" className="relative mt-[20vh]">
+    <section id="blog" className="relative mt-0">
       <FullRule color={accent} className="mb-2" />
-      {/* Title — line-box trimmed to cap height + baseline so the gap above and
-          below is purely the symmetric py, not the font's whitespace. */}
       <h2
         style={{ color: accent }}
-        className="block w-full text-center font-cheee font-arialblack text-[26vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+        className="block w-full text-center font-poster text-[24vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[22rem]"
       >
         BLOG
       </h2>
-
       <FullRule color={accent} className="mt-0" />
 
-      {/* Featured (latest) entry — image left, text right */}
+      {/* ===== Featured (latest) post — big two-column layout ===== */}
       {featured && (
-        <button
-          type="button"
-          onClick={() => setOpenPost(featured)}
-          className="group mt-[8vh] flex w-full flex-col gap-6 text-left sm:flex-row sm:items-center sm:gap-10"
-        >
-          <div className="w-full shrink-0 overflow-hidden rounded-2xl shadow-[0_16px_34px_rgba(0,0,0,0.28)] sm:w-1/2">
-            <div className="aspect-[4/3] w-full overflow-hidden">
+        <article className="mt-10 sm:mt-14">
+          <button
+            type="button"
+            onClick={() => setOpenPost(featured)}
+            className="group grid w-full grid-cols-1 items-center gap-8 text-left lg:grid-cols-[1.1fr_0.9fr] lg:gap-14"
+            style={{ color: accent }}
+          >
+            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl transition-transform duration-500 group-hover:-translate-y-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={featured.img}
-                alt={featured.title}
-                loading="lazy"
+                alt={featured.alt}
+                loading="eager"
                 draggable={false}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
             </div>
-          </div>
-          <div className="sm:w-1/2" style={{ color: accent }}>
-            <time className="text-xs font-semibold uppercase tracking-wide opacity-60">
-              {featured.date}
-            </time>
-            <h3 className="mt-2 font-arialblack text-2xl uppercase leading-tight tracking-tight sm:text-4xl">
-              {featured.title}
-            </h3>
-            {featuredExcerpt && (
-              <p className="mt-3 line-clamp-4 text-sm leading-relaxed opacity-80 sm:text-base">
-                {featuredExcerpt}
+
+            <div className="flex flex-col">
+              <span
+                aria-hidden
+                className="font-arialblack text-[11px] uppercase tracking-[0.35em] opacity-70"
+              >
+                Latest
+              </span>
+              <time
+                dateTime={featured.isoDate}
+                className="mt-2 font-arialblack text-xs uppercase tracking-[0.3em] opacity-70"
+              >
+                {featured.date}
+              </time>
+              <h3 className="mt-3 font-arialblack text-3xl uppercase leading-[0.95] tracking-tight sm:text-5xl xl:text-6xl">
+                {featured.title}
+              </h3>
+              <p className="mt-5 max-w-prose text-base leading-relaxed opacity-85 sm:text-lg">
+                {featured.excerpt}
               </p>
-            )}
-            <span className="mt-4 inline-block font-arialblack text-sm uppercase tracking-wide underline-offset-4 group-hover:underline">
-              Read more →
-            </span>
-          </div>
-        </button>
+              <span className="mt-7 inline-flex items-center gap-3 font-arialblack text-sm uppercase tracking-[0.2em] underline-offset-4 group-hover:underline">
+                Read full article
+                <span aria-hidden className="text-lg">→</span>
+              </span>
+            </div>
+          </button>
+        </article>
       )}
 
-      {/* Remaining posts — horizontally-scrolling square card row */}
-      <div className="relative mt-[3vh] sm:mt-[8vh]">
-      {/* Negative-margin bleed + matching padding so the cards' drop shadows
-          have room and aren't clipped by the scroll container's overflow. */}
-      <div
-        ref={cardsRef}
-        className="blog-cards -mx-8 flex w-[calc(100%+4rem)] items-start gap-6 overflow-x-auto px-8 pb-10 pt-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-current [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1"
-        style={{
-          color: accent,
-          scrollbarWidth: "thin",
-          scrollbarColor: `${accent} transparent`,
-        }}
-      >
-        {rest.map((p) => (
-          <button
-            type="button"
-            key={p.title}
-            onClick={() => setOpenPost(p)}
-            className="blog-card group flex w-44 shrink-0 flex-col text-left sm:w-56"
+      {/* ===== Older posts — horizontally scrollable row of smaller cards ===== */}
+      {older.length > 0 && (
+        <div className="mt-12 sm:mt-16">
+          <div
+            className="flex items-end justify-between gap-4"
+            style={{ color: accent }}
           >
-            <div className="aspect-square w-full overflow-hidden rounded-xl shadow-[0_18px_26px_-12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:-translate-y-1">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.img}
-                alt={p.title}
-                loading="lazy"
-                draggable={false}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-            <h3
-              className="mt-3 line-clamp-2 font-arialblack text-sm uppercase tracking-tight"
-              style={{ color: accent }}
+            <h4 className="font-arialblack text-base uppercase tracking-[0.3em] opacity-80 sm:text-lg">
+              Older posts
+            </h4>
+            <span
+              aria-hidden
+              className="font-arialblack text-xs uppercase tracking-[0.3em] opacity-60"
             >
-              {p.title}
-            </h3>
-            <time
-              className="text-xs font-semibold uppercase tracking-wide opacity-60"
-              style={{ color: accent }}
-            >
-              {p.date}
-            </time>
-          </button>
-        ))}
-      </div>
+              ← scroll →
+            </span>
+          </div>
 
-      {/* Right-edge arrow overlay — always visible, hints at more entries and
-          scrolls the row right on click. Centred on the square image height. */}
-      <button
-        type="button"
-        aria-label="More blog entries"
-        onClick={() =>
-          cardsRef.current?.scrollBy({ left: 280, behavior: "smooth" })
-        }
-        className="group/arrow absolute right-0 top-4 flex h-44 items-center sm:h-56"
-      >
-        <span
-          className="grid h-12 w-12 place-items-center rounded-full text-2xl leading-none text-cream shadow-[0_6px_16px_rgba(0,0,0,0.35)] transition-transform duration-300 group-hover/arrow:translate-x-1"
-          style={{ backgroundColor: accent }}
-        >
-          →
-        </span>
-      </button>
-      </div>
+          {/* Native horizontal overflow scroll + scroll snap so cards settle
+              cleanly. Cards have a fixed width so they read as a strip. */}
+          <ul className="no-scrollbar mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 sm:gap-7">
+            {older.map((p) => (
+              <li
+                key={p.slug}
+                className="w-[68%] shrink-0 snap-start sm:w-[36%] lg:w-[28%]"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenPost(p)}
+                  className="group flex w-full flex-col gap-3 text-left"
+                  style={{ color: accent }}
+                >
+                  <div className="aspect-[3/2] w-full overflow-hidden rounded-xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={p.img}
+                      alt={p.alt}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  </div>
+                  <time
+                    dateTime={p.isoDate}
+                    className="text-[10px] font-semibold uppercase tracking-[0.25em] opacity-70 sm:text-[11px]"
+                  >
+                    {p.date}
+                  </time>
+                  <h3 className="font-arialblack text-base uppercase leading-tight tracking-tight sm:text-lg">
+                    {p.title}
+                  </h3>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <FullRule color={accent} className="mt-1" />
+      <FullRule color={accent} className="mt-10 sm:mt-12" />
 
       {openPost && (
         <BlogModal post={openPost} onClose={() => setOpenPost(null)} />
@@ -1433,17 +1301,16 @@ function CafeDescription({ accent }: { accent: string }) {
   );
 
   return (
-    <div
-      ref={root}
-      className="relative left-1/2 mt-[10vh] w-screen -translate-x-1/2 px-[3vw]"
-    >
-      {/* Bounded box — words bounce off its top & bottom edges (and the sides).
-          The vertical padding gives them room to drift before they hit an edge. */}
-      <div className="cafe-box py-[5vh]">
+    <div ref={root} className="relative mt-[15px]">
+      {/* Bounded box — words bounce off its side edges and drift along the
+          x axis (motion is horizontal-only, so vertical breathing room is
+          purely cosmetic). Width is inherited from the menu wrapper so the
+          description lines up with the menu rail above it. */}
+      <div className="cafe-box">
         <h3
           aria-label={CAFE_DESC}
           style={{ color: accent }}
-          className="font-cheee w-full text-justify uppercase [text-align-last:justify] text-3xl leading-[0.95] sm:text-[6vw]"
+          className="font-cheee w-full text-justify uppercase [text-align-last:justify] text-2xl leading-[0.95] sm:text-[4.5vw]"
         >
           {CAFE_DESC.split(" ").map((word, wi) => (
             <span key={wi} aria-hidden>
@@ -1457,6 +1324,7 @@ function CafeDescription({ accent }: { accent: string }) {
             </span>
           ))}
         </h3>
+        <FullRule color={accent} className="mt-4" />
       </div>
     </div>
   );
@@ -1521,16 +1389,35 @@ function MealDealBanner() {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const items = gsap.utils.toArray<HTMLElement>("[data-md-item]", root.current);
 
-      // zoom in/out: from their normal size, the pieces punch out BIG and snap
-      // back to normal with a jumpy overshoot (back.out → yoyo back).
-      const tl = gsap.timeline({ paused: true });
+      // zoom in/out: the pieces punch out and snap back with a jumpy
+      // overshoot (back.out → yoyo back). To stop the GPU from re-rasterising
+      // each element's drop-shadow on every tween frame we:
+      //   1. promote them with will-change: transform,
+      //   2. *strip* the filter for the duration of the tween (the missing
+      //      shadow is imperceptible during a sub-second pop), and
+      //   3. soften the scale + back-out so there's less per-frame work.
+      const tl = gsap.timeline({
+        paused: true,
+        onStart: () => {
+          items.forEach((el) => {
+            el.style.willChange = "transform";
+            el.style.filter = "none";
+          });
+        },
+        onComplete: () => {
+          items.forEach((el) => {
+            el.style.willChange = "";
+            el.style.filter = "";
+          });
+        },
+      });
       tl.fromTo(
         items,
         { scale: 1 },
         {
-          scale: 1.1,
+          scale: 1.06,
           duration: 0.5,
-          ease: "back.out(3)",
+          ease: "back.out(1.7)",
           stagger: 0,
           yoyo: true,
           repeat: 1,
@@ -1640,30 +1527,40 @@ function MealDealBanner() {
           data-md-item
           src="/media/mealdeal/mealdeal-web.png"
           alt="Cafe Mama meal deal tray"
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute bottom-[-60%] right-[-12.5%] z-10 w-[62.5%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)]"
         />
         <img
           data-md-item
           src="/media/mealdeal/spanishlatte_clear-web.png"
           alt="Spanish latte"
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute bottom-[-32.5%] left-[-17.5%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
         <img
           data-md-item
-          src="/media/mealdeal/jonas.jpg"
-          alt="Spanish latte"
+          src="/media/mealdeal/jonas-web.jpg"
+          alt="Jonas portrait"
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute bottom-[-27.5%] left-[55%] z-50 aspect-square w-[15%] rounded-full object-cover -rotate-[-8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
         <img
           data-md-item
           src="/media/mealdeal/jerkchicken-web.png"
           alt="Toasted sando"
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute bottom-[-70%] left-[-2.5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
         <img
           data-md-item
           src="/media/mealdeal/flatwhite-web.png"
           alt="Flat white"
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute bottom-[-47.5%] left-[52.5%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
         />
 
@@ -1979,7 +1876,7 @@ export default function Menu() {
           <h2
             data-reveal
             style={{ color: theme.accent }}
-            className="menu-title block w-full text-center font-cheee font-arialblack text-[26vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[20rem]"
+            className="menu-title block w-full text-center font-poster text-[24vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[22rem]"
           >
             MENU
             {/* menu<span>.</span> */}
@@ -2080,15 +1977,16 @@ export default function Menu() {
 
         {/* Press / collab logos — draggable, continuously-scrolling strip */}
         <CollabMarquee accent={theme.accent} />
+        <FullRule color={theme.accent} className="mt-0" />
 
         {/* About us */}
         {/* <AboutUs accent={theme.accent} /> */}
 
+        {/* Location widget — shares this section's gradient background. */}
+        <Location />
+
         {/* Blog */}
         <Blog accent={theme.accent} />
-
-        {/* Location widget — lives at the end of the menu so it shares this section's gradient background. */}
-        <Location />
       </div>
 
     </section>

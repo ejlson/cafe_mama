@@ -30,7 +30,7 @@ function Env() {
  * caseback reads "AUTHENTIC ROLOX — 1 OF 1". The hands track real local time.
  * A pill reads OPEN / CLOSED (green / red) — the second hand matches.
  *
- * Hours mirror the Location widget: Mon–Fri 8:00–18:00, Sat & Sun 9:00–17:00.
+ * Hours mirror the Location widget: Mon–Fri 8:00–17:00, Sat & Sun 9:00–17:00.
  * Keep these in sync with HOURS in Location.tsx.
  */
 const OPEN_COLOR = "#1f9d57";
@@ -51,8 +51,9 @@ type Ctrl = {
 };
 
 function hoursFor(day: number): [number, number] {
+  // Always closed after 5pm. Weekdays open 8am, weekends 9am.
   if (day === 0 || day === 6) return [9, 17];
-  return [8, 18];
+  return [8, 17];
 }
 function isOpenNow(d: Date) {
   const [open, close] = hoursFor(d.getDay());
