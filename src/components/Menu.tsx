@@ -309,6 +309,11 @@ function MenuImagePreview({ children }: { children: ReactNode }) {
           <div
             ref={wrapRef}
             aria-hidden
+            // Inline opacity:0 + visibility:hidden so the empty cream-bordered
+            // img can never flash in the top-left corner before useGSAP runs
+            // and calls gsap.set(autoAlpha: 0). show() overrides both via
+            // autoAlpha when (and if) it's ever called.
+            style={{ opacity: 0, visibility: "hidden" }}
             className="pointer-events-none fixed left-0 top-0 z-[60] will-change-transform"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

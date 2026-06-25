@@ -48,24 +48,28 @@ export default function Location() {
       <h2
         aria-label="Location"
         style={{ color: RED }}
-        // title-shadow drops a hard offset black behind the letters so the
-        // word pops against the menu section's gold / lavender background.
         // Two variants: the mobile one is plain "LOCATION" so it can scale
         // up dramatically without the inter-letter spaces eating width; the
         // desktop one keeps the justified-spread "L O C A T I O N" so the
-        // letters fill the wrapper rail-to-rail.
-        className="title-shadow block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] text-center"
+        // letters fill the wrapper rail-to-rail. title-shadow is applied
+        // PER SPAN (not on the h2) because the text-shadow uses em units —
+        // it has to be calculated against the span's own large font-size,
+        // not the h2's default 16px.
+        className="block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] text-center"
       >
         {/* sr-only text so crawlers / screen readers always read the proper
             word "Location" even when the visible content is space-separated
             (which some user agents render letter-by-letter). */}
         <span className="sr-only">Location</span>
-        <span aria-hidden className="block text-[17vw] sm:hidden">
+        <span
+          aria-hidden
+          className="title-shadow block text-[17vw] sm:hidden"
+        >
           LOCATION
         </span>
         <span
           aria-hidden
-          className="hidden w-full text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)] sm:block"
+          className="title-shadow hidden w-full text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)] sm:block"
         >
           L O C A T I O N
         </span>
@@ -73,7 +77,7 @@ export default function Location() {
       <div
         aria-hidden
         style={{ backgroundColor: RED }}
-        className="relative left-1/2 h-px w-[calc(100%+2rem)] -translate-x-1/2"
+        className="relative left-1/2 mt-[5px] h-px w-[calc(100%+2rem)] -translate-x-1/2"
       />
 
       {/* Two-column body — map on the left, content (headline + 2-col
