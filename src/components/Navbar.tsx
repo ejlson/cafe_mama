@@ -8,9 +8,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const LINKS = [
   { label: "Menu", href: "#menu" },
-  { label: "Gallery", href: "#gallery" },
   { label: "Location", href: "#location" },
   { label: "Blog", href: "#blog" },
+  { label: "Gallery", href: "#gallery" },
 ];
 
 export default function Navbar() {

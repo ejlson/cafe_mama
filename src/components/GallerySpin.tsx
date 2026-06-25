@@ -147,7 +147,7 @@ export default function GallerySpin() {
       e.preventDefault();
       e.stopImmediatePropagation();
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      slider.target += delta * 0.0026;
+      slider.target += delta * 0.0002;
     };
     window.addEventListener("wheel", onWheel, { passive: false, capture: true });
 
@@ -159,12 +159,14 @@ export default function GallerySpin() {
       slider = new Core(el, {
         infinite: true,
         snap: false,
-        speedDecay: 0.92,
-        dragSensitivity: 0.006,
+        speedDecay: 0.5,
+        dragSensitivity: 0.002,
       }) as Slider;
       // Steady self-scroll — the strip cruises on its own and returns to this
       // speed after a drag/flick/wheel settles. Paused while actively dragging.
-      const SPEED = 0.006;
+      // Negative SPEED so the content drifts from right to left (the strip
+      // reads left-to-right as it scrolls past you, like film through a gate).
+      const SPEED = -0.0001;
       const loop = () => {
         if (slider && !reduce && !slider.isDragging) slider.target += SPEED;
         slider!.update();
@@ -246,36 +248,44 @@ export default function GallerySpin() {
         className="invisible fixed inset-0 z-[95] text-cream"
         style={{ background: "#FF1353" }}
       >
-        <div className="flex items-center justify-end px-6 py-5 sm:px-10">
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="font-arialblack text-sm uppercase tracking-[0.2em] transition-opacity hover:opacity-70 sm:text-base"
-            style={{ color: GOLD }}
-          >
-            Close ✕
-          </button>
-        </div>
+        {/* Close button floats over the strip so the JPG can fill the entire
+            viewport edge-to-edge (top, bottom, both sides). Higher z than the
+            slider so it stays clickable. */}
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="absolute right-6 top-5 z-10 font-arialblack text-sm uppercase tracking-[0.2em] transition-opacity hover:opacity-70 sm:right-10 sm:text-base"
+          style={{ color: GOLD }}
+        >
+          Close ✕
+        </button>
 
-        {/* smooothy horizontal slider — drag to scroll */}
+        {/* smooothy horizontal slider — one designed magazine strip (a JPEG
+            export of the gallery layout), rendered twice so smooothy's
+            infinite mode has a second copy to wrap to without revealing a
+            gap. h-full lets the slider fill the entire overlay so the JPG
+            touches the top and bottom of the viewport. */}
         <div
           ref={sliderEl}
           data-slider
-          className="flex h-[calc(100%-72px)] cursor-grab overflow-x-hidden active:cursor-grabbing sm:h-[calc(100%-88px)]"
+          className="flex h-full cursor-grab items-end overflow-hidden active:cursor-grabbing"
         >
-          {PHOTOS.map((src, i) => (
-            <div key={i} className="h-full w-[78vw] shrink-0 px-3 sm:w-[46vw] lg:w-[34vw]">
-              <div className="h-full overflow-hidden rounded-2xl border border-cream/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={`Café Mama & Sons gallery — Filipino-Japanese café in Kentish Town, London (${i + 1})`}
-                  loading="lazy"
-                  draggable={false}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </div>
+          {[0, 1].map((i) => (
+            // The img is the flex item directly — no aspect-ratio wrapper.
+            // h-full pins it to the slider's height; w-auto + the JPG's
+            // intrinsic 17300×1024 give it a natural width that matches
+            // the source pixel-for-pixel. block strips inline whitespace so
+            // the slide width is exactly the rendered image width (smooothy
+            // measures via getBoundingClientRect on the slide).
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src="/gallery/gallery-strip.jpg"
+              alt="Café Mama & Sons gallery — best sellers, the team, and the Kentish Town shop"
+              loading="lazy"
+              draggable={false}
+              className="block h-full w-auto max-w-none shrink-0"
+            />
           ))}
         </div>
       </div>

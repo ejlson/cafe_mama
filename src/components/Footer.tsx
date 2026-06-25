@@ -1,99 +1,29 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
-
-gsap.registerPlugin(useGSAP, MorphSVGPlugin);
-
 /**
- * Footer bounce — the GSAP demo (https://demos.gsap.com/demo/footer-bounce/).
- * The footer's top edge is an SVG path that morphs from a hanging curve to flat
- * with an elastic ease when you scroll into it; the spring's strength is read
- * from scroll velocity. Menu-coloured gradient + the navbar's heavy gold type.
+ * Footer — original SVG-shaped footer with the curved top edge and the
+ * --foot-a/--foot-b gradient that Menu.tsx drives per active tab. The
+ * elastic bounce-on-scroll-in has been removed; the curve is now a static
+ * permanent shape. Brand is the square Cafe Mama & Sons logo.
  */
-// Exact demo paths: DOWN (top edge hangs to y=156) springs to CENTER (flat).
-const DOWN =
-  "M0-0.3C0-0.3,464,156,1139,156S2278-0.3,2278-0.3V683H0V-0.3z";
+
+// Path from the original GSAP footer-bounce demo. CENTER is the flat
+// resting state (the position the original bounce settled to) — used here
+// statically so the footer fills as a clean rectangle with no transparent
+// dip at the top. DOWN (the curved hanging state) is kept as a reference
+// but no longer rendered.
 const CENTER =
   "M0-0.3C0-0.3,464,0,1139,0s1139-0.3,1139-0.3V683H0V-0.3z";
 
 export default function Footer() {
-  const footerRef = useRef<HTMLElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
-
-  useGSAP(
-    () => {
-      const path = pathRef.current!;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        path.setAttribute("d", CENTER);
-        return;
-      }
-
-      const bounce = (velocity: number) => {
-        // exact demo: variation from velocity drives the elastic amplitude/period
-        const variation = gsap.utils.clamp(-0.9, 0.9, velocity / 10000);
-        gsap.fromTo(
-          path,
-          { morphSVG: DOWN },
-          {
-            duration: 2,
-            morphSVG: CENTER,
-            ease: `elastic.out(${1 + variation}, ${1 - variation})`,
-            overwrite: true,
-          },
-        );
-      };
-
-      // Track scroll velocity so the spring strength reflects how hard you
-      // arrived (the demo reads ScrollTrigger.getVelocity, but that depends on
-      // the scroller; window scroll works under ScrollSmoother too).
-      let lastY = window.scrollY;
-      let lastT = performance.now();
-      let vel = 0;
-      const onScroll = () => {
-        const now = performance.now();
-        const y = window.scrollY;
-        const dt = now - lastT;
-        if (dt > 0) vel = ((y - lastY) / dt) * 1000;
-        lastY = y;
-        lastT = now;
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-
-      // Fire the bounce whenever the footer scrolls into view — Intersection
-      // Observer works regardless of ScrollSmoother's transform/scroll proxy,
-      // which a ScrollTrigger onEnter does not reliably catch here.
-      // fire when the footer's top edge is ~120px into view, so the wobble
-      // plays where you can actually see it (not while it's still off the
-      // bottom of the screen)
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) if (e.isIntersecting) bounce(vel);
-        },
-        { rootMargin: "0px 0px -120px 0px", threshold: 0 },
-      );
-      io.observe(footerRef.current!);
-
-      return () => {
-        io.disconnect();
-        window.removeEventListener("scroll", onScroll);
-      };
-    },
-    { scope: footerRef },
-  );
-
   return (
     <footer
-      ref={footerRef}
-      // Lift the footer over the section above (z-20 + negative margin) so its
-      // morphing top edge reveals the warm menu behind it — no cream/black gap.
-      // The footer's own colour is a deeper warm (terracotta) so it's clearly
-      // distinct from the bright menu while staying in the same palette.
-      className="relative z-20 -mt-[150px] text-cream"
+      // Footer's colour comes from --foot-a / --foot-b which Menu.tsx
+      // updates per active tab. No more negative-margin overlap with the
+      // section above — that was for the morphing curve, which is gone.
+      className="relative z-20 text-cream"
     >
-      {/* morphing top edge — deep-warm gradient */}
+      {/* curved top edge — deep-warm gradient, no animation */}
       <svg
         aria-hidden
         id="footer-img"
@@ -111,32 +41,45 @@ export default function Footer() {
             y2="683"
             gradientUnits="userSpaceOnUse"
           >
-            {/* Colours follow the active menu tab (set by Menu via --foot-*):
-                bright orange-red for sandwiches, vibrant violet for drinks. */}
+            {/* Colours follow the active menu tab (set by Menu via --foot-*) */}
             <stop offset="0" style={{ stopColor: "var(--foot-a, #ff7a2f)" }} />
             <stop offset="1" style={{ stopColor: "var(--foot-b, #e8362b)" }} />
           </linearGradient>
         </defs>
-        <path ref={pathRef} id="bouncy-path" fill="url(#footGrad)" d={DOWN} />
+        <path id="bouncy-path" fill="url(#footGrad)" d={CENTER} />
       </svg>
 
-      <div className="relative z-10 px-0 pb-7 pt-44">
-        {/* Brand — two big lines that fill the width, split after MAMA */}
+      <div className="relative z-10 flex flex-col items-start gap-y-6 px-4 pb-40 pt-10 sm:gap-y-8 sm:px-8 sm:pb-48 sm:pt-14">
+        {/* Brand — horizontal Cafe Mama & Sons mirror logo, anchored to the
+            top-left. Recoloured via CSS mask so it matches the active
+            menu tab's background colour (--wave-f0). The PNG is the alpha
+            mask; the visible "ink" comes from backgroundColor. */}
         <a
           href="#top"
-          className="nav-blackface font-cheee block w-full pl-4 text-left leading-[0.78] tracking-[-0.03em] sm:pl-8"
-          style={{ textShadow: "none", color: "var(--foot-brand, #f4c33c)" }}
+          aria-label="Cafe Mama & Sons — back to top"
+          className="block"
         >
-          <span className="block whitespace-nowrap text-[14vw]">
-            CAFE&nbsp;MAMA
-          </span>
-          <span className="block whitespace-nowrap text-[14vw]">
-            &amp;&nbsp;SONS
-          </span>
+          <span
+            aria-hidden
+            className="block w-[80vw] max-w-5xl"
+            style={{
+              aspectRatio: "7024 / 970",
+              backgroundColor: "var(--wave-f0, #fbd400)",
+              WebkitMaskImage: "url('/media/logo/CAFELOGOMIRROR.png')",
+              maskImage: "url('/media/logo/CAFELOGOMIRROR.png')",
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "left center",
+              maskPosition: "left center",
+            }}
+          />
         </a>
 
-        {/* bottom strip: review CTA + instagram + email */}
-        <div className="mt-7 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 px-4">
+        {/* Links sit directly under the logo, left-aligned. Wrap as a row
+            so they stay tidy across breakpoints. */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a
             href={`https://www.google.com/search?q=${encodeURIComponent(
               "Cafe Mama & Sons, 83 Kentish Town Rd, London NW1 8NY",
@@ -144,14 +87,14 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Leave us a Google review"
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
           >
             <span aria-hidden className="text-sm leading-none">★★★★★</span>
             Review us on Google
           </a>
           <a
             href="#blog"
-            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
           >
             Blog
           </a>
@@ -160,7 +103,7 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
-            className="text-[#f4c33c] transition-opacity hover:opacity-70"
+            className="[color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
           >
             <svg
               viewBox="0 0 24 24"
@@ -177,7 +120,7 @@ export default function Footer() {
           </a>
           <a
             href="mailto:hello@cafemamasons.com"
-            className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#f4c33c] transition-opacity hover:opacity-70"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
           >
             hello@cafemamasons.com
           </a>

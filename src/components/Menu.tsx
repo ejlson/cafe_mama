@@ -63,7 +63,7 @@ type Category = {
 const SANDOS: Item[] = [
   {
     name: "Chilli Kimchi Chicken",
-    price: "9",
+    price: "9.00",
     desc: "Crispy chicken, chilli crisp, kimchi mayo, American cheese, tomatoes and lettuce.",
     allergens: "crustacean, fish",
     img: "/media/sandos/chilli-kimchi-chicken.jpg",
@@ -73,7 +73,7 @@ const SANDOS: Item[] = [
   },
   {
     name: "Egg Mayo",
-    price: "9",
+    price: "8.50",
     desc: "Creamy egg mayo with chives and onion.",
     img: "/media/sandos/egg-mayo.jpg",
     angle: 5,
@@ -82,7 +82,7 @@ const SANDOS: Item[] = [
   },
   {
     name: "Tuna Melt",
-    price: "9",
+    price: "8.50",
     desc: "Tuna mayo with sweetcorn, topped with crispy melted cheddar.",
     img: "/media/sandos/tuna-melt.jpg",
     angle: -3,
@@ -91,7 +91,7 @@ const SANDOS: Item[] = [
   },
   {
     name: "Jerk Chicken",
-    price: "10",
+    price: "9.50",
     desc: "Jerk chicken with mayo, fresh tomato and pesto.",
     img: "/media/sandos/jerk-chicken.jpg",
     angle: 8,
@@ -100,7 +100,7 @@ const SANDOS: Item[] = [
   },
   {
     name: "Adobo Mushroom",
-    price: "9.5",
+    price: "9.00",
     desc: "Crispy croquette stuffed with creamy adobo mushrooms and rich pesto.",
     allergens: "soya",
     img: "/media/sandos/adobo-mushroom.jpg",
@@ -110,7 +110,7 @@ const SANDOS: Item[] = [
   },
   {
     name: "Corned Beef",
-    price: "10.5",
+    price: "10.50",
     desc: "Corned beef croquette with lettuce and mayo.",
     allergens: "nuts, celery & crustaceans",
     img: "/media/sandos/corned-beef.jpg",
@@ -121,28 +121,29 @@ const SANDOS: Item[] = [
 ];
 
 const SIDES: Item[] = [
-  { name: "Box of Tater-Tots", price: "5" },
-  { name: "Box of Crisps", price: "4" },
+  { name: "Box of Tater-Tots", price: "4.50" },
+  { name: "Box of Crisps", price: "4.00" },
 ];
 
 const PANDESAL: Item[] = [
-  { name: "Egg Pandesal", price: "—" },
-  { name: "Longanisa Pandesal", price: "—" },
+  { name: "Egg Pandesal", price: "5.50" },
+  { name: "Longanisa Pandesal", price: "9.00" },
 ];
 
 const BAKED: Item[] = [
-  { name: "Honey Toast", price: "—" },
-  { name: "Honey Garlic Twist", price: "—" },
-  { name: "Spanish Bread", price: "—" },
-  { name: "Croissant", price: "—" },
-  { name: "Cookie Croissant", price: "—" },
-  { name: "Miso Cookie", price: "—" },
-  { name: "Ube Bow", price: "—" },
-  { name: "Ube Pain Au Chocolat", price: "—" },
-  { name: "Pain Au Chocolat", price: "—" },
-  { name: "Banana Pudding", price: "—" },
-  { name: "Milo Tiramisu", price: "—" },
-
+  { name: "Honey Toast", price: "2.99" },
+  { name: "Honey Garlic Twist", price: "4.80" },
+  { name: "Spanish Bread", price: "3.50" },
+  { name: "Croissant", price: "2.90" },
+  { name: "Cookie Croissant", price: "6.00" },
+  { name: "Almond Croissant", price: "3.50" },
+  { name: "Miso Cookie", price: "3.99" },
+  { name: "Ube Bow", price: "4.90" },
+  { name: "Ube Pain Au Chocolat", price: "5.50" },
+  { name: "Pain Au Chocolat", price: "3.00" },
+  { name: "Peanutsal", price: "4.00"},
+  { name: "Gianduja", price: "5.50"},
+  { name: "Banana Pudding", price: "5.50" },
 ];
 
 const DRINKS_GROUPS: Group[] = [
@@ -436,7 +437,9 @@ function GroupTitle({ children, accent }: { children: string; accent: string }) 
 
 // A thin rule that separates blocks. Spans the content column and overhangs
 // each edge a little so it runs just past where the content starts.
-function FullRule({ color, className = "mt-12" }: { color: string; className?: string }) {
+// Default gap is the site-wide "small separator" token (~8px). Use mt-0 /
+// mb-0 only when the rule is hugging a poster headline.
+function FullRule({ color, className = "mt-2" }: { color: string; className?: string }) {
   return (
     <div
       aria-hidden
@@ -461,6 +464,7 @@ const ABOUT_IMAGES = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(
 // `alt` names each outlet for SEO / screen readers.
 const COLLABS: { src: string; alt: string }[] = [
   { src: "/media/collabs/Canva-logo-PNG-large-size.png", alt: "Canva" },
+  { src: "/media/collabs/hotdinners.jpeg", alt: "Café Mama & Sons featured in Hot Dinners" },
   { src: "/media/collabs/feedthelion.png", alt: "Café Mama & Sons featured in Feed the Lion" },
   {
     src: "/media/collabs/London%20On%20The%20Inside.gif",
@@ -470,7 +474,6 @@ const COLLABS: { src: string; alt: string }[] = [
     src: "/media/collabs/restaurantonline.avif",
     alt: "Café Mama & Sons featured in Restaurant Online",
   },
-  { src: "/media/collabs/hotdinners.jpeg", alt: "Café Mama & Sons featured in Hot Dinners" },
   { src: "/media/collabs/ldn.png", alt: "Café Mama & Sons featured in LDN" },
   { src: "/media/collabs/mamali.jpeg", alt: "Café Mama & Sons featured in Mamali" },
 ];
@@ -673,7 +676,7 @@ function AboutUs({ accent }: { accent: string }) {
       </h2>
 
       {/* Line under the about-us title */}
-      <FullRule color={accent} className="mt-1" />
+      <FullRule color={accent} className="mt-0" />
 
       <div className="flex min-h-0 flex-1 gap-8 sm:gap-12">
         {/* Left — text + progress (held still) */}
@@ -900,22 +903,28 @@ function Blog({ accent }: { accent: string }) {
 
   return (
     <section id="blog" className="relative mt-0">
-      <FullRule color={accent} className="mb-2" />
+      <FullRule color={accent} className="mb-0" />
       <h2
+        aria-label="Blog"
         style={{ color: accent }}
-        className="block w-full text-center font-poster text-[24vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[22rem]"
+        // Letters separated by spaces + text-justify + text-align-last:justify
+        // makes the browser stretch each space to fill the wrapper width —
+        // letters end up evenly spread from left rail to right rail.
+        // title-shadow drops a hard offset black behind the letters so the
+        // title pops off the section background (same idiom as nav-blackface).
+        className="title-shadow block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] sm:text-[20rem]"
       >
-        BLOG
+        B L O G
       </h2>
       <FullRule color={accent} className="mt-0" />
 
       {/* ===== Featured (latest) post — big two-column layout ===== */}
       {featured && (
-        <article className="mt-10 sm:mt-14">
+        <article className="mt-2">
           <button
             type="button"
             onClick={() => setOpenPost(featured)}
-            className="group grid w-full grid-cols-1 items-center gap-8 text-left lg:grid-cols-[1.1fr_0.9fr] lg:gap-14"
+            className="group grid w-full grid-cols-1 items-stretch gap-8 text-left lg:grid-cols-[1.1fr_0.9fr] lg:gap-14"
             style={{ color: accent }}
           >
             <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl transition-transform duration-500 group-hover:-translate-y-1">
@@ -930,25 +939,26 @@ function Blog({ accent }: { accent: string }) {
             </div>
 
             <div className="flex flex-col">
-              <span
-                aria-hidden
-                className="font-arialblack text-[11px] uppercase tracking-[0.35em] opacity-70"
-              >
-                Latest
-              </span>
-              <time
-                dateTime={featured.isoDate}
-                className="mt-2 font-arialblack text-xs uppercase tracking-[0.3em] opacity-70"
-              >
-                {featured.date}
-              </time>
+              {/* "LATEST · 17 APRIL 2026" — single row, leading-none so the
+                  top of these caps lines up with the top of the image to
+                  the left (the grid uses items-start). */}
+              <div className="flex flex-wrap items-baseline gap-x-3 font-arialblack text-xs uppercase tracking-[0.3em] leading-none opacity-70">
+                <span aria-hidden className="text-[11px] tracking-[0.35em]">
+                  Latest
+                </span>
+                <span aria-hidden>·</span>
+                <time dateTime={featured.isoDate}>{featured.date}</time>
+              </div>
               <h3 className="mt-3 font-arialblack text-3xl uppercase leading-[0.95] tracking-tight sm:text-5xl xl:text-6xl">
                 {featured.title}
               </h3>
               <p className="mt-5 max-w-prose text-base leading-relaxed opacity-85 sm:text-lg">
                 {featured.excerpt}
               </p>
-              <span className="mt-7 inline-flex items-center gap-3 font-arialblack text-sm uppercase tracking-[0.2em] underline-offset-4 group-hover:underline">
+              {/* mt-auto pushes this CTA to the bottom of the stretched
+                  right column so its baseline lines up with the bottom edge
+                  of the featured image on the left. */}
+              <span className="mt-auto inline-flex items-center gap-3 pt-7 font-arialblack text-sm uppercase tracking-[0.2em] underline-offset-4 group-hover:underline">
                 Read full article
                 <span aria-hidden className="text-lg">→</span>
               </span>
@@ -959,7 +969,8 @@ function Blog({ accent }: { accent: string }) {
 
       {/* ===== Older posts — horizontally scrollable row of smaller cards ===== */}
       {older.length > 0 && (
-        <div className="mt-12 sm:mt-16">
+        <div className="mt-2">
+          <FullRule color={accent} className="mb-2" />
           <div
             className="flex items-end justify-between gap-4"
             style={{ color: accent }}
@@ -977,7 +988,7 @@ function Blog({ accent }: { accent: string }) {
 
           {/* Native horizontal overflow scroll + scroll snap so cards settle
               cleanly. Cards have a fixed width so they read as a strip. */}
-          <ul className="no-scrollbar mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 sm:gap-7">
+          <ul className="no-scrollbar mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-1 sm:gap-7">
             {older.map((p) => (
               <li
                 key={p.slug}
@@ -1016,7 +1027,7 @@ function Blog({ accent }: { accent: string }) {
         </div>
       )}
 
-      <FullRule color={accent} className="mt-10 sm:mt-12" />
+      <FullRule color={accent} className="mt-2" />
 
       {openPost && (
         <BlogModal post={openPost} onClose={() => setOpenPost(null)} />
@@ -1324,7 +1335,7 @@ function CafeDescription({ accent }: { accent: string }) {
             </span>
           ))}
         </h3>
-        <FullRule color={accent} className="mt-4" />
+        <FullRule color={accent} className="mt-2" />
       </div>
     </div>
   );
@@ -1361,7 +1372,7 @@ function GroupBlock({
         )}
       </div>
       {/* rule under the header + blurb */}
-      <FullRule color={accent} className="mt-1" />
+      <FullRule color={accent} className="mt-2" />
       <ul className={`mt-3 ${twoCol ? "sm:grid sm:grid-cols-2 sm:gap-x-14" : ""}`}>
         {group.items.map((it) => (
           <ItemRow
@@ -1598,6 +1609,13 @@ type BgVars = {
   ay: number;
   // fbr = footer "CAFE MAMA & SONS" brand colour
   fbr: string;
+  // Title-anim water palette: tb = base/dark, t1 = light highlight,
+  // t2 = mid, t3 = bright pop. Drives the .title-anim background-clip
+  // on MENU / BLOG / LOCATION via CSS vars.
+  tb: string;
+  t1: string;
+  t2: string;
+  t3: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1615,6 +1633,12 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ay: 1,
         // drinks: footer brand matches the drinks page (purple) background
         fbr: "#9b81c9",
+        // drinks title-anim: yellow water (matches the section's yellow
+        // text colour). Deep gold → bright yellow shades.
+        tb: "#d4a82a",
+        t1: "#fff39c",
+        t2: "#fbd400",
+        t3: "#ffea4d",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1633,6 +1657,11 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ab: 1,
         ay: 0,
         fbr: "#f4c33c",
+        // food title-anim: hot-pink water. Deep magenta → light pink shades.
+        tb: "#d50050",
+        t1: "#ffb3cf",
+        t2: "#FF1353",
+        t3: "#ff6090",
       };
 
 function setBgVars(v: BgVars) {
@@ -1648,6 +1677,10 @@ function setBgVars(v: BgVars) {
   s.setProperty("--loc-card", v.lc);
   s.setProperty("--art-blue", String(v.ab));
   s.setProperty("--art-yellow", String(v.ay));
+  s.setProperty("--title-base", v.tb);
+  s.setProperty("--title-1", v.t1);
+  s.setProperty("--title-2", v.t2);
+  s.setProperty("--title-3", v.t3);
 }
 
 export default function Menu() {
@@ -1872,14 +1905,17 @@ export default function Menu() {
           <FullRule color={theme.accent} className="mb-0" />
 
           {/* Title — line-box trimmed to cap height + baseline so the gap above
-              and below is purely the symmetric py, not the font's whitespace. */}
+              and below is purely the symmetric py, not the font's whitespace.
+              Letters separated by spaces + text-justify + text-align-last:
+              justify makes the browser stretch each space so M / E / N / U
+              spread evenly from left rail to right rail. */}
           <h2
             data-reveal
+            aria-label="Menu"
             style={{ color: theme.accent }}
-            className="menu-title block w-full text-center font-poster text-[24vw] leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] sm:text-[22rem]"
+            className="title-shadow menu-title block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] sm:text-[20rem]"
           >
-            MENU
-            {/* menu<span>.</span> */}
+            M E N U
           </h2>
 
           {/* Line under the title, above the Food / Drinks tabs */}
@@ -1918,7 +1954,7 @@ export default function Menu() {
         </nav>
 
           {/* Line under the Food / Drinks tabs */}
-          <FullRule color={theme.accent} className="mt-1" />
+          <FullRule color={theme.accent} className="mt-2" />
           </div>
           {/* end header rail */}
 
@@ -1941,7 +1977,7 @@ export default function Menu() {
                 <SideRails color={theme.accent} />
                 {current.groups?.map((g) => (
                   <div key={g.title}>
-                    <FullRule color={theme.accent} className="mt-3" />
+                    <FullRule color={theme.accent} className="mt-2" />
                     <GroupBlock
                       group={g}
                       accent={theme.accent}
@@ -1955,7 +1991,7 @@ export default function Menu() {
                 ))}
 
                 {/* Allergen note — inside the rail so the side rules run through it */}
-                <FullRule color={theme.accent} className="mt-3" />
+                <FullRule color={theme.accent} className="mt-2" />
                 <p
                   style={{ color: theme.accent }}
                   className="mt-1 text-xs font-semibold uppercase tracking-wide opacity-70"
@@ -1963,7 +1999,7 @@ export default function Menu() {
                   Allergens listed in brackets. Alternative milks, such as oat and coconut milk, are available for an additional 50p. Please
                   tell us about any allergies before ordering.
                 </p>
-                <FullRule color={theme.accent} className="mt-1" />
+                <FullRule color={theme.accent} className="mt-2" />
 
               </div>
             )}
@@ -1977,7 +2013,7 @@ export default function Menu() {
 
         {/* Press / collab logos — draggable, continuously-scrolling strip */}
         <CollabMarquee accent={theme.accent} />
-        <FullRule color={theme.accent} className="mt-0" />
+        <FullRule color={theme.accent} className="mt-2" />
 
         {/* About us */}
         {/* <AboutUs accent={theme.accent} /> */}

@@ -529,4 +529,14 @@ video {
   animation: focus-heart-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* ---------- Section title — hard offset shadow ----------
+   Used by the MENU, BLOG and LOCATION poster headings. Same broadcast
+   idiom as .nav-blackface — a single offset black behind the letterforms
+   so the title pops off the section background. Scales with font-size
+   via em so it stays proportional whether the title is rendered at
+   text-[22vw] (mobile) or text-[20rem] (desktop). */
+.title-shadow {
+  text-shadow: 0.045em 0.045em 0 #000;
+}
+
 /* cheee->arialblack revert 1781110843 */

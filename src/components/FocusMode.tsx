@@ -685,20 +685,28 @@ export default function FocusMode() {
 
   return (
     <>
-      {/* toggle — classic WordArt, sits above the watch in the bottom-right stack */}
+      {/* toggle — pre-rendered WordArt PNGs (DoomScroll to enter, LockIn to
+          exit) above the watch in the bottom-right stack. */}
       <button
         type="button"
         onClick={toggle}
         aria-pressed={on}
         aria-label={on ? "Exit focus mode" : "Focus mode"}
-        className="fixed bottom-[17rem] right-6 z-[56] flex w-28 select-none justify-center transition-transform hover:-translate-y-0.5 active:scale-95 sm:bottom-[19rem] sm:w-32"
+        // Same width + right offset as the OpeningClock watch
+        // (right-6 w-28 sm:w-32 — see app/page.tsx) so this button sits
+        // horizontally centered directly above it. items-end pins the PNG
+        // to the bottom of the box (rather than vertically centring it)
+        // so the visible art hugs the watch instead of floating 50px above
+        // it. object-contain still centres each PNG horizontally.
+        className="fixed bottom-[15rem] right-6 z-[56] flex h-28 w-28 select-none items-end justify-center transition-transform hover:-translate-y-0.5 active:scale-95 sm:bottom-[17rem] sm:h-32 sm:w-32"
       >
-        <span
-          className="wordart-3d text-3xl sm:text-4xl"
-          data-text={on ? "EXIT" : "FOCUS"}
-        >
-          {on ? "EXIT" : "FOCUS"}
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={on ? "/media/word%20art/LockIn.png" : "/media/FAMILY-FAM--ily-FOCUS-LockIn-DoomScroll-LockIn-Doo.png"}
+          alt={on ? "Lock in — exit focus mode" : "Doom scroll — enter focus mode"}
+          draggable={false}
+          className="block h-full w-full object-contain"
+        />
       </button>
 
       {/* video panel — reel-style stack, bottom-left to start. Drag is via

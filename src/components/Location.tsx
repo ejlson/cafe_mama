@@ -46,14 +46,13 @@ export default function Location() {
           FullRule rendered under CollabMarquee in Menu.tsx, so we don't
           repeat one here (a double rule was reading as a heavy bar). */}
       <h2
+        aria-label="Location"
         style={{ color: RED }}
-        // Breaks out of the menu wrapper (left-1/2 + w-screen + -translate-x-1/2)
-        // so the title can scale up past the wrapper rails into the full
-        // viewport. The horizontal rules above and below stay at wrapper
-        // width — magazine-headline-over-frame.
-        className="relative left-1/2 block w-screen -translate-x-1/2 text-center font-poster leading-none [text-box:trim-both_cap_alphabetic] py-[0.03em] text-[clamp(3rem,14vw,20rem)]"
+        // title-shadow drops a hard offset black behind the letters so the
+        // word pops against the menu section's gold / lavender background.
+        className="title-shadow block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)]"
       >
-        LOCATION
+        L O C A T I O N
       </h2>
       <div
         aria-hidden
@@ -95,10 +94,10 @@ export default function Location() {
           </h3>
 
           {/* Two-column description — left col is the address + hours, right
-              col opens with NASAAN TAYO? as a subhead. Body type matches the
-              menu's allergen / category-blurb pattern: Archivo (the page
-              body font), text-[11px] sm:text-xs, font-semibold, uppercase,
-              tracking-wide, opacity-70. */}
+              col is the brand copy. Body type matches the menu's allergen /
+              category-blurb pattern: Archivo (the page body font),
+              text-[11px] sm:text-xs, font-semibold, uppercase, tracking-wide,
+              opacity-70. */}
           <div className="mt-8 grid gap-5 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:grid-cols-2 sm:gap-7 sm:text-xs">
             <div className="space-y-4">
               <p>
@@ -111,9 +110,6 @@ export default function Location() {
               </p>
             </div>
             <div className="space-y-4">
-              <p className="font-cheee text-base uppercase tracking-tight sm:text-lg">
-                Nasaan tayo?
-              </p>
               <p>
                 Filipino-Japanese sandos, all-day pandesal breakfast meals,
                 house drinks, and freshly-baked goods. Made by mama, served
