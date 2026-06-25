@@ -117,7 +117,7 @@ export default function BestSellers() {
             Row 2: TOP (large) + SELLERS (smaller, baseline-aligned to TOP) */}
       <h3
         aria-label="Our Top Sellers"
-        className="relative z-0 font-poster leading-[0.78] tracking-tight [text-shadow:6px_6px_0_rgba(0,0,0,0.18)]"
+        className="title-shadow relative z-0 font-poster leading-[0.78] tracking-tight"
         style={{ color: TITLE_COLOR }}
       >
         {/* OUR */}
@@ -168,12 +168,16 @@ export default function BestSellers() {
         </div>
       </h3>
 
-      {/* Cards — three portrait panels under the title. */}
-      <ul className="relative z-10 mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-3 sm:gap-6">
+      {/* Cards — three portrait panels under the title. Small negative
+          top margin pulls them up so they just kiss the bottom of TOP
+          SELLERS; z-10 keeps them on top of the title at the overlap. */}
+      <ul className="relative z-10 -mt-[2vw] grid grid-cols-1 gap-4 sm:-mt-8 sm:grid-cols-3 sm:gap-6">
         {DRINKS.map((d) => (
           <li
             key={d.name.join("-")}
-            className="bs-card relative aspect-[3/4] overflow-hidden rounded-2xl border-[2.5px] border-white/70 bg-white shadow-[0_10px_28px_rgba(0,0,0,0.18)]"
+            // hover:scale-[1.04] + hover:z-20 + deeper shadow lifts the
+            // hovered card above its neighbours so it reads as forward.
+            className="bs-card relative aspect-[3/4] overflow-hidden rounded-2xl border-[2.5px] border-white/70 bg-white shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out hover:z-20 hover:scale-[1.04] hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -185,7 +189,7 @@ export default function BestSellers() {
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div
-              className="relative z-10 p-4 font-poster uppercase leading-[0.82] text-3xl [text-shadow:3px_3px_0_rgba(0,0,0,0.15)] sm:p-5 sm:text-4xl lg:text-5xl xl:text-6xl"
+              className="relative z-10 p-4 font-poster uppercase leading-[0.82] text-3xl sm:p-5 sm:text-4xl lg:text-5xl xl:text-6xl"
               style={{ color: d.color }}
             >
               {d.name.map((line) => (

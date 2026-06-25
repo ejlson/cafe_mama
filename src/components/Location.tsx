@@ -50,9 +50,25 @@ export default function Location() {
         style={{ color: RED }}
         // title-shadow drops a hard offset black behind the letters so the
         // word pops against the menu section's gold / lavender background.
-        className="title-shadow block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)]"
+        // Two variants: the mobile one is plain "LOCATION" so it can scale
+        // up dramatically without the inter-letter spaces eating width; the
+        // desktop one keeps the justified-spread "L O C A T I O N" so the
+        // letters fill the wrapper rail-to-rail.
+        className="title-shadow block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] text-center"
       >
-        L O C A T I O N
+        {/* sr-only text so crawlers / screen readers always read the proper
+            word "Location" even when the visible content is space-separated
+            (which some user agents render letter-by-letter). */}
+        <span className="sr-only">Location</span>
+        <span aria-hidden className="block text-[17vw] sm:hidden">
+          LOCATION
+        </span>
+        <span
+          aria-hidden
+          className="hidden w-full text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)] sm:block"
+        >
+          L O C A T I O N
+        </span>
       </h2>
       <div
         aria-hidden
@@ -88,9 +104,9 @@ export default function Location() {
 
         {/* Right column — headline, two-column description, CTAs */}
         <div className="flex flex-col" style={{ color: RED }}>
-          <h3 className="font-cheee font-arialblack uppercase leading-[0.92] text-right">
-            <span className="block text-[12vw] sm:text-[7rem]">Where</span>
-            <span className="block text-[12vw] sm:text-[7rem]">are we?</span>
+          <h3 className="font-cheee font-arialblack uppercase leading-[0.92] text-left sm:text-right">
+            <span className="block text-[9vw] sm:text-[7rem]">Where</span>
+            <span className="block text-[9vw] sm:text-[7rem]">are we?</span>
           </h3>
 
           {/* Two-column description — left col is the address + hours, right
@@ -98,8 +114,8 @@ export default function Location() {
               category-blurb pattern: Archivo (the page body font),
               text-[11px] sm:text-xs, font-semibold, uppercase, tracking-wide,
               opacity-70. */}
-          <div className="mt-8 grid gap-5 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:grid-cols-2 sm:gap-7 sm:text-xs">
-            <div className="space-y-4">
+          <div className="mt-5 grid gap-4 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:mt-8 sm:grid-cols-2 sm:gap-7 sm:text-xs">
+            <div className="space-y-3 sm:space-y-4">
               <p>
                 {ADDRESS}. A corner spot between Camden Lock and Kentish Town
                 Station — the bright shopfront is hard to miss.
@@ -109,7 +125,7 @@ export default function Location() {
                 Kitchen serves all-day breakfast meals and sandos until close.
               </p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <p>
                 Filipino-Japanese sandos, all-day pandesal breakfast meals,
                 house drinks, and freshly-baked goods. Made by mama, served
@@ -124,7 +140,7 @@ export default function Location() {
 
           {/* CTAs — Get Directions (outlined, narrower) + Instagram (filled,
               wider) on top, Leave a Review spans the row below. */}
-          <div className="mt-8 grid grid-cols-[1fr_1.5fr] gap-3 sm:mt-10 sm:gap-4">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-[1fr_1.5fr] sm:gap-4">
             <a
               href={DIRECTIONS}
               target="_blank"
@@ -151,7 +167,7 @@ export default function Location() {
               href={REVIEW_URL}
               target="_blank"
               rel="noreferrer"
-              className="col-span-2 rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
+              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:col-span-2 sm:text-sm"
               style={{ borderColor: RED, color: RED }}
             >
               Leave a Review on Google

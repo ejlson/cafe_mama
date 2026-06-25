@@ -393,6 +393,32 @@ video {
   }
 }
 
+/* ---------- Mobile / low-end device perf pass ----------
+   The CRT effects (scanlines, static grain, drifting roll-bar) and the
+   retro grid floor are pure decoration but each one is a full-viewport
+   layer running its own infinite CSS animation, often with mix-blend-mode
+   — that combination is expensive on phones and low-end GPUs. We hide
+   them entirely under 640px (Tailwind's `sm` breakpoint) so mobile
+   visitors get a clean, smooth render. The wordart-3d pseudo-element
+   layers (extrusion + cast shadow) are also dropped at the same
+   breakpoint since they double the paint cost of every word-art mark. */
+@media (max-width: 639px) {
+  .crt-rollbar,
+  .crt-scanlines,
+  .crt-static,
+  .crt-rollwrap {
+    display: none !important;
+  }
+  .grid-floor {
+    animation: none !important;
+    display: none;
+  }
+  .wordart-3d::before,
+  .wordart-3d::after {
+    display: none;
+  }
+}
+
 /* Classic Word 97 "WordArt" — gold metallic gradient fill, dark outline and a
    stacked 3D extrusion, with the trademark italic slant. */
 .wordart-3d {

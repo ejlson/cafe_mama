@@ -64,7 +64,10 @@ export default function Footer() {
             className="block w-[80vw] max-w-5xl"
             style={{
               aspectRatio: "7024 / 970",
-              backgroundColor: "var(--wave-f0, #fbd400)",
+              // --foot-brand is the brand-contrast colour per tab (gold on
+              // food's pink footer, deep purple on drinks' yellow footer) —
+              // higher contrast than --wave-f0 against the footer bg.
+              backgroundColor: "var(--foot-brand, #f4c33c)",
               WebkitMaskImage: "url('/media/logo/CAFELOGOMIRROR.png')",
               maskImage: "url('/media/logo/CAFELOGOMIRROR.png')",
               WebkitMaskSize: "contain",
@@ -77,9 +80,9 @@ export default function Footer() {
           />
         </a>
 
-        {/* Links sit directly under the logo, left-aligned. Wrap as a row
-            so they stay tidy across breakpoints. */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {/* Links sit directly under the logo, stacked in a single
+            left-aligned column. */}
+        <div className="flex flex-col items-start gap-y-3">
           <a
             href={`https://www.google.com/search?q=${encodeURIComponent(
               "Cafe Mama & Sons, 83 Kentish Town Rd, London NW1 8NY",
@@ -87,14 +90,14 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Leave us a Google review"
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70"
           >
             <span aria-hidden className="text-sm leading-none">★★★★★</span>
             Review us on Google
           </a>
           <a
             href="#blog"
-            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70"
           >
             Blog
           </a>
@@ -103,7 +106,7 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
-            className="[color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
+            className="[color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70"
           >
             <svg
               viewBox="0 0 24 24"
@@ -120,7 +123,7 @@ export default function Footer() {
           </a>
           <a
             href="mailto:hello@cafemamasons.com"
-            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--wave-f0,#f4c33c)] transition-opacity hover:opacity-70"
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70"
           >
             hello@cafemamasons.com
           </a>

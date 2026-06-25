@@ -22,6 +22,16 @@ export default function Home() {
       <TvHero videoSrc="/media/hero-draft3.mp4" />
       <SmoothScroll>
         <main>
+          {/* H1 for SEO — visually hidden via sr-only so it doesn't intrude
+              on the broadcast-style hero layout, but crawlers read it as the
+              page's primary topic. Without this, the document has no H1
+              (MENU / BLOG / LOCATION are H2s) which weakens topical signal. */}
+          <h1 className="sr-only">
+            Cafe Mama &amp; Sons — Filipino-Japanese cafe &amp; bakery on
+            Kentish Town Road, London NW1. Pandesal sandos, ube mochi
+            croissants, Spanish &amp; ube lattes, ceremonial-grade matcha,
+            and a £14 weekday meal deal.
+          </h1>
           <div className="relative z-10">
             <Menu />
           </div>

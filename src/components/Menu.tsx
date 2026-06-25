@@ -50,7 +50,7 @@ const BLURB_SANDOS =
 const BLURB_BREAKFAST =
   "All-day pandesal breakfast: longanisa, egg mayo and Filipino classics, served from open to close.";
 const BLURB_SIDES =
-  "Quick bites to round the meal deal out — crisp nori-dusted tater-tots and a rotating box of crisps.";
+  "Quick bites to round the meal deal out — golden tater-tots and a rotating box of house-made nori crisps.";
 const BLURB_BAKED =
   "Daily bakes from our Kentish Town counter: ube mochi croissant, cookie croissant, milo tiramisu, ensaymada and more.";
 type Category = {
@@ -328,19 +328,14 @@ function ItemRow({
   item,
   body,
   dot,
-  active,
   registerRow,
 }: {
   item: Item;
   body: string;
   dot: string;
-  active?: boolean;
   registerRow?: (name: string, el: HTMLLIElement | null) => void;
 }) {
   const interactive = Boolean(item.img);
-  const hasDetail = Boolean(item.desc || item.img);
-  const [hover, setHover] = useState(false);
-  const preview = useContext(PreviewCtx);
 
   return (
     <li
@@ -349,36 +344,10 @@ function ItemRow({
           ? (el) => registerRow(item.name, el)
           : undefined
       }
-      className={`py-1 ${interactive ? "cursor-pointer" : ""}`}
-      onMouseEnter={
-        hasDetail
-          ? () => {
-              setHover(true);
-              if (item.img)
-                preview?.show({
-                  img: item.img,
-                  w: item.w,
-                  h: item.h,
-                  angle: item.angle,
-                });
-            }
-          : undefined
-      }
-      onMouseLeave={
-        hasDetail
-          ? () => {
-              setHover(false);
-              if (item.img) preview?.hide();
-            }
-          : undefined
-      }
+      className="py-1"
     >
       {/* name · leader · price */}
-      <p
-        className={`flex items-baseline gap-2 transition-transform duration-200 ease-out ${
-          hover ? "translate-x-1.5" : ""
-        }`}
-      >
+      <p className="flex items-baseline gap-2">
         <span
           style={{ color: body }}
           className="font-arialblack text-lg uppercase tracking-tight sm:text-xl"
@@ -398,8 +367,9 @@ function ItemRow({
         </span>
       </p>
 
-      {/* Description is always shown; the photo appears as the cursor-tracking
-          preview on hover (and inline for the mobile scroll-active row). */}
+      {/* Description is always shown; the photo only appears as the
+          cursor-tracking preview on hover (desktop). The inline mobile
+          image was removed at the user's request. */}
       {item.desc && (
         <p
           style={{ color: body }}
@@ -410,15 +380,6 @@ function ItemRow({
             <span className="opacity-70"> ({item.allergens})</span>
           )}
         </p>
-      )}
-      {active && item.img && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.img}
-          alt={item.name}
-          loading="lazy"
-          className="animate-item-pop mb-2 mt-3 aspect-[4/3] w-full max-w-sm rounded-2xl border-4 border-cream object-cover shadow-[0_12px_30px_rgba(0,0,0,0.4)]"
-        />
       )}
     </li>
   );
@@ -912,7 +873,7 @@ function Blog({ accent }: { accent: string }) {
         // letters end up evenly spread from left rail to right rail.
         // title-shadow drops a hard offset black behind the letters so the
         // title pops off the section background (same idiom as nav-blackface).
-        className="title-shadow block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] sm:text-[20rem]"
+        className="title-shadow block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[20rem]"
       >
         B L O G
       </h2>
@@ -1346,7 +1307,6 @@ function GroupBlock({
   accent,
   body,
   dot,
-  activeImg,
   registerRow,
   twoCol,
 }: {
@@ -1354,7 +1314,6 @@ function GroupBlock({
   accent: string;
   body: string;
   dot: string;
-  activeImg?: string | null;
   registerRow?: (name: string, el: HTMLLIElement | null) => void;
   twoCol?: boolean;
 }) {
@@ -1380,7 +1339,6 @@ function GroupBlock({
             item={it}
             body={body}
             dot={dot}
-            active={activeImg === it.name}
             registerRow={registerRow}
           />
         ))}
@@ -1531,7 +1489,7 @@ function MealDealBanner() {
               "radial-gradient(ellipse 74% 72% at 50% 54%, #000 22%, rgba(0,0,0,0.5) 48%, transparent 66%)",
           }}
         >
-          <source src="/media/sando-adobo-mushroom.mp4" type="video/mp4" />
+          <source src="/media/videos/website%20adobo%20mushroom.mp4" type="video/mp4" />
         </video>
 
         <img
@@ -1609,13 +1567,6 @@ type BgVars = {
   ay: number;
   // fbr = footer "CAFE MAMA & SONS" brand colour
   fbr: string;
-  // Title-anim water palette: tb = base/dark, t1 = light highlight,
-  // t2 = mid, t3 = bright pop. Drives the .title-anim background-clip
-  // on MENU / BLOG / LOCATION via CSS vars.
-  tb: string;
-  t1: string;
-  t2: string;
-  t3: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1633,12 +1584,6 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ay: 1,
         // drinks: footer brand matches the drinks page (purple) background
         fbr: "#9b81c9",
-        // drinks title-anim: yellow water (matches the section's yellow
-        // text colour). Deep gold → bright yellow shades.
-        tb: "#d4a82a",
-        t1: "#fff39c",
-        t2: "#fbd400",
-        t3: "#ffea4d",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1657,11 +1602,6 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ab: 1,
         ay: 0,
         fbr: "#f4c33c",
-        // food title-anim: hot-pink water. Deep magenta → light pink shades.
-        tb: "#d50050",
-        t1: "#ffb3cf",
-        t2: "#FF1353",
-        t3: "#ff6090",
       };
 
 function setBgVars(v: BgVars) {
@@ -1677,63 +1617,15 @@ function setBgVars(v: BgVars) {
   s.setProperty("--loc-card", v.lc);
   s.setProperty("--art-blue", String(v.ab));
   s.setProperty("--art-yellow", String(v.ay));
-  s.setProperty("--title-base", v.tb);
-  s.setProperty("--title-1", v.t1);
-  s.setProperty("--title-2", v.t2);
-  s.setProperty("--title-3", v.t3);
 }
 
 export default function Menu() {
   const [active, setActive] = useState("sandos");
   const current = CATEGORIES.find((c) => c.key === active) ?? CATEGORIES[0];
 
-  // Mobile: which image item is currently "in focus" as you scroll.
-  const [activeImg, setActiveImg] = useState<string | null>(null);
-  const rowsRef = useRef<Map<string, HTMLLIElement>>(new Map());
-  const registerRow = useCallback(
-    (name: string, el: HTMLLIElement | null) => {
-      if (el) rowsRef.current.set(name, el);
-      else rowsRef.current.delete(name);
-    },
-    [],
-  );
-
-  // On mobile, the active item is the last image-row whose top has passed the
-  // reading line (~45% down the viewport). As you scroll, the active item
-  // changes one at a time, so its image expands and the previous one collapses.
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    let raf = 0;
-    const compute = () => {
-      raf = 0;
-      if (!mq.matches) {
-        setActiveImg((v) => (v === null ? v : null));
-        return;
-      }
-      const line = window.innerHeight * 0.45;
-      let name: string | null = null;
-      let bestTop = -Infinity;
-      for (const [n, el] of rowsRef.current) {
-        const top = el.getBoundingClientRect().top;
-        if (top <= line && top > bestTop) {
-          bestTop = top;
-          name = n;
-        }
-      }
-      setActiveImg((v) => (v === name ? v : name));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(compute);
-    };
-    compute();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active]);
+  // (The mobile scroll-active row tracker was removed along with the inline
+  // mobile menu-item image. GroupBlock no longer takes activeImg / registerRow
+  // props, so there's nothing left to wire up here.)
 
   // The title, tabs and list rise + fade in each time the menu is revealed by
   // the hero→menu transition (which dispatches "menu:reveal"). They start hidden
@@ -1913,7 +1805,7 @@ export default function Menu() {
             data-reveal
             aria-label="Menu"
             style={{ color: theme.accent }}
-            className="title-shadow menu-title block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.02em] pb-[0.08em] sm:text-[20rem]"
+            className="title-shadow menu-title block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[20rem]"
           >
             M E N U
           </h2>
@@ -1983,8 +1875,6 @@ export default function Menu() {
                       accent={theme.accent}
                       body={theme.body}
                       dot={theme.dot}
-                      activeImg={activeImg}
-                      registerRow={registerRow}
                       twoCol={active === "sandos" || active === "drinks"}
                     />
                   </div>
