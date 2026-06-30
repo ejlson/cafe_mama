@@ -74,8 +74,19 @@ export default function MenuReveal() {
       };
       const scrollTop0 = () => {
         const s = sm();
-        if (s) s.scrollTo(0, false);
-        else window.scrollTo(0, 0);
+        if (s) {
+          // ScrollSmoother.scrollTo on a PAUSED smoother queues the change
+          // but doesn't reposition the rendered content — so when the smoother
+          // later resumes it animates from the leftover scroll back to 0,
+          // which is the "menu reveals mid-page then drifts back to the top"
+          // bug. Temporarily unpause to apply the jump, then restore state.
+          const wasPaused = s.paused();
+          if (wasPaused) s.paused(false);
+          s.scrollTo(0, false);
+          if (wasPaused) s.paused(true);
+        } else {
+          window.scrollTo(0, 0);
+        }
       };
       const scrollTopVal = () => {
         const s = sm();

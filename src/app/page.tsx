@@ -20,6 +20,10 @@ export default function Home() {
       {/* The hero is a separate fixed layer (not in the scroll flow), toggled by
           the morph transition — so the menu never peeks behind it and vice-versa. */}
       <TvHero videoSrc="/media/hero-draft3.mp4" />
+      {/* Footer is pinned to the viewport BEHIND the smooth-scroll content.
+          The menu card scrolls up over it; as main exits the bottom of the
+          screen, the footer is revealed underneath. */}
+      <Footer />
       <SmoothScroll>
         <main>
           {/* H1 for SEO — visually hidden via sr-only so it doesn't intrude
@@ -32,11 +36,20 @@ export default function Home() {
             croissants, Spanish &amp; ube lattes, ceremonial-grade matcha,
             and a £14 weekday meal deal.
           </h1>
-          <div className="relative z-10">
+          {/* "Card" wrapping the menu. The bottom corners START square; a
+              scroll-driven scrub in Footer.tsx rounds them as the user
+              scrolls, so it feels like the menu peels off the page and
+              the footer behind it shows through the corners. */}
+          <div
+            data-menu-card
+            className="relative z-10 overflow-hidden"
+          >
             <Menu />
           </div>
         </main>
-        <Footer />
+        {/* Spacer — gives ScrollSmoother runway to carry the menu card fully
+            off the top of the viewport, exposing the fixed footer beneath. */}
+        <div aria-hidden className="h-screen w-full" />
       </SmoothScroll>
       {/* Full-screen hero→menu morph transition + its bottom-centre trigger. */}
       <MenuReveal />

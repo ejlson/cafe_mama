@@ -873,14 +873,12 @@ function Blog({ accent }: { accent: string }) {
       <h2
         aria-label="Blog"
         style={{ color: accent }}
-        // Letters separated by spaces + text-justify + text-align-last:justify
-        // makes the browser stretch each space to fill the wrapper width —
-        // letters end up evenly spread from left rail to right rail.
-        // title-shadow drops a hard offset black behind the letters so the
-        // title pops off the section background (same idiom as nav-blackface).
-        className="title-shadow block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[20rem]"
+        // Single-word title with a fixed letter-spacing — Arial Black is too
+        // wide for the old "B L O G" + text-justify rail-to-rail trick to fit
+        // on one line at narrower desktops, so we set the gap explicitly.
+        className="title-shadow block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[14rem]"
       >
-        B L O G
+        BLOG
       </h2>
       <FullRule color={accent} className="mt-0" />
 
@@ -1013,22 +1011,6 @@ function CafeDescription({ accent }: { accent: string }) {
     () => {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const words = gsap.utils.toArray<HTMLElement>(".cafe-word", root.current);
-      const chars = gsap.utils.toArray<HTMLElement>(".cafe-char", root.current);
-
-      // Entrance: characters fly up + flip in on scroll (after
-      // codepen.io/GreenSock/poZaJQa).
-      if (!reduce)
-        gsap.from(chars, {
-          duration: 1,
-          opacity: 0,
-          scale: 0,
-          y: 80,
-          rotationX: 180,
-          transformOrigin: "0% 50% -50",
-          ease: "back",
-          stagger: 0.01,
-          scrollTrigger: { trigger: root.current, start: "top 80%", once: true },
-        });
 
       // Interactive physics: motion is horizontal-only. The cursor shoves words
       // left/right and they collide with each other (resolved along x) so they
@@ -1572,6 +1554,10 @@ type BgVars = {
   ay: number;
   // fbr = footer "CAFE MAMA & SONS" brand colour
   fbr: string;
+  // footer-clock artwork — swapped per tab so the drinks variant pulls
+  // the yellow halo + face, and food pulls the pink/wine pair
+  clockShadow: string;
+  clockFace: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1589,6 +1575,8 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ay: 1,
         // drinks: footer brand matches the drinks page (purple) background
         fbr: "#9b81c9",
+        clockShadow: "url('/footerclock/drinksmenu/Ellipse%2069.svg')",
+        clockFace: "url('/footerclock/drinksmenu/Ellipse%2070.svg')",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1607,6 +1595,8 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ab: 1,
         ay: 0,
         fbr: "#f4c33c",
+        clockShadow: "url('/footerclock/Ellipse%2069.svg')",
+        clockFace: "url('/footerclock/Ellipse%2070.svg')",
       };
 
 function setBgVars(v: BgVars) {
@@ -1622,6 +1612,8 @@ function setBgVars(v: BgVars) {
   s.setProperty("--loc-card", v.lc);
   s.setProperty("--art-blue", String(v.ab));
   s.setProperty("--art-yellow", String(v.ay));
+  s.setProperty("--foot-clock-shadow", v.clockShadow);
+  s.setProperty("--foot-clock-face", v.clockFace);
 }
 
 export default function Menu() {
@@ -1721,6 +1713,10 @@ export default function Menu() {
           ab: li.ab(o.p),
           ay: li.ay(o.p),
           fbr: li.fbr(o.p),
+          // URL strings can't be interpolated — snap to the destination
+          // artwork the moment the tab switch starts.
+          clockShadow: to.clockShadow,
+          clockFace: to.clockFace,
         }),
     });
 
@@ -1803,16 +1799,15 @@ export default function Menu() {
 
           {/* Title — line-box trimmed to cap height + baseline so the gap above
               and below is purely the symmetric py, not the font's whitespace.
-              Letters separated by spaces + text-justify + text-align-last:
-              justify makes the browser stretch each space so M / E / N / U
-              spread evenly from left rail to right rail. */}
+              Letter gap set with tracking so Arial Black fits on a single line
+              at narrower desktop widths. */}
           <h2
             data-reveal
             aria-label="Menu"
             style={{ color: theme.accent }}
-            className="title-shadow menu-title block w-full text-justify [text-align-last:justify] font-poster text-[22vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[20rem]"
+            className="title-shadow menu-title block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[14rem]"
           >
-            M E N U
+            MENU
           </h2>
 
           {/* Line under the title, above the Food / Drinks tabs */}

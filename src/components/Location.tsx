@@ -20,9 +20,83 @@ const INSTAGRAM_URL = "https://www.instagram.com/cafe_mama_sons/";
 // active tab (food = yellow + red, drinks = purple + yellow). The fallbacks
 // are the food-tab values so the panel renders correctly before Menu's
 // useGSAP effect installs the live values on first mount.
-const YELLOW = "var(--loc-card, #f4c33c)";
 const RED = "var(--loc-text, #FF1353)";
-const BLUE = "#2463C3";
+const YELLOW = "var(--loc-card, #f4c33c)";
+
+/**
+ * Glowing gold pill CTA — two-layer SVG construction matching the artwork
+ * the user supplied in /public/buttons:
+ *   - Rectangle 151 (507×122): gold→dark-gold gradient with heavy blur,
+ *     placed BEHIND the pill at a 25 px overhang on each side so the natural
+ *     12.5 stdDev gaussian halo isn't squashed by the button's content box.
+ *   - Rectangle 152 (481×96): solid gold pill with lighter blur, sized to a
+ *     12 px overhang so its softer edge sits cleanly on top of the halo.
+ * The pill itself is 457×72 (rx 36) — that's the shared inner geometry inside
+ * each SVG frame, so the button's "content area" is 72 px tall and the SVGs
+ * are sized proportionally around it via calc(100% + 2×margin). Hot pink text
+ * (--loc-text) lives on the top layer, dead-centred.
+ */
+function PillCTA({
+  href,
+  children,
+  className = "",
+  variant = "gold",
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  // gold = Get Directions / Leave a Review (gold glow, hot-pink label)
+  // pink = @cafe_mama_sons (hot-pink glow, yellow label)
+  variant?: "gold" | "pink";
+}) {
+  const isPink = variant === "pink";
+  const glowSrc = isPink
+    ? "/buttons/Rectangle%20151%20pink.svg"
+    : "/buttons/Rectangle%20151.svg";
+  const faceSrc = isPink
+    ? "/buttons/Rectangle%20152%20pink.svg"
+    : "/buttons/Rectangle%20152.svg";
+  const labelColor = isPink ? YELLOW : RED;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      // Press-in animation: hover lifts the pill ~2 px and active mashes it
+      // down ~3 px + 3% scale + slight opacity drop, so click feedback feels
+      // tactile. Transform cascades to the absolute SVG layers below.
+      className={`relative block h-[72px] text-center transition-all duration-100 ease-out hover:-translate-y-0.5 active:translate-y-[3px] active:scale-[0.97] active:opacity-90 ${className}`}
+    >
+      {/* glow halo */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-[25px] -top-[25px] block h-[122px] w-[calc(100%+50px)]"
+        style={{
+          backgroundImage: `url('${glowSrc}')`,
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* face */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-[12px] -top-[12px] block h-[96px] w-[calc(100%+24px)]"
+        style={{
+          backgroundImage: `url('${faceSrc}')`,
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* label */}
+      <span
+        className="relative z-10 inline-flex h-full items-center justify-center whitespace-nowrap font-arialblack text-xs uppercase tracking-[0.18em] sm:text-sm"
+        style={{ color: labelColor }}
+      >
+        {children}
+      </span>
+    </a>
+  );
+}
 
 /**
  * Location section — Japanese magazine / manga-inspired layout. A red strap
@@ -48,36 +122,29 @@ export default function Location() {
       <h2
         aria-label="Location"
         style={{ color: RED }}
-        // Two variants: the mobile one is plain "LOCATION" so it can scale
-        // up dramatically without the inter-letter spaces eating width; the
-        // desktop one keeps the justified-spread "L O C A T I O N" so the
-        // letters fill the wrapper rail-to-rail. title-shadow is applied
-        // PER SPAN (not on the h2) because the text-shadow uses em units —
-        // it has to be calculated against the span's own large font-size,
-        // not the h2's default 16px.
-        className="block w-full whitespace-nowrap font-poster leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] text-center"
+        className="block w-full whitespace-nowrap font-arialblack leading-none text-center mt-[2px]"
       >
-        {/* sr-only text so crawlers / screen readers always read the proper
-            word "Location" even when the visible content is space-separated
-            (which some user agents render letter-by-letter). */}
         <span className="sr-only">Location</span>
+        {/* letter-spacing AND padding live here, NOT on the h2 — em values
+            on the h2 would compute against the inherited 16px instead of
+            this span's big poster font-size and collapse to nothing. The
+            pt/pb adds visible breathing room above and below the cap-height
+            trim so the title doesn't kiss the horizontal rules. */}
         <span
           aria-hidden
-          className="title-shadow block text-[17vw] sm:hidden"
+          // pl matches the tracking so `text-align: center` doesn't slide the
+          // visible ink left of true centre — `letter-spacing` puts a trailing
+          // 0.04em space after the final N that the browser counts as text
+          // width but is invisible.
+          className="title-shadow block tracking-[0.04em] pl-[0.04em] [text-box:trim-both_cap_alphabetic] pt-[0.03em] pb-[0.05em] text-[22vw] sm:text-[clamp(3rem,13vw,14rem)]"
         >
           LOCATION
-        </span>
-        <span
-          aria-hidden
-          className="title-shadow hidden w-full text-justify [text-align-last:justify] text-[clamp(2rem,8.5vw,9.5rem)] sm:block"
-        >
-          L O C A T I O N
         </span>
       </h2>
       <div
         aria-hidden
         style={{ backgroundColor: RED }}
-        className="relative left-1/2 mt-[5px] h-px w-[calc(100%+2rem)] -translate-x-1/2"
+        className="relative left-1/2 -mt-px h-px w-[calc(100%+2rem)] -translate-x-1/2 sm:mt-[7px]"
       />
 
       {/* Two-column body — map on the left, content (headline + 2-col
@@ -142,40 +209,23 @@ export default function Location() {
             </div>
           </div>
 
-          {/* CTAs — Get Directions (outlined, narrower) + Instagram (filled,
-              wider) on top, Leave a Review spans the row below. */}
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-[1fr_1.5fr] sm:gap-4">
-            <a
-              href={DIRECTIONS}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
-              style={{ borderColor: RED, color: RED }}
-            >
-              Get Directions
-            </a>
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:text-sm"
-              style={{
-                backgroundColor: RED,
-                borderColor: BLUE,
-                color: YELLOW,
-              }}
-            >
+          {/* CTAs — Get Directions (gold pill, glowing) + Instagram (filled
+              red) on top, Leave a Review spans the row below as a second gold
+              pill. The gold pills layer two SVGs: Rectangle 151 supplies the
+              wide gradient halo behind, Rectangle 152 the brighter face on
+              top, both sized proportionally beyond the button's content box so
+              the natural blur margins aren't squashed. */}
+          {/* Column gap is larger than row gap because each PillCTA carries a
+              25px glow halo on every side — a tight column gap makes the two
+              top buttons' halos overlap into one continuous smear. */}
+          <div className="mt-5 grid grid-cols-1 items-center gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-x-16 sm:gap-y-4">
+            <PillCTA href={DIRECTIONS}>Get Directions</PillCTA>
+            <PillCTA href={INSTAGRAM_URL} variant="pink">
               @cafe_mama_sons
-            </a>
-            <a
-              href={REVIEW_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border-[3px] px-5 py-3 text-center font-arialblack text-xs uppercase tracking-[0.18em] transition-transform hover:-translate-y-0.5 sm:col-span-2 sm:text-sm"
-              style={{ borderColor: RED, color: RED }}
-            >
+            </PillCTA>
+            <PillCTA href={REVIEW_URL} className="sm:col-span-2">
               Leave a Review on Google
-            </a>
+            </PillCTA>
           </div>
         </div>
       </div>
