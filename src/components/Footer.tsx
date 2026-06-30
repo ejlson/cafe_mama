@@ -1,9 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 const CENTER =
   "M0-0.3C0-0.3,464,0,1139,0s1139-0.3,1139-0.3V683H0V-0.3z";
+
+// Instagram glyph for the footer's order-online nav. 24×24 viewBox so it
+// renders crisply at any line-height.
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
+      <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.06 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.06 1.17-.25 1.8-.41 2.23a3.7 3.7 0 0 1-.9 1.38c-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.06-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.06-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.86 5.86 0 0 0-2.12 1.39A5.86 5.86 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.73 1.46 1.39 2.12.66.66 1.33 1.08 2.12 1.39.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.86 5.86 0 0 0 2.12-1.39 5.86 5.86 0 0 0 1.39-2.12c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.86 5.86 0 0 0-1.39-2.12A5.86 5.86 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.41-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88Z" />
+    </svg>
+  );
+}
+
+const ORDER_LINKS = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/cafe_mama_sons/",
+    Icon: InstagramIcon,
+  },
+];
 
 // London (Europe/London) is the cafe's actual local time — keep it correct
 // regardless of where the visitor's browser sits.
@@ -88,6 +112,10 @@ function ClockFace({ t }: { t: Time }) {
   // Container = that disc size, so the visible face edge aligns with the
   // container box and the dial SVG fills it 1:1.
   return (
+    // Clock face artwork is fixed at 715×715 with absolutely-positioned
+    // overlays up to 915px wide. The parent wrapper handles mobile scaling
+    // (see Footer return), so this container just lays out the dial at
+    // native size.
     <div className="relative aspect-square h-[715px] w-[715px] max-w-full">
       {/* shadow halo — rendered at the SVG's natural pixel size (food
           variant is 915×915, drinks is 815×815). `background-size: auto`
@@ -97,8 +125,7 @@ function ClockFace({ t }: { t: Time }) {
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[915px] w-[915px] max-w-none -translate-x-1/2 -translate-y-1/2 select-none bg-center bg-no-repeat"
         style={{
-          backgroundImage:
-            "var(--foot-clock-shadow, url('/footerclock/Ellipse%2069.svg'))",
+          backgroundImage: `var(--foot-clock-shadow, url('${cldUrl("/footerclock/Ellipse%2069.svg")}'))`,
           backgroundSize: "auto",
         }}
       />
@@ -108,8 +135,7 @@ function ClockFace({ t }: { t: Time }) {
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[765px] w-[765px] max-w-none -translate-x-1/2 -translate-y-1/2 select-none bg-center bg-no-repeat"
         style={{
-          backgroundImage:
-            "var(--foot-clock-face, url('/footerclock/Ellipse%2070.svg'))",
+          backgroundImage: `var(--foot-clock-face, url('${cldUrl("/footerclock/Ellipse%2070.svg")}'))`,
           backgroundSize: "auto",
         }}
       />
@@ -345,40 +371,27 @@ export default function Footer() {
         <path id="bouncy-path" fill="url(#footGrad)" d={CENTER} />
       </svg>
 
-      {/* top-right ordering stack — Instagram + delivery partners. Same
-          Archivo body font as the "(I think) we're open" status overlay. */}
+      {/* top-right ordering stack — Instagram + delivery partners. Each row
+          is `LABEL [ICON]`; the icon column is fixed-width so the three
+          glyphs line up vertically regardless of label length. */}
       <nav
         aria-label="Order online"
-        className="absolute right-6 top-10 z-10 flex flex-col items-end gap-2 sm:right-10 sm:top-14 lg:right-16"
+        className="absolute right-6 top-10 z-[50] flex flex-col items-end gap-2 sm:right-10 sm:top-14 lg:right-16"
       >
-        <a
-          href="https://www.instagram.com/cafe_mama_sons/"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-semibold uppercase tracking-[0.2em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70 sm:text-sm"
-        >
-          Instagram
-        </a>
-        <a
-          // Search Deliveroo for the cafe — drop in the direct store URL
-          // once the listing is live.
-          href="https://deliveroo.co.uk/search?query=Cafe+Mama+Sons"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-semibold uppercase tracking-[0.2em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70 sm:text-sm"
-        >
-          Deliveroo
-        </a>
-        <a
-          // Search Uber Eats for the cafe — drop in the direct store URL
-          // once the listing is live.
-          href="https://www.ubereats.com/gb/search?q=Cafe+Mama+%26+Sons"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-semibold uppercase tracking-[0.2em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70 sm:text-sm"
-        >
-          Uber Eats
-        </a>
+        {ORDER_LINKS.map(({ href, label, Icon }) => (
+          <a
+            key={label}
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70 sm:text-sm"
+          >
+            <span>{label}</span>
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
+              <Icon className="h-full w-full" />
+            </span>
+          </a>
+        ))}
       </nav>
 
       {/* left rail — digital readout, edge-aligned, vertically centred with clock.
@@ -410,15 +423,21 @@ export default function Footer() {
         </div>
       )}
 
-      {/* centerpiece — clock disc dead-centre */}
-      <div className="relative z-10">
+      {/* centerpiece — clock disc dead-centre. Absolute + translate guarantees
+          the wrap is centred even when its 715×715 contents overflow a
+          mobile viewport; the scale shrinks the visual on small screens so
+          the dial, halo and "we're closed" caption all fit on-screen. */}
+      <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 scale-[0.42] sm:scale-100">
         {time && <ClockFace t={time} />}
       </div>
 
-      {/* mobile-only stacked readout under the clock */}
+      {/* mobile-only stacked readout — sits between the Instagram nav and
+          the top of the clock face. Bottom-anchored on mobile would collide
+          with the GallerySpin / OpeningClock / FocusMode widget stack on
+          the right rail, so top-anchored keeps it visible and uncluttered. */}
       {time && (
         <div
-          className="font-arialblack pointer-events-none absolute bottom-16 left-1/2 z-10 -translate-x-1/2 select-none text-2xl leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
+          className="font-arialblack pointer-events-none absolute left-1/2 top-[6.5rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
         >
           {digital} · {time.tz}
         </div>

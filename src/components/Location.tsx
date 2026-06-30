@@ -45,52 +45,67 @@ function PillCTA({
   href: string;
   children: React.ReactNode;
   className?: string;
-  // gold = Get Directions / Leave a Review (gold glow, hot-pink label)
-  // pink = @cafe_mama_sons (hot-pink glow, yellow label)
+  // gold = card-coloured pill, accent-text label (Get Directions / Leave a
+  //        Review on the food tab → gold pill + hot-pink text; drinks tab →
+  //        dark-purple pill + yellow text).
+  // pink = swapped — accent-coloured pill, card-coloured label
+  //        (@cafe_mama_sons: pink pill + gold text on food; yellow pill +
+  //        dark-purple text on drinks).
+  // Both variants resolve through --loc-card / --loc-text so the buttons
+  // re-tint with the active menu tab without needing per-tab asset swaps.
   variant?: "gold" | "pink";
 }) {
-  const isPink = variant === "pink";
-  const glowSrc = isPink
-    ? "/buttons/Rectangle%20151%20pink.svg"
-    : "/buttons/Rectangle%20151.svg";
-  const faceSrc = isPink
-    ? "/buttons/Rectangle%20152%20pink.svg"
-    : "/buttons/Rectangle%20152.svg";
-  const labelColor = isPink ? YELLOW : RED;
+  // `variant` is retained on the public API so future callers can ask for a
+  // visually different pill, but both options currently render the same
+  // artwork — the gold/pink distinction was dropped in favour of a single
+  // theme-driven look.
+  void variant;
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      // Press-in animation: hover lifts the pill ~2 px and active mashes it
-      // down ~3 px + 3% scale + slight opacity drop, so click feedback feels
-      // tactile. Transform cascades to the absolute SVG layers below.
-      className={`relative block h-[72px] text-center transition-all duration-100 ease-out hover:-translate-y-0.5 active:translate-y-[3px] active:scale-[0.97] active:opacity-90 ${className}`}
+      // Interactive feedback:
+      //  • hover  → lifts 4 px and brightens the pill 8 % so the pointer feels
+      //             obviously over a clickable element (the soft blur otherwise
+      //             swallows tiny translates).
+      //  • active → mashes 3 px down, scales to 96 %, brightness back down 10 %
+      //             — reads as a physical press-in.
+      //  • focus-visible → 2 px ring in the brand colour for keyboard users.
+      // `cursor-pointer` is explicit so the cursor doesn't fall back to the
+      // CustomCursor's `data-cursor-target` default mid-hover. `isolate`
+      // scopes the inner z-stack so the halo's blur stays contained within
+      // this button's stacking context.
+      data-cursor-target
+      className={`relative isolate block h-[72px] cursor-pointer text-center outline-none transition duration-150 ease-out hover:-translate-y-1 hover:brightness-[1.08] active:translate-y-[3px] active:scale-[0.96] active:brightness-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:[--tw-ring-color:var(--foot-brand,#f4c33c)] focus-visible:[--tw-ring-offset-color:transparent] ${className}`}
     >
-      {/* glow halo */}
+      {/* Bottom layer: vertical gradient halo — brand colour at the top,
+          deep stop (matches Rectangle 151's #8E7123 food / #4C4063 drinks
+          stops exactly) at the bottom. 12 pt blur (halved from the original
+          25 pt for a crisper edge). Pushed 2 px below the face so the dark
+          portion of the gradient peeks out as a visible drop-shadow rather
+          than hiding entirely under the face. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -left-[25px] -top-[25px] block h-[122px] w-[calc(100%+50px)]"
+        className="pointer-events-none absolute -inset-x-0 -bottom-1 top-1 rounded-full blur-[9px]"
         style={{
-          backgroundImage: `url('${glowSrc}')`,
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
+          background:
+            "linear-gradient(to bottom, var(--foot-brand, #f4c33c) 0%, var(--foot-brand-deep, #8e7123) 100%)",
         }}
       />
-      {/* face */}
+      {/* Top layer: solid pill face in the brand colour, 6 pt blur (halved
+          from the original 12 pt). The softer edge sits on top of the
+          gradient halo and reads as a glassy pill rather than a hard-edged
+          button. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -left-[12px] -top-[12px] block h-[96px] w-[calc(100%+24px)]"
-        style={{
-          backgroundImage: `url('${faceSrc}')`,
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-        }}
+        className="pointer-events-none absolute inset-0 rounded-full blur-[3px]"
+        style={{ background: "var(--foot-brand, #f4c33c)" }}
       />
-      {/* label */}
+      {/* Label — sits above both blurred layers, stays sharp. */}
       <span
-        className="relative z-10 inline-flex h-full items-center justify-center whitespace-nowrap font-arialblack text-xs uppercase tracking-[0.18em] sm:text-sm"
-        style={{ color: labelColor }}
+        className="relative inline-flex h-full items-center justify-center whitespace-nowrap font-arialblack text-xs uppercase tracking-[0.18em] sm:text-sm"
+        style={{ color: RED }}
       >
         {children}
       </span>
@@ -122,7 +137,7 @@ export default function Location() {
       <h2
         aria-label="Location"
         style={{ color: RED }}
-        className="block w-full whitespace-nowrap font-arialblack leading-none text-center mt-[2px]"
+        className="block w-full whitespace-nowrap font-arialblack leading-none text-center"
       >
         <span className="sr-only">Location</span>
         {/* letter-spacing AND padding live here, NOT on the h2 — em values
@@ -132,11 +147,13 @@ export default function Location() {
             trim so the title doesn't kiss the horizontal rules. */}
         <span
           aria-hidden
-          // pl matches the tracking so `text-align: center` doesn't slide the
-          // visible ink left of true centre — `letter-spacing` puts a trailing
-          // 0.04em space after the final N that the browser counts as text
-          // width but is invisible.
-          className="title-shadow block tracking-[0.04em] pl-[0.04em] [text-box:trim-both_cap_alphabetic] pt-[0.03em] pb-[0.05em] text-[22vw] sm:text-[clamp(3rem,13vw,14rem)]"
+          // The tracked-out word is wider than its block container, so
+          // `text-align: center` has nothing to do — the line overflows from
+          // its left edge instead of straddling the centre. A small leftward
+          // translate (in em so it scales with the title font-size) nudges
+          // the visible ink back to true centre relative to the horizontal
+          // rule beneath. Adjust the value if a viewport change shifts it.
+          className="title-shadow block tracking-[0.04em] -translate-x-[calc(0.15em-3px)] [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] text-[22vw] sm:text-[clamp(3rem,13vw,14rem)]"
         >
           LOCATION
         </span>
@@ -144,7 +161,7 @@ export default function Location() {
       <div
         aria-hidden
         style={{ backgroundColor: RED }}
-        className="relative left-1/2 -mt-px h-px w-[calc(100%+2rem)] -translate-x-1/2 sm:mt-[7px]"
+        className="relative left-1/2 h-px w-[calc(100%+2rem)] -translate-x-1/2"
       />
 
       {/* Two-column body — map on the left, content (headline + 2-col

@@ -21,6 +21,7 @@ import Smooothy, { damp } from "smooothy";
 import Location from "@/components/Location";
 import { BLOG_POSTS as SHARED_BLOG_POSTS, type BlogPost as SharedBlogPost } from "@/lib/blog";
 import BestSellers from "@/components/BestSellers";
+import { cldUrl } from "@/lib/cloudinary";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother, Draggable, InertiaPlugin);
 
@@ -249,7 +250,7 @@ function MenuImagePreview({ children }: { children: ReactNode }) {
         if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
           return;
         const my = ++token;
-        img.src = d.img;
+        img.src = cldUrl(d.img);
         const natW = d.w ?? 240;
         const natH = d.h ?? 180;
         const W = 250;
@@ -532,7 +533,7 @@ function CollabMarquee({ accent }: { accent: string }) {
     <>
       <div className="relative left-1/2 w-screen -translate-x-1/2 pb-2 pt-1">
         <p
-          className="mb-1 text-center font-arialblack text-[0.85rem] uppercase tracking-[0.35em] opacity-50"
+          className="mb-1 text-center text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-[13px]"
           style={{ color: accent }}
         >
           as seen in or collaborated with
@@ -554,7 +555,7 @@ function CollabMarquee({ accent }: { accent: string }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   data-logo
-                  src={logo.src}
+                  src={cldUrl(logo.src)}
                   alt={logo.alt}
                   loading="lazy"
                   draggable={false}
@@ -683,7 +684,7 @@ function AboutUs({ accent }: { accent: string }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={i}
-                src={src}
+                src={cldUrl(src)}
                 alt=""
                 loading="lazy"
                 draggable={false}
@@ -815,7 +816,7 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={post.img}
+          src={cldUrl(post.img)}
           alt={post.title}
           className="h-64 w-full object-cover sm:h-80"
         />
@@ -876,7 +877,7 @@ function Blog({ accent }: { accent: string }) {
         // Single-word title with a fixed letter-spacing — Arial Black is too
         // wide for the old "B L O G" + text-justify rail-to-rail trick to fit
         // on one line at narrower desktops, so we set the gap explicitly.
-        className="title-shadow block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[14rem]"
+        className="title-shadow block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] sm:text-[14rem]"
       >
         BLOG
       </h2>
@@ -894,7 +895,7 @@ function Blog({ accent }: { accent: string }) {
             <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl transition-transform duration-500 group-hover:-translate-y-1">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={featured.img}
+                src={cldUrl(featured.img)}
                 alt={featured.alt}
                 loading="eager"
                 draggable={false}
@@ -905,18 +906,18 @@ function Blog({ accent }: { accent: string }) {
             <div className="flex flex-col">
               {/* "LATEST · 17 APRIL 2026" — single row, leading-none so the
                   top of these caps lines up with the top of the image to
-                  the left (the grid uses items-start). */}
-              <div className="flex flex-wrap items-baseline gap-x-3 font-arialblack text-xs uppercase tracking-[0.3em] leading-none opacity-70">
-                <span aria-hidden className="text-[11px] tracking-[0.35em]">
-                  Latest
-                </span>
+                  the left (the grid uses items-start). Font matches the
+                  menu-item allergens copy so the section reads as one
+                  consistent voice. */}
+              <div className="flex flex-wrap items-baseline gap-x-3 text-xs font-semibold uppercase leading-none tracking-wide opacity-70 sm:text-[13px]">
+                <span aria-hidden>Latest</span>
                 <span aria-hidden>·</span>
                 <time dateTime={featured.isoDate}>{featured.date}</time>
               </div>
               <h3 className="mt-3 font-arialblack text-3xl uppercase leading-[0.95] tracking-tight sm:text-5xl xl:text-6xl">
                 {featured.title}
               </h3>
-              <p className="mt-5 max-w-prose text-base leading-relaxed opacity-85 sm:text-lg">
+              <p className="mt-5 max-w-prose text-base font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-lg">
                 {featured.excerpt}
               </p>
               {/* mt-auto pushes this CTA to the bottom of the stretched
@@ -967,7 +968,7 @@ function Blog({ accent }: { accent: string }) {
                   <div className="aspect-[3/2] w-full overflow-hidden rounded-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={p.img}
+                      src={cldUrl(p.img)}
                       alt={p.alt}
                       loading="lazy"
                       decoding="async"
@@ -1458,7 +1459,7 @@ function MealDealBanner() {
 
   return (
     <div ref={root} className="relative mb-40 mt-12 sm:mb-60 sm:mt-16">
-      <audio ref={sfx} src="/sfx/rizz.mp3" preload="auto" />
+      <audio ref={sfx} src={cldUrl("/sfx/rizz.mp3")} preload="auto" />
       <div className="relative mx-auto aspect-[5/4] w-full sm:aspect-[16/10]">
         {/* video oval backdrop — kept, sat in the upper-centre */}
         <video
@@ -1468,7 +1469,7 @@ function MealDealBanner() {
           muted
           playsInline
           preload="metadata"
-          poster="/media/g-mealdeals-poster.jpg"
+          poster={cldUrl("/media/g-mealdeals-poster.jpg")}
           style={{
             WebkitMaskImage:
               "radial-gradient(ellipse 74% 72% at 50% 54%, #000 22%, rgba(0,0,0,0.5) 48%, transparent 66%)",
@@ -1476,12 +1477,12 @@ function MealDealBanner() {
               "radial-gradient(ellipse 74% 72% at 50% 54%, #000 22%, rgba(0,0,0,0.5) 48%, transparent 66%)",
           }}
         >
-          <source src="/media/videos/website%20adobo%20mushroom.mp4" type="video/mp4" />
+          <source src={cldUrl("/media/videos/website%20adobo%20mushroom.mp4")} type="video/mp4" />
         </video>
 
         <img
           data-md-item
-          src="/media/mealdeal/mealdeal-web.png"
+          src={cldUrl("/media/mealdeal/mealdeal-web.png")}
           alt="Cafe Mama meal deal tray"
           loading="lazy"
           decoding="async"
@@ -1489,7 +1490,7 @@ function MealDealBanner() {
         />
         <img
           data-md-item
-          src="/media/mealdeal/spanishlatte_clear-web.png"
+          src={cldUrl("/media/mealdeal/spanishlatte_clear-web.png")}
           alt="Spanish latte"
           loading="lazy"
           decoding="async"
@@ -1497,7 +1498,7 @@ function MealDealBanner() {
         />
         <img
           data-md-item
-          src="/media/mealdeal/jonas-web.jpg"
+          src={cldUrl("/media/mealdeal/jonas-web.jpg")}
           alt="Jonas portrait"
           loading="lazy"
           decoding="async"
@@ -1505,7 +1506,7 @@ function MealDealBanner() {
         />
         <img
           data-md-item
-          src="/media/mealdeal/jerkchicken-web.png"
+          src={cldUrl("/media/mealdeal/jerkchicken-web.png")}
           alt="Toasted sando"
           loading="lazy"
           decoding="async"
@@ -1513,7 +1514,7 @@ function MealDealBanner() {
         />
         <img
           data-md-item
-          src="/media/mealdeal/flatwhite-web.png"
+          src={cldUrl("/media/mealdeal/flatwhite-web.png")}
           alt="Flat white"
           loading="lazy"
           decoding="async"
@@ -1523,7 +1524,7 @@ function MealDealBanner() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           data-md-item
-          src="/media/word%20art/14%20MEAL%20DEAL.svg"
+          src={cldUrl("/media/word%20art/14%20MEAL%20DEAL.svg")}
           alt="£14 meal deal — all meal deals come with house-made nori crisps & a drink of your choice, available all day"
           className="pointer-events-none absolute -top-[3%] -bottom-[40%] -left-[0%] -right-[10%] z-40 object-contain"
         />
@@ -1558,6 +1559,16 @@ type BgVars = {
   // the yellow halo + face, and food pulls the pink/wine pair
   clockShadow: string;
   clockFace: string;
+  // Location-section pill CTA artwork — gold/wine on food, purple on
+  // drinks. Same Rectangle 151 (glow halo) + Rectangle 152 (face) pair
+  // as the rest of the buttons; just recoloured per tab.
+  pillGlow: string;
+  pillFace: string;
+  // Deep / dark stop of the PillCTA's bottom gradient halo. Matches the
+  // SVG mockup's bottom-of-gradient colour exactly (#8E7123 for food gold,
+  // #4C4063 for drinks purple) so the visible drop-shadow under the pill
+  // reads as the same wash regardless of which tab is active.
+  pillDeep: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1575,8 +1586,11 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ay: 1,
         // drinks: footer brand matches the drinks page (purple) background
         fbr: "#9b81c9",
-        clockShadow: "url('/footerclock/drinksmenu/Ellipse%2069.svg')",
-        clockFace: "url('/footerclock/drinksmenu/Ellipse%2070.svg')",
+        clockShadow: `url('${cldUrl("/footerclock/drinksmenu/Ellipse%2069.svg")}')`,
+        clockFace: `url('${cldUrl("/footerclock/drinksmenu/Ellipse%2070.svg")}')`,
+        pillGlow: `url('${cldUrl("/buttons/drinksmenu/Rectangle%20151.svg")}')`,
+        pillFace: `url('${cldUrl("/buttons/drinksmenu/Rectangle%20152.svg")}')`,
+        pillDeep: "#4C4063",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1595,8 +1609,11 @@ const bgVars = (isDrinks: boolean): BgVars =>
         ab: 1,
         ay: 0,
         fbr: "#f4c33c",
-        clockShadow: "url('/footerclock/Ellipse%2069.svg')",
-        clockFace: "url('/footerclock/Ellipse%2070.svg')",
+        clockShadow: `url('${cldUrl("/footerclock/Ellipse%2069.svg")}')`,
+        clockFace: `url('${cldUrl("/footerclock/Ellipse%2070.svg")}')`,
+        pillGlow: `url('${cldUrl("/buttons/Rectangle%20151.svg")}')`,
+        pillFace: `url('${cldUrl("/buttons/Rectangle%20152.svg")}')`,
+        pillDeep: "#8E7123",
       };
 
 function setBgVars(v: BgVars) {
@@ -1614,6 +1631,9 @@ function setBgVars(v: BgVars) {
   s.setProperty("--art-yellow", String(v.ay));
   s.setProperty("--foot-clock-shadow", v.clockShadow);
   s.setProperty("--foot-clock-face", v.clockFace);
+  s.setProperty("--loc-pill-glow", v.pillGlow);
+  s.setProperty("--loc-pill-face", v.pillFace);
+  s.setProperty("--foot-brand-deep", v.pillDeep);
 }
 
 export default function Menu() {
@@ -1717,6 +1737,8 @@ export default function Menu() {
           // artwork the moment the tab switch starts.
           clockShadow: to.clockShadow,
           clockFace: to.clockFace,
+          pillGlow: to.pillGlow,
+          pillFace: to.pillFace,
         }),
     });
 
@@ -1805,7 +1827,7 @@ export default function Menu() {
             data-reveal
             aria-label="Menu"
             style={{ color: theme.accent }}
-            className="title-shadow menu-title block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[0.035em] pb-[0.08em] sm:text-[14rem]"
+            className="title-shadow menu-title block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] sm:text-[14rem]"
           >
             MENU
           </h2>
@@ -1813,10 +1835,12 @@ export default function Menu() {
           {/* Line under the title, above the Food / Drinks tabs */}
           <FullRule color={theme.accent} className="mt-0" />
 
-          {/* Category tabs */}
+          {/* Category tabs — 5px breathing room above/below the tab caps so
+              the surrounding rules sit at a consistent gap. text-box trim
+              hugs the line to cap height so pt/pb match what you see. */}
           <nav
             data-reveal
-            className="mt-1 flex flex-wrap items-baseline gap-x-5 gap-y-1 sm:gap-x-10"
+            className="flex flex-wrap items-baseline gap-x-5 gap-y-1 [text-box:trim-both_cap_alphabetic] pt-[5px] pb-[5px] sm:gap-x-10"
           >
           {CATEGORIES.map((c, i) => {
             const isActive = active === c.key;
@@ -1846,7 +1870,7 @@ export default function Menu() {
         </nav>
 
           {/* Line under the Food / Drinks tabs */}
-          <FullRule color={theme.accent} className="mt-2" />
+          <FullRule color={theme.accent} className="mt-0" />
           </div>
           {/* end header rail */}
 
