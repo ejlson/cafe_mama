@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
   // Allow phones / other LAN devices to reach dev resources (HMR) so hot-reload
   // works when testing on a real device over the local network.
   allowedDevOrigins: ["192.168.1.185", "192.168.1.*"],
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: SECURITY_HEADERS }];
   },
