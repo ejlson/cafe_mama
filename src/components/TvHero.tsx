@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Full-screen retro broadcast hero. There is no TV casing in Cafe_Mama_2 —
@@ -83,7 +84,12 @@ export default function TvHero({
     <section
       ref={sectionRef}
       id="top"
-      className="fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black"
+      // pointer-events-none so the hero — which spans the entire viewport at
+      // z-40 — doesn't intercept clicks meant for the footer beneath it once
+      // the menu has scrolled out of the way. The hero has no interactive
+      // elements of its own; Navbar / MusicToggle / etc. sit at higher z and
+      // re-enable pointer events on themselves.
+      className="pointer-events-none fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black"
     >
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />
@@ -100,14 +106,14 @@ export default function TvHero({
             muted
             playsInline
             preload="auto"
-            poster={poster}
+            poster={cldUrl(poster)}
           >
-            <source src={videoSrc} type="video/mp4" />
+            <source src={cldUrl(videoSrc)} type="video/mp4" />
           </video>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={poster}
+            src={cldUrl(poster)}
             alt="Cafe Mama & Sons shopfront on Kentish Town Road"
             className="h-full w-full scale-[1.06] object-cover"
           />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BLOG_POSTS, SITE_URL } from "@/lib/blog";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * /blog — the indexable blog index. Lists every post with date, title and
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
       "News, press coverage and stories from Cafe Mama & Sons — Filipino-Japanese cafe and bakery on Kentish Town Road.",
     images: [
       {
-        url: "/media/shopfront.jpg",
+        url: cldUrl("/media/shopfront.jpg"),
         width: 1200,
         height: 630,
         alt: "Cafe Mama & Sons shopfront on Kentish Town Road, London NW1",
@@ -48,7 +49,7 @@ const COLLECTION_JSONLD = {
     headline: p.title,
     datePublished: p.isoDate,
     url: `${SITE_URL}/blog/${p.slug}`,
-    image: p.img.startsWith("http") ? p.img : `${SITE_URL}${p.img}`,
+    image: cldUrl(p.img),
   })),
 };
 
@@ -104,7 +105,7 @@ export default function BlogIndexPage() {
               >
                 <div className="relative aspect-[3/2] w-full overflow-hidden rounded-xl">
                   <Image
-                    src={post.img}
+                    src={cldUrl(post.img)}
                     alt={post.alt}
                     fill
                     sizes="(min-width: 640px) 50vw, 100vw"

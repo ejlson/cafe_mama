@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { cldUrl } from "@/lib/cloudinary";
 
 gsap.registerPlugin(useGSAP);
 
@@ -198,7 +199,7 @@ export default function CustomCursor() {
       ref={handRef}
       aria-hidden
       alt=""
-      src={over ? `/media/cursor/press${pressFrame}.png` : `/media/cursor/hand${frame}.png`}
+      src={cldUrl(over ? `/media/cursor/press${pressFrame}.png` : `/media/cursor/hand${frame}.png`)}
       draggable={false}
       className="pointer-events-none fixed left-0 top-0 z-[9999] w-12 opacity-0 drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)]"
     />

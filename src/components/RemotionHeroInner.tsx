@@ -7,6 +7,9 @@ import {
   heroDurationInFrames,
   type Caption,
 } from "@/remotion/HeroBroadcast";
+import { cldUrl } from "@/lib/cloudinary";
+
+const DEFAULT_VIDEO_SRC = cldUrl("/media/hero-draft3-web.mp4");
 
 /**
  * Live in-browser playback of the Remotion hero via @remotion/player.
@@ -21,7 +24,7 @@ import {
  * Player touches `window` on mount.
  */
 export default function RemotionHeroInner({
-  videoSrc = "/media/hero-draft3.mp4",
+  videoSrc = DEFAULT_VIDEO_SRC,
   captions = HERO_CAPTIONS,
 }: {
   videoSrc?: string;

@@ -150,7 +150,8 @@ video {
 /* Moving TV static / grain */
 .crt-static {
   z-index: 84;
-  background-image: url("/media/noise.png");
+  /* Served via Cloudinary — see scripts/upload-to-cloudinary.mjs */
+  background-image: url("https://res.cloudinary.com/mmia7qfr/image/upload/f_auto,q_auto/cafemama/media/noise.png");
   background-size: 200px 200px;
   opacity: 0.035;
   mix-blend-mode: screen;

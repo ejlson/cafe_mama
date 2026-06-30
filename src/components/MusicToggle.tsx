@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Looping background music with a music-note toggle pinned to the very
@@ -136,7 +137,7 @@ export default function MusicToggle() {
 
   return (
     <>
-      <audio ref={audioRef} src="/media/bg-music.mp4" loop preload="auto" />
+      <audio ref={audioRef} src={cldUrl("/media/bg-music.mp4")} loop preload="auto" />
       <button
         type="button"
         onClick={toggle}

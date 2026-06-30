@@ -11,6 +11,7 @@ import {
   type BlogPost,
   type BlogSegment,
 } from "@/lib/blog";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * /blog/[slug] — individual blog post page. Statically generated for every
@@ -33,7 +34,7 @@ export async function generateMetadata({
   const post = POSTS_BY_SLUG[slug];
   if (!post) return {};
   const url = `${SITE_URL}/blog/${post.slug}`;
-  const image = post.img.startsWith("http") ? post.img : `${SITE_URL}${post.img}`;
+  const image = cldUrl(post.img);
   return {
     title: post.title,
     description: post.excerpt,
@@ -93,7 +94,7 @@ function renderParagraph(p: BlogParagraph, key: number) {
 
 function articleJsonLd(post: BlogPost) {
   const url = `${SITE_URL}/blog/${post.slug}`;
-  const image = post.img.startsWith("http") ? post.img : `${SITE_URL}${post.img}`;
+  const image = cldUrl(post.img);
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -170,7 +171,7 @@ export default async function BlogPostPage({
         <figure className="mt-8">
           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl">
             <Image
-              src={post.img}
+              src={cldUrl(post.img)}
               alt={post.alt}
               fill
               priority

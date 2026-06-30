@@ -19,7 +19,7 @@ export default function Home() {
       <Navbar />
       {/* The hero is a separate fixed layer (not in the scroll flow), toggled by
           the morph transition — so the menu never peeks behind it and vice-versa. */}
-      <TvHero videoSrc="/media/hero-draft3.mp4" />
+      <TvHero videoSrc="/media/hero-draft3-web.mp4" />
       {/* Footer is pinned to the viewport BEHIND the smooth-scroll content.
           The menu card scrolls up over it; as main exits the bottom of the
           screen, the footer is revealed underneath. */}
@@ -42,14 +42,21 @@ export default function Home() {
               the footer behind it shows through the corners. */}
           <div
             data-menu-card
-            className="relative z-10 overflow-hidden"
+            // pointer-events-auto re-enables interactivity for the menu
+            // content. The parent SmoothScroll wrappers carry pointer-events-
+            // none so they don't swallow clicks meant for the fixed footer
+            // beneath them — Tailwind v4 / Chromium evaluates the descendants
+            // as inheriting that `none`, so we explicitly opt back in here.
+            className="pointer-events-auto relative z-10 overflow-hidden"
           >
             <Menu />
           </div>
         </main>
         {/* Spacer — gives ScrollSmoother runway to carry the menu card fully
-            off the top of the viewport, exposing the fixed footer beneath. */}
-        <div aria-hidden className="h-screen w-full" />
+            off the top of the viewport, exposing the fixed footer beneath.
+            pointer-events-none so it doesn't swallow clicks meant for the
+            footer's social/delivery nav once it's been revealed. */}
+        <div aria-hidden className="pointer-events-none h-screen w-full" />
       </SmoothScroll>
       {/* Full-screen hero→menu morph transition + its bottom-centre trigger. */}
       <MenuReveal />

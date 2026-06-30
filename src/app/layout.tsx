@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Archivo, Caveat, Archivo_Black } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/blog";
+import { cldUrl } from "@/lib/cloudinary";
 
 // Web-loaded Arial Black equivalent — Arial Black is a system font that isn't
 // present everywhere, so the poster headings/nav could fall back to a thinner
@@ -72,7 +73,7 @@ export const metadata: Metadata = {
     locale: "en_GB",
     images: [
       {
-        url: "/media/shopfront.jpg",
+        url: cldUrl("/media/shopfront.jpg"),
         width: 1200,
         height: 630,
         alt: "Cafe Mama & Sons shopfront on Kentish Town Road, London NW1",
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cafe Mama & Sons — Filipino-Japanese cafe & bakery, Kentish Town",
     description: DESCRIPTION,
-    images: ["/media/shopfront.jpg"],
+    images: [cldUrl("/media/shopfront.jpg")],
     creator: "@cafe_mama_sons",
     site: "@cafe_mama_sons",
   },
@@ -111,9 +112,9 @@ const RESTAURANT_JSONLD = {
   description: DESCRIPTION,
   url: SITE_URL,
   image: [
-    `${SITE_URL}/media/shopfront.jpg`,
-    `${SITE_URL}/media/g-shopfront-full.jpg`,
-    `${SITE_URL}/media/drinks/ubematcha-web.jpg`,
+    cldUrl("/media/shopfront.jpg"),
+    cldUrl("/media/g-shopfront-full.jpg"),
+    cldUrl("/media/drinks/ubematcha-web.jpg"),
   ],
   logo: `${SITE_URL}/favicon.ico`,
   email: "hello@cafemamasons.com",

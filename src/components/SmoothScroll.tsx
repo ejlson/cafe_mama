@@ -44,8 +44,12 @@ export default function SmoothScroll({
   });
 
   return (
-    <div id="smooth-wrapper" ref={wrapper}>
-      <div id="smooth-content" ref={content}>
+    // pointer-events-none on both wrappers so they don't sit on top of the
+    // fixed footer (z-0) and swallow clicks meant for the order-online nav.
+    // Children keep their default `pointer-events: auto` — pointer-events is
+    // not inherited, so the menu and every interactive child stay clickable.
+    <div id="smooth-wrapper" ref={wrapper} className="pointer-events-none">
+      <div id="smooth-content" ref={content} className="pointer-events-none">
         {children}
       </div>
     </div>

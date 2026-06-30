@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cldUrl } from "@/lib/cloudinary";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -181,7 +182,7 @@ export default function BestSellers() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={d.img}
+              src={cldUrl(d.img)}
               alt={d.name.join(" ")}
               loading="lazy"
               decoding="async"

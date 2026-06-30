@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
+import { cldUrl } from "@/lib/cloudinary";
 
 gsap.registerPlugin(useGSAP, Draggable, InertiaPlugin);
 
@@ -186,7 +187,7 @@ export default function GallerySpin() {
   return (
     <>
       {/* anime-wow sound */}
-      <audio ref={sfx} src="/sfx/anime-wow.mp3" preload="auto" />
+      <audio ref={sfx} src={cldUrl("/sfx/anime-wow.mp3")} preload="auto" />
 
       {/* ---- spinnable badge ---- */}
       <div
@@ -208,7 +209,7 @@ export default function GallerySpin() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={idx}
-            src={PHOTOS[idx]}
+            src={cldUrl(PHOTOS[idx]!)}
             alt="Café Mama & Sons — Filipino-Japanese café & bakery in Kentish Town, London"
             draggable={false}
             className="absolute left-1/2 top-1/2 h-[150%] w-[150%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
@@ -280,7 +281,7 @@ export default function GallerySpin() {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={i}
-              src="/gallery/gallery-strip.jpg"
+              src={cldUrl("/gallery/gallery-strip.jpg")}
               alt="Café Mama & Sons gallery — best sellers, the team, and the Kentish Town shop"
               loading="lazy"
               draggable={false}

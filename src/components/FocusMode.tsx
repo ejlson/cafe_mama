@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Focus mode — a WordArt toggle (above the clock) brings up a video in the
@@ -16,7 +17,7 @@ const VIDEOS = [
   "/focusvideos/JONAS%20LONGANISA.mp4",
   "/focusvideos/chilli%20chicken%20kimchi.mp4",
   "/focusvideos/mango%20mog%20final1.mp4",
-  "/focusvideos/meat%20boys.mp4",
+  "/focusvideos/meat%20boys-web.mp4",
   "/focusvideos/sando-adobo-mushroom.mp4",
   "/focusvideos/subwaysurf.mp4",
   "/focusvideos/ube%20latte%20final.mp4",
@@ -87,7 +88,7 @@ const MOCK_COMMENT_POOL_BY_VIDEO: Record<string, MockComment[]> = {
     { id: 5, user: "marko_b", text: "stop teasing me i'm at work", time: "6d", likes: 31 },
     { id: 6, user: "tina_kt", text: "the colour 🧡", time: "2d", likes: 67 },
   ],
-  "/focusvideos/meat%20boys.mp4": [
+  "/focusvideos/meat%20boys-web.mp4": [
     { id: 1, user: "henry.chua", text: "the meat boys are EATING", time: "4d", likes: 76 },
     { id: 2, user: "samtam23", text: "wtv they're doing keep doing 🔥", time: "1w", likes: 49 },
     { id: 3, user: "jacob_lee", text: "this is the sign to visit", time: "2d", likes: 22 },
@@ -702,7 +703,7 @@ export default function FocusMode() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={on ? "/media/word%20art/LockIn.png" : "/media/FAMILY-FAM--ily-FOCUS-LockIn-DoomScroll-LockIn-Doo.png"}
+          src={cldUrl(on ? "/media/word%20art/LockIn.png" : "/media/FAMILY-FAM--ily-FOCUS-LockIn-DoomScroll-LockIn-Doo.png")}
           alt={on ? "Lock in — exit focus mode" : "Doom scroll — enter focus mode"}
           draggable={false}
           className="block h-full w-full object-contain"
@@ -741,7 +742,7 @@ export default function FocusMode() {
                 ref={(el) => {
                   videoRefs.current[i] = el;
                 }}
-                src={src}
+                src={cldUrl(src)}
                 onEnded={() => i === index && advance(1)}
                 className="pointer-events-none block h-full w-full object-cover"
                 preload={preloadFor(i)}
