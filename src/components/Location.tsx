@@ -79,28 +79,33 @@ function PillCTA({
       data-cursor-target
       className={`relative isolate block h-[72px] cursor-pointer text-center outline-none transition duration-150 ease-out hover:-translate-y-1 hover:brightness-[1.08] active:translate-y-[3px] active:scale-[0.96] active:brightness-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:[--tw-ring-color:var(--foot-brand,#f4c33c)] focus-visible:[--tw-ring-offset-color:transparent] ${className}`}
     >
-      {/* Bottom layer: vertical gradient halo — brand colour at the top,
-          deep stop (matches Rectangle 151's #8E7123 food / #4C4063 drinks
-          stops exactly) at the bottom. 12 pt blur (halved from the original
-          25 pt for a crisper edge). Pushed 2 px below the face so the dark
-          portion of the gradient peeks out as a visible drop-shadow rather
-          than hiding entirely under the face. */}
+      {/* Bottom layer: vertical gradient halo using --foot-brand at top and
+          a 50% darker mix at the bottom. 9 pt blur, shifted 2 px below the
+          face so the dark portion peeks out as a drop-shadow. */}
       <span
         aria-hidden
         className="pointer-events-none absolute -inset-x-0 -bottom-1 top-1 rounded-full blur-[9px]"
         style={{
           background:
-            "linear-gradient(to bottom, var(--foot-brand, #f4c33c) 0%, var(--foot-brand-deep, #8e7123) 100%)",
+            "linear-gradient(to bottom, var(--foot-brand, #f4c33c) 0%, color-mix(in srgb, var(--foot-brand, #f4c33c) 50%, black) 100%)",
         }}
       />
-      {/* Top layer: solid pill face in the brand colour, 6 pt blur (halved
-          from the original 12 pt). The softer edge sits on top of the
-          gradient halo and reads as a glassy pill rather than a hard-edged
-          button. */}
+      {/* Top layer: solid pill face in the brand colour, 3 pt blur for the
+          soft glassy edge. */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-full blur-[3px]"
         style={{ background: "var(--foot-brand, #f4c33c)" }}
+      />
+      {/* Crisp inset stroke — sits above the blurred face so it stays sharp,
+          painted in the label colour so it defines the pill shape against
+          any background tint (especially when --foot-brand ~= page bg).
+          Positioned with inset-[8px] so the stroke floats inside the pill
+          edge rather than tracing it. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-[8px] rounded-full border-2"
+        style={{ borderColor: "var(--loc-text, #FF1353)" }}
       />
       {/* Label — sits above both blurred layers, stays sharp. */}
       <span

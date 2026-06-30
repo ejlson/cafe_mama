@@ -1564,11 +1564,6 @@ type BgVars = {
   // as the rest of the buttons; just recoloured per tab.
   pillGlow: string;
   pillFace: string;
-  // Deep / dark stop of the PillCTA's bottom gradient halo. Matches the
-  // SVG mockup's bottom-of-gradient colour exactly (#8E7123 for food gold,
-  // #4C4063 for drinks purple) so the visible drop-shadow under the pill
-  // reads as the same wash regardless of which tab is active.
-  pillDeep: string;
 };
 const bgVars = (isDrinks: boolean): BgVars =>
   isDrinks
@@ -1590,7 +1585,6 @@ const bgVars = (isDrinks: boolean): BgVars =>
         clockFace: `url('${cldUrl("/footerclock/drinksmenu/Ellipse%2070.svg")}')`,
         pillGlow: `url('${cldUrl("/buttons/drinksmenu/Rectangle%20151.svg")}')`,
         pillFace: `url('${cldUrl("/buttons/drinksmenu/Rectangle%20152.svg")}')`,
-        pillDeep: "#4C4063",
       }
     : {
         // food bg = the nav-bar / drinks-text yellow (gold), subtle radial
@@ -1613,7 +1607,6 @@ const bgVars = (isDrinks: boolean): BgVars =>
         clockFace: `url('${cldUrl("/footerclock/Ellipse%2070.svg")}')`,
         pillGlow: `url('${cldUrl("/buttons/Rectangle%20151.svg")}')`,
         pillFace: `url('${cldUrl("/buttons/Rectangle%20152.svg")}')`,
-        pillDeep: "#8E7123",
       };
 
 function setBgVars(v: BgVars) {
@@ -1633,7 +1626,6 @@ function setBgVars(v: BgVars) {
   s.setProperty("--foot-clock-face", v.clockFace);
   s.setProperty("--loc-pill-glow", v.pillGlow);
   s.setProperty("--loc-pill-face", v.pillFace);
-  s.setProperty("--foot-brand-deep", v.pillDeep);
 }
 
 export default function Menu() {
