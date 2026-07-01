@@ -197,7 +197,7 @@ export default function Location() {
 
         {/* Right column — headline, two-column description, CTAs */}
         <div className="flex flex-col" style={{ color: RED }}>
-          <h3 className="font-cheee font-arialblack uppercase leading-[0.92] text-left sm:text-right">
+          <h3 className="font-arialblack uppercase leading-[0.92] text-left sm:text-right">
             <span className="block text-[9vw] sm:text-[7rem]">Where</span>
             <span className="block text-[9vw] sm:text-[7rem]">are we?</span>
           </h3>

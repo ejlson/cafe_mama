@@ -531,17 +531,30 @@ function CollabMarquee({ accent }: { accent: string }) {
 
   return (
     <>
-      <div className="relative left-1/2 w-screen -translate-x-1/2 pb-2 pt-1">
+      <div className="relative left-1/2 w-screen -translate-x-1/2 pb-6 pt-1">
         <p
           className="mb-1 text-center text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-[13px]"
           style={{ color: accent }}
         >
           as seen in or collaborated with
         </p>
-        {/* smooothy wrapper: flex + overflow-hidden, direct children are slides */}
+        {/* smooothy wrapper: flex + overflow-hidden, direct children are slides.
+            Mask aligns the fully-opaque band with the horizontal rules that
+            frame this section: FullRule is `w-[calc(100%+2rem)]` of the
+            1500 px content container, so its max span is 1532 px (1500 +
+            2×16 px overhang). Fade spans 60 px OUTSIDE that boundary for a
+            soft dissolve past the rule ends.
+            py-10 gives the drop-shadows enough vertical room that the parent
+            menu section's overflow-hidden doesn't clip them. */}
         <div
           ref={track}
-          className="flex cursor-grab overflow-x-clip overflow-y-visible py-6 active:cursor-grabbing"
+          className="flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0, transparent calc(max(0px, (100vw - 1532px) / 2) - 60px), black max(0px, calc((100vw - 1532px) / 2)), black calc(100% - max(0px, (100vw - 1532px) / 2)), transparent calc(100% - max(0px, (100vw - 1532px) / 2) + 60px), transparent 100%)",
+            maskImage:
+              "linear-gradient(to right, transparent 0, transparent calc(max(0px, (100vw - 1532px) / 2) - 60px), black max(0px, calc((100vw - 1532px) / 2)), black calc(100% - max(0px, (100vw - 1532px) / 2)), transparent calc(100% - max(0px, (100vw - 1532px) / 2) + 60px), transparent 100%)",
+          }}
         >
           {logos.map((logo, i) => (
             <div
@@ -636,7 +649,7 @@ function AboutUs({ accent }: { accent: string }) {
       <SideRails color={accent} />
 
       <h2
-        className="font-cheee font-arialblack text-[24vw] leading-[0.8] pb-[0.2em] sm:text-[25rem]"
+        className="font-arialblack text-[24vw] leading-[0.8] pb-[0.2em] sm:text-[25rem]"
         style={{ color: accent }}
       >
         blog
@@ -877,7 +890,7 @@ function Blog({ accent }: { accent: string }) {
         // Single-word title with a fixed letter-spacing — Arial Black is too
         // wide for the old "B L O G" + text-justify rail-to-rail trick to fit
         // on one line at narrower desktops, so we set the gap explicitly.
-        className="title-shadow block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] sm:text-[14rem]"
+        className="title-shadow block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[19px] sm:text-[14rem]"
       >
         BLOG
       </h2>
