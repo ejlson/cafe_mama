@@ -3,8 +3,22 @@
 import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cldUrl } from "@/lib/cloudinary";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Brand logo mask — MUST go through Cloudinary. /public/media is gitignored,
+// so the local path 404s in production and both masked layers render
+// invisible (the "logo disappeared from the navbar" bug).
+const LOGO_MASK_URL = cldUrl("/media/logo/CAFELOGOMIRROR.png");
+const LOGO_MASK: React.CSSProperties = {
+  WebkitMaskImage: `url(${LOGO_MASK_URL})`,
+  maskImage: `url(${LOGO_MASK_URL})`,
+  WebkitMaskSize: "100% 100%",
+  maskSize: "100% 100%",
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+};
 
 const LINKS = [
   { label: "Menu", href: "#menu" },
@@ -94,29 +108,13 @@ export default function Navbar() {
           <span
             aria-hidden
             className="absolute left-[2px] top-[2px] block aspect-[7024/970] h-6 sm:left-[3px] sm:top-[3px] sm:h-8 lg:h-10"
-            style={{
-              backgroundColor: "#000",
-              WebkitMaskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
-              maskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
-              WebkitMaskSize: "100% 100%",
-              maskSize: "100% 100%",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-            }}
+            style={{ backgroundColor: "#000", ...LOGO_MASK }}
           />
           {/* yellow foreground */}
           <span
             aria-hidden
             className="relative block aspect-[7024/970] h-6 sm:h-8 lg:h-10"
-            style={{
-              backgroundColor: navColor,
-              WebkitMaskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
-              maskImage: "url(/media/logo/CAFELOGOMIRROR.png)",
-              WebkitMaskSize: "100% 100%",
-              maskSize: "100% 100%",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-            }}
+            style={{ backgroundColor: navColor, ...LOGO_MASK }}
           />
         </a>
 

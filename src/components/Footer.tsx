@@ -147,14 +147,16 @@ function ClockFace({ t }: { t: Time }) {
       >
         {statusText}
       </div>
-      {/* Cafe Mama mark, masked to the brand text colour */}
+      {/* Cafe Mama mark, masked to the brand text colour. Mask served via
+          Cloudinary — /public/media is gitignored so the local path 404s in
+          production and the mark vanishes. */}
       <span
         aria-hidden
         className="absolute left-1/2 top-1/2 block h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 opacity-30"
         style={{
           backgroundColor: "var(--foot-brand, #f4c33c)",
-          WebkitMaskImage: "url('/media/logo/CAFE%20MAMA%20SQUARE%20LOGO.png')",
-          maskImage: "url('/media/logo/CAFE%20MAMA%20SQUARE%20LOGO.png')",
+          WebkitMaskImage: `url(${cldUrl("/media/logo/CAFE MAMA SQUARE LOGO.png")})`,
+          maskImage: `url(${cldUrl("/media/logo/CAFE MAMA SQUARE LOGO.png")})`,
           WebkitMaskSize: "contain",
           maskSize: "contain",
           WebkitMaskRepeat: "no-repeat",
