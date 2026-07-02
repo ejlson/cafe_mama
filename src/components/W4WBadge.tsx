@@ -21,14 +21,18 @@ const DONATE_URL = "https://www.wavesforwater.org/donate#donate-option-anchor";
 export default function W4WBadge() {
   const [open, setOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLAnchorElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const wasPaused = useRef(false);
 
-  // idle bob — gives the drop a subtle "hanging" feel without competing with
-  // the OpeningClock's rotation directly above it.
+  // Idle bob — teardrop + pill share one tween so they hang together in
+  // perfect sync. Same 1.8s sine.inOut yoyo the drop had before.
   useGSAP(() => {
-    if (!dropRef.current) return;
-    const t = gsap.to(dropRef.current, {
+    const targets = [dropRef.current, pillRef.current].filter(
+      Boolean,
+    ) as Element[];
+    if (!targets.length) return;
+    const t = gsap.to(targets, {
       y: -6,
       duration: 1.8,
       ease: "sine.inOut",
@@ -81,25 +85,30 @@ export default function W4WBadge() {
           as a call-to-action. Text is bold gold with a stacked drop-shadow
           so it pops against any page background. */}
       <a
+        ref={pillRef}
         href={DONATE_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Donate to Waves For Water"
         className="fixed bottom-1 right-4 z-[56] inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-arialblack text-[11px] uppercase tracking-[0.22em] transition-transform hover:scale-105 sm:bottom-2 sm:right-6 sm:text-xs"
         style={{
+          // Near-clear glass — barely-there translucent tint so whatever's
+          // behind the pill shows through the backdrop-blur. The gold border,
+          // top-lit inset rim and soft gold outer glow define the pill shape
+          // on their own; text-shadow keeps the label crisp on any backdrop.
           background:
-            "linear-gradient(160deg, rgba(20,30,50,0.55) 0%, rgba(13,79,138,0.4) 100%)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          border: `1.5px solid rgba(244,195,60,0.65)`,
+            "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)",
+          backdropFilter: "blur(22px) saturate(180%)",
+          WebkitBackdropFilter: "blur(22px) saturate(180%)",
+          border: `1.5px solid rgba(244,195,60,0.75)`,
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.35), 0 0 22px rgba(244,195,60,0.35), 0 10px 24px rgba(0,0,0,0.5)",
+            "inset 0 1px 0 rgba(255,255,255,0.5), 0 0 22px rgba(244,195,60,0.4), 0 10px 24px rgba(0,0,0,0.45)",
           color: GOLD,
           textShadow:
-            "0 1px 2px rgba(0,0,0,0.75), 0 0 10px rgba(0,0,0,0.35)",
+            "0 1px 2px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55), 0 0 16px rgba(0,0,0,0.35)",
         }}
       >
-        <span aria-hidden style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }}>
+        <span aria-hidden style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))" }}>
           ♥
         </span>{" "}
         Donate
