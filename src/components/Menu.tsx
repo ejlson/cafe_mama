@@ -340,6 +340,8 @@ function ItemRow({
   registerRow?: (name: string, el: HTMLLIElement | null) => void;
 }) {
   const interactive = Boolean(item.img);
+  const hasDesc = Boolean(item.desc);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <li
@@ -350,17 +352,25 @@ function ItemRow({
       }
       className="py-1"
     >
-      {/* Mobile: name on its own line, price aligned bottom-right, no
-          dotted leader (a narrow 2-col grid killed the leader — it read
-          as 3 stray dots between wrapping words). Small viewports get
-          text-sm too, so 18-char names like "PAIN AU CHOCOLAT" fit on
-          one line inside a ~163 px column.
-          Desktop (sm+): unchanged — name · dotted leader · price on one
-          baseline. */}
-      <p className="flex flex-col items-stretch sm:flex-row sm:items-baseline sm:gap-2">
+      {/* Name + price header. On every viewport the price sits on the same
+          baseline as the name — if the name is too long to fit on one line
+          it wraps naturally and the price stays anchored to the first
+          baseline on the right. The dotted leader only makes sense on wide
+          rows so it's hidden below sm.
+          If there's a description, the whole header row doubles as a tap
+          target on mobile to toggle it open (desktop always shows the desc
+          so the button is inert there). */}
+      <button
+        type="button"
+        onClick={hasDesc ? () => setExpanded((v) => !v) : undefined}
+        aria-expanded={hasDesc ? expanded : undefined}
+        className={`flex w-full items-baseline gap-2 text-left ${
+          hasDesc ? "cursor-pointer sm:cursor-default" : ""
+        }`}
+      >
         <span
           style={{ color: body }}
-          className="font-arialblack text-sm uppercase leading-tight tracking-tight sm:text-xl"
+          className="min-w-0 flex-1 font-arialblack text-sm uppercase leading-tight tracking-tight [text-wrap:balance] sm:text-xl"
         >
           {item.name}
         </span>
@@ -371,19 +381,34 @@ function ItemRow({
         />
         <span
           style={{ color: body }}
-          className="font-arialblack mt-0.5 self-end text-[13px] leading-none sm:mt-0 sm:self-auto sm:text-xl"
+          className="shrink-0 font-arialblack text-[13px] leading-none sm:text-xl"
         >
           {item.price}
         </span>
-      </p>
+        {/* Mobile-only expand chevron — subtle, indicates this row has more
+            info. Rotates 45° when open. Hidden on rows without a desc and on
+            sm+ (where the desc is always shown). */}
+        {hasDesc && (
+          <span
+            aria-hidden
+            style={{ color: body }}
+            className={`ml-1 inline-block shrink-0 text-[13px] leading-none opacity-60 transition-transform sm:hidden ${
+              expanded ? "rotate-45" : ""
+            }`}
+          >
+            +
+          </span>
+        )}
+      </button>
 
-      {/* Description is always shown; the photo only appears as the
-          cursor-tracking preview on hover (desktop). The inline mobile
-          image was removed at the user's request. */}
+      {/* Description — mobile hides it behind the tap-to-expand toggle above.
+          sm+ always shows it because there's room on wide rows. */}
       {item.desc && (
         <p
           style={{ color: body }}
-          className="mt-1 max-w-prose text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:text-[13px]"
+          className={`mt-1 max-w-prose text-xs font-semibold uppercase leading-snug tracking-wide opacity-70 sm:block sm:text-[13px] ${
+            expanded ? "block" : "hidden"
+          }`}
         >
           {item.desc}
           {item.allergens && (
