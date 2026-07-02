@@ -78,7 +78,19 @@ export default function LoadingScreen() {
       window.setTimeout(resolve, 12000),
     );
 
-    Promise.race([Promise.all([docReady(), heroReady()]), hardCap]).then(() => {
+    // Minimum display time — on fast connections everything is ready in a
+    // few hundred ms and the cup barely started filling before the overlay
+    // vanished, which read as a glitch. 2.4s lets the crawl arc play and
+    // the brand moment register; slow connections are unaffected (readiness
+    // is what they wait on).
+    const minShow = new Promise<void>((resolve) =>
+      window.setTimeout(resolve, 2400),
+    );
+
+    Promise.all([
+      Promise.race([Promise.all([docReady(), heroReady()]), hardCap]),
+      minShow,
+    ]).then(() => {
       if (cancelled) return;
       setReady(true);
       setProgress(1);
