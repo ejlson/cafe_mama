@@ -433,8 +433,8 @@ export default function Footer() {
 
       {/* mobile-only stacked readout — sits between the Instagram nav and
           the top of the clock face. Bottom-anchored on mobile would collide
-          with the GallerySpin / OpeningClock / FocusMode widget stack on
-          the right rail, so top-anchored keeps it visible and uncluttered. */}
+          with the W4WBadge / OpeningClock / FocusMode widget stack on the
+          right rail, so top-anchored keeps it visible and uncluttered. */}
       {time && (
         <div
           className="font-arialblack pointer-events-none absolute left-1/2 top-[6.5rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"

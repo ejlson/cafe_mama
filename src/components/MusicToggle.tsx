@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Looping background music with a music-note toggle pinned to the very
@@ -25,13 +24,25 @@ const NOTE_MASK: CSSProperties = {
   maskPosition: "center",
 };
 
+// Music volume — audible over ambient chatter, still quiet enough to talk
+// over. 0.15 (the previous value) read as "did it even start?" for most
+// listeners.
+const MUSIC_VOLUME = 0.35;
+
 export default function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const startedRef = useRef(false);
+  // Tracks the user's intent — muted or playing. The audio's `paused` flag
+  // isn't a reliable source of truth: browsers can pause the track on their
+  // own (tab hidden, media session interrupt, buffering stall) and we want
+  // to resume once the interruption is over.
+  const wantsPlayingRef = useRef(false);
   const [playing, setPlaying] = useState(false);
 
   // Synthesize a brief CRT "power-on" — a low thump, a high flyback whine and
-  // a static click — via the Web Audio API, so it needs no asset.
+  // a static click — via the Web Audio API, so it needs no asset. Gains have
+  // been dialled DOWN from earlier so the music (which starts at the same
+  // instant) isn't masked for the first half-second of playback.
   const playPowerOn = () => {
     try {
       const AC =
@@ -46,7 +57,7 @@ export default function MusicToggle() {
       thump.frequency.setValueAtTime(120, now);
       thump.frequency.exponentialRampToValueAtTime(55, now + 0.25);
       tg.gain.setValueAtTime(0.0001, now);
-      tg.gain.exponentialRampToValueAtTime(0.45, now + 0.02);
+      tg.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
       tg.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
       thump.connect(tg).connect(ctx.destination);
       thump.start(now);
@@ -57,7 +68,7 @@ export default function MusicToggle() {
       whine.type = "sine";
       whine.frequency.setValueAtTime(15600, now);
       wg.gain.setValueAtTime(0.0001, now);
-      wg.gain.exponentialRampToValueAtTime(0.035, now + 0.05);
+      wg.gain.exponentialRampToValueAtTime(0.015, now + 0.05);
       wg.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
       whine.connect(wg).connect(ctx.destination);
       whine.start(now);
@@ -72,7 +83,7 @@ export default function MusicToggle() {
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       const ng = ctx.createGain();
-      ng.gain.setValueAtTime(0.22, now);
+      ng.gain.setValueAtTime(0.09, now);
       noise.connect(ng).connect(ctx.destination);
       noise.start(now);
 
@@ -82,45 +93,102 @@ export default function MusicToggle() {
     }
   };
 
-  const begin = (withPowerOn: boolean) => {
+  // Try to play the audio. Waits until the element has at least
+  // HAVE_FUTURE_DATA (readyState 3) so .play() doesn't stall on a large,
+  // still-buffering file. Returns whether play actually started.
+  const tryPlay = async (audio: HTMLAudioElement): Promise<boolean> => {
+    if (audio.readyState < 3) {
+      await new Promise<void>((resolve) => {
+        const on = () => {
+          audio.removeEventListener("canplay", on);
+          resolve();
+        };
+        audio.addEventListener("canplay", on, { once: true });
+        // safety timeout so we don't hang forever if the file never buffers
+        window.setTimeout(() => {
+          audio.removeEventListener("canplay", on);
+          resolve();
+        }, 4000);
+      });
+    }
+    try {
+      await audio.play();
+      return !audio.paused;
+    } catch {
+      return false;
+    }
+  };
+
+  const begin = async (withPowerOn: boolean) => {
     const audio = audioRef.current;
     if (!audio) return;
+    wantsPlayingRef.current = true;
     if (withPowerOn) playPowerOn();
-    audio
-      .play()
-      .then(() => setPlaying(true))
-      .catch(() => setPlaying(false));
+    const ok = await tryPlay(audio);
+    setPlaying(ok);
   };
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = 0.15;
+    audio.volume = MUSIC_VOLUME;
 
-    const startOnGesture = () => {
+    const startOnGesture = async () => {
       if (startedRef.current) return;
       startedRef.current = true;
       cleanup();
-      begin(true);
+      await begin(true);
     };
     const events = ["pointerdown", "keydown", "touchstart", "scroll"] as const;
     const cleanup = () =>
       events.forEach((e) => window.removeEventListener(e, startOnGesture));
 
-    // Optimistic autoplay; if the browser allows it, no gesture needed.
-    audio
-      .play()
-      .then(() => {
+    // Optimistic autoplay. Waits for the file to be playable so a slow first
+    // byte doesn't make it look like the music never started.
+    (async () => {
+      const ok = await tryPlay(audio);
+      if (ok) {
         startedRef.current = true;
+        wantsPlayingRef.current = true;
         setPlaying(true);
-      })
-      .catch(() => {
+      } else {
         events.forEach((e) =>
           window.addEventListener(e, startOnGesture, { passive: true }),
         );
-      });
+      }
+    })();
 
-    return cleanup;
+    // Auto-resume if the browser silently pauses the track (media session
+    // interrupt, tab returning from background, buffer stall, another page
+    // grabbing the audio focus). We only resume if the user hasn't muted.
+    const onPause = () => {
+      if (!wantsPlayingRef.current) return;
+      // Give the browser a beat before re-firing play — some pause events
+      // are immediately followed by an internal resume, and stacking .play()
+      // on top can throw AbortError.
+      window.setTimeout(() => {
+        if (!wantsPlayingRef.current) return;
+        audio.play().catch(() => {});
+      }, 200);
+    };
+    const onPlay = () => setPlaying(true);
+    const onEnded = () => {
+      // loop=true should keep it looping, but if a browser ever drops out,
+      // re-seek and go again.
+      if (!wantsPlayingRef.current) return;
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    };
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("ended", onEnded);
+
+    return () => {
+      cleanup();
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("ended", onEnded);
+    };
   }, []);
 
   const toggle = () => {
@@ -128,6 +196,7 @@ export default function MusicToggle() {
     if (!audio) return;
     startedRef.current = true;
     if (playing) {
+      wantsPlayingRef.current = false;
       audio.pause();
       setPlaying(false);
     } else {
@@ -137,7 +206,9 @@ export default function MusicToggle() {
 
   return (
     <>
-      <audio ref={audioRef} src={cldUrl("/media/bg-music.mp4")} loop preload="auto" />
+      {/* Served from /public directly so we always play the newest bounce of
+          the track — the Cloudinary-hosted copy can lag behind local edits. */}
+      <audio ref={audioRef} src="/media/videoplayback.mp3" loop preload="auto" />
       <button
         type="button"
         onClick={toggle}

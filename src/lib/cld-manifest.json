@@ -227,10 +227,10 @@
       "width": 1500,
       "height": 1000
     },
-    "/media/bg-music.mp4": {
-      "kind": "video",
-      "publicId": "cafemama/media/bg-music",
-      "ext": ".mp4",
+    "/media/videoplayback.mp3": {
+      "kind": "music",
+      "publicId": "cafemama/media/videoplayback",
+      "ext": ".mp3",
       "width": 636,
       "height": 360
     },

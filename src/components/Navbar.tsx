@@ -60,8 +60,8 @@ export default function Navbar() {
 
   const navColor = overMenu ? "var(--loc-text, #f4c33c)" : "#f4c33c";
 
-  // The Gallery link opens the spinning-badge gallery overlay (which lives in
-  // GallerySpin) via a custom event, rather than jumping to an anchor.
+  // The Gallery link opens the swipe-in gallery overlay (which lives in
+  // GalleryOverlay) via a custom event, rather than jumping to an anchor.
   const onLinkClick = (e: React.MouseEvent, href: string) => {
     if (href === "#gallery") {
       e.preventDefault();
