@@ -43,10 +43,13 @@ export default function CustomCursor() {
     const hand = handRef.current!;
     document.documentElement.classList.add("has-custom-cursor");
 
-    // preload every frame so neither animation flickers
+    // Preload every frame so neither animation flickers. Must preload the
+    // SAME Cloudinary URLs the <img> renders with — preloading the raw local
+    // paths 404s in production (/public/media is gitignored) and leaves the
+    // real frames loading cold on first hover.
     [...HAND_FRAMES, ...PRESS_FRAMES].forEach((src) => {
       const img = new Image();
-      img.src = src;
+      img.src = cldUrl(src);
     });
 
     const setOverMode = (hit: boolean) => {

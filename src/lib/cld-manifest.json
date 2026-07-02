@@ -24,26 +24,12 @@
       "width": 481,
       "height": 96
     },
-    "/buttons/Rectangle 151 pink.svg": {
-      "kind": "image",
-      "publicId": "cafemama/buttons/Rectangle_151_pink",
-      "ext": ".svg",
-      "width": 507,
-      "height": 122
-    },
     "/buttons/Rectangle 151.svg": {
       "kind": "image",
       "publicId": "cafemama/buttons/Rectangle_151",
       "ext": ".svg",
       "width": 507,
       "height": 122
-    },
-    "/buttons/Rectangle 152 pink.svg": {
-      "kind": "image",
-      "publicId": "cafemama/buttons/Rectangle_152_pink",
-      "ext": ".svg",
-      "width": 481,
-      "height": 96
     },
     "/buttons/Rectangle 152.svg": {
       "kind": "image",
@@ -228,18 +214,9 @@
       "height": 1000
     },
     "/media/videoplayback.mp3": {
-      "kind": "music",
+      "kind": "video",
       "publicId": "cafemama/media/videoplayback",
-      "ext": ".mp3",
-      "width": 636,
-      "height": 360
-    },
-    "/media/ChatGPT Image Jun 15, 2026, 05_58_33 PM.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/ChatGPT_Image_Jun_15_2026_05_58_33_PM",
-      "ext": ".png",
-      "width": 1536,
-      "height": 1024
+      "ext": ".mp3"
     },
     "/media/collabs/Canva-logo-PNG-large-size.png": {
       "kind": "image",
@@ -289,13 +266,6 @@
       "ext": ".avif",
       "width": 1200,
       "height": 630
-    },
-    "/media/cursor/ChatGPT Image Jun 24, 2026, 01_26_25 PM.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/cursor/ChatGPT_Image_Jun_24_2026_01_26_25_PM",
-      "ext": ".png",
-      "width": 1536,
-      "height": 1024
     },
     "/media/cursor/hand1.png": {
       "kind": "image",
@@ -367,96 +337,12 @@
       "width": 307,
       "height": 396
     },
-    "/media/drinks/ChatGPT Image Jun 8, 2026, 04_27_22 PM.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/ChatGPT_Image_Jun_8_2026_04_27_22_PM",
-      "ext": ".png",
-      "width": 1024,
-      "height": 1536
-    },
-    "/media/drinks/cuts/hpm_sticker.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/cuts/hpm_sticker",
-      "ext": ".png",
-      "width": 620,
-      "height": 808
-    },
-    "/media/drinks/cuts/spanishlatte_sticker.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/cuts/spanishlatte_sticker",
-      "ext": ".png",
-      "width": 620,
-      "height": 827
-    },
-    "/media/drinks/cuts/ubematcha_sticker.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/cuts/ubematcha_sticker",
-      "ext": ".png",
-      "width": 620,
-      "height": 864
-    },
-    "/media/drinks/hpm_clear-web.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/hpm_clear-web",
-      "ext": ".png",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/drinks/hpm_clear.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/hpm_clear",
-      "ext": ".png",
-      "width": 2731,
-      "height": 4096
-    },
     "/media/drinks/hpm-web.jpg": {
       "kind": "image",
       "publicId": "cafemama/media/drinks/hpm-web",
       "ext": ".jpg",
       "width": 933,
       "height": 1400
-    },
-    "/media/drinks/paper bag/ChatGPT Image Jun 8, 2026, 05_39_59 PM.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/paper_bag/ChatGPT_Image_Jun_8_2026_05_39_59_PM",
-      "ext": ".png",
-      "width": 1536,
-      "height": 1024
-    },
-    "/media/drinks/paper bag/paper_bag.webp": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/paper_bag/paper_bag",
-      "ext": ".webp",
-      "width": 500,
-      "height": 500
-    },
-    "/media/drinks/paper-bag-clean.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/paper-bag-clean",
-      "ext": ".png",
-      "width": 1000,
-      "height": 671
-    },
-    "/media/drinks/paper-bag.webp": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/paper-bag",
-      "ext": ".webp",
-      "width": 500,
-      "height": 500
-    },
-    "/media/drinks/spanishlatte_clear-web.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/spanishlatte_clear-web",
-      "ext": ".png",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/drinks/spanishlatte_clear.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/spanishlatte_clear",
-      "ext": ".png",
-      "width": 2731,
-      "height": 4096
     },
     "/media/drinks/spanishlatte-web.jpg": {
       "kind": "image",
@@ -465,33 +351,12 @@
       "width": 933,
       "height": 1400
     },
-    "/media/drinks/ubematcha_clear-web.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/ubematcha_clear-web",
-      "ext": ".png",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/drinks/ubematcha_clear.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/ubematcha_clear",
-      "ext": ".png",
-      "width": 2812,
-      "height": 4217
-    },
     "/media/drinks/ubematcha-web.jpg": {
       "kind": "image",
       "publicId": "cafemama/media/drinks/ubematcha-web",
       "ext": ".jpg",
       "width": 933,
       "height": 1400
-    },
-    "/media/drinks/ubemilk.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/drinks/ubemilk",
-      "ext": ".jpg",
-      "width": 4000,
-      "height": 6000
     },
     "/media/FAMILY-FAM--ily-FOCUS-LockIn-DoomScroll-LockIn-Doo.png": {
       "kind": "image",
@@ -500,20 +365,6 @@
       "width": 2583,
       "height": 1524
     },
-    "/media/g-longanisa-meal.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/g-longanisa-meal",
-      "ext": ".jpg",
-      "width": 1400,
-      "height": 937
-    },
-    "/media/g-longanisa-poster.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/g-longanisa-poster",
-      "ext": ".jpg",
-      "width": 900,
-      "height": 1273
-    },
     "/media/g-mealdeals-poster.jpg": {
       "kind": "image",
       "publicId": "cafemama/media/g-mealdeals-poster",
@@ -521,110 +372,12 @@
       "width": 900,
       "height": 1272
     },
-    "/media/g-sando-matcha.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/g-sando-matcha",
-      "ext": ".jpg",
-      "width": 1400,
-      "height": 474
-    },
     "/media/g-shopfront-full.jpg": {
       "kind": "image",
       "publicId": "cafemama/media/g-shopfront-full",
       "ext": ".jpg",
       "width": 1000,
       "height": 1517
-    },
-    "/media/g-shopfront-sign.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/g-shopfront-sign",
-      "ext": ".jpg",
-      "width": 850,
-      "height": 683
-    },
-    "/media/gallery/DSC07722.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/DSC07722",
-      "ext": ".jpg",
-      "width": 4128,
-      "height": 6192
-    },
-    "/media/gallery/DSC07739.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/DSC07739",
-      "ext": ".jpg",
-      "width": 4128,
-      "height": 6192
-    },
-    "/media/gallery/web/DSC07056-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSC07056-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSC07722-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSC07722-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSC07739-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSC07739-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF2296-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF2296-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF2298-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF2298-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF2472-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF2472-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF2995-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF2995-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF3015-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF3015-web",
-      "ext": ".jpg",
-      "width": 1100,
-      "height": 733
-    },
-    "/media/gallery/web/DSCF3035-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF3035-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
-    },
-    "/media/gallery/web/DSCF3052-web.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/gallery/web/DSCF3052-web",
-      "ext": ".jpg",
-      "width": 733,
-      "height": 1100
     },
     "/media/hero-draft3-web.mp4": {
       "kind": "video",
@@ -654,26 +407,12 @@
       "width": 533,
       "height": 800
     },
-    "/media/mealdeal/flatwhite.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/mealdeal/flatwhite",
-      "ext": ".png",
-      "width": 1024,
-      "height": 1536
-    },
     "/media/mealdeal/jerkchicken-web.png": {
       "kind": "image",
       "publicId": "cafemama/media/mealdeal/jerkchicken-web",
       "ext": ".png",
       "width": 533,
       "height": 800
-    },
-    "/media/mealdeal/jerkchicken.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/mealdeal/jerkchicken",
-      "ext": ".png",
-      "width": 1024,
-      "height": 1536
     },
     "/media/mealdeal/jonas-web.jpg": {
       "kind": "image",
@@ -689,13 +428,6 @@
       "width": 533,
       "height": 800
     },
-    "/media/mealdeal/mealdeal.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/mealdeal/mealdeal",
-      "ext": ".png",
-      "width": 1024,
-      "height": 1536
-    },
     "/media/mealdeal/spanishlatte_clear-web.png": {
       "kind": "image",
       "publicId": "cafemama/media/mealdeal/spanishlatte_clear-web",
@@ -703,31 +435,12 @@
       "width": 533,
       "height": 800
     },
-    "/media/mealdeal/spanishlatte_clear.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/mealdeal/spanishlatte_clear",
-      "ext": ".png",
-      "width": 2731,
-      "height": 4096
-    },
-    "/media/menu.pdf": {
-      "kind": "raw",
-      "publicId": "cafemama/media/menu.pdf",
-      "ext": ".pdf"
-    },
     "/media/musical-note.png": {
       "kind": "image",
       "publicId": "cafemama/media/musical-note",
       "ext": ".png",
       "width": 512,
       "height": 512
-    },
-    "/media/noise.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/noise",
-      "ext": ".png",
-      "width": 160,
-      "height": 160
     },
     "/media/sandos/adobo-mushroom.jpg": {
       "kind": "image",
@@ -749,13 +462,6 @@
       "ext": ".jpg",
       "width": 900,
       "height": 600
-    },
-    "/media/sandos/DSCF6237.jpg": {
-      "kind": "image",
-      "publicId": "cafemama/media/sandos/DSCF6237",
-      "ext": ".jpg",
-      "width": 6246,
-      "height": 4170
     },
     "/media/sandos/egg-mayo.jpg": {
       "kind": "image",
@@ -785,13 +491,6 @@
       "width": 1000,
       "height": 1517
     },
-    "/media/shopfront.webp": {
-      "kind": "image",
-      "publicId": "cafemama/media/shopfront",
-      "ext": ".webp",
-      "width": 1000,
-      "height": 1517
-    },
     "/media/videos/website adobo mushroom.mp4": {
       "kind": "video",
       "publicId": "cafemama/media/videos/website_adobo_mushroom",
@@ -806,59 +505,12 @@
       "width": 1798,
       "height": 1321
     },
-    "/media/word art/come-find-us-tile-purple.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/come-find-us-tile-purple",
-      "ext": ".png",
-      "width": 1921,
-      "height": 292
-    },
-    "/media/word art/come-find-us-tile-yellow.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/come-find-us-tile-yellow",
-      "ext": ".png",
-      "width": 1921,
-      "height": 292
-    },
-    "/media/word art/come-find-us-tile.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/come-find-us-tile",
-      "ext": ".png",
-      "width": 1921,
-      "height": 292
-    },
-    "/media/word art/COMEFINDUSCOMEFINDUS-COMEFINDUSCOMEFINDUS.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/COMEFINDUSCOMEFINDUS-COMEFINDUSCOMEFINDUS",
-      "ext": ".png",
-      "width": 4362,
-      "height": 468
-    },
-    "/media/word art/DoomScroll.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/DoomScroll",
-      "ext": ".png",
-      "width": 4266,
-      "height": 928
-    },
     "/media/word art/LockIn.png": {
       "kind": "image",
       "publicId": "cafemama/media/word_art/LockIn",
       "ext": ".png",
       "width": 2913,
       "height": 951
-    },
-    "/media/word art/sdf-sdf-Only-Only14.png": {
-      "kind": "image",
-      "publicId": "cafemama/media/word_art/sdf-sdf-Only-Only14",
-      "ext": ".png",
-      "width": 2652,
-      "height": 1721
-    },
-    "/sfx/anime-wow.mp3": {
-      "kind": "video",
-      "publicId": "cafemama/sfx/anime-wow",
-      "ext": ".mp3"
     },
     "/sfx/rizz.mp3": {
       "kind": "video",
