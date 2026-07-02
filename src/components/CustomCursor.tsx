@@ -59,15 +59,16 @@ export default function CustomCursor() {
       gsap.killTweensOf(hand, "scale,scaleX,scaleY,xPercent,yPercent");
       // Hand image is mirrored (scaleX:-1) and centered (-50%/-50%) on the
       // pointer. The press cursor is un-mirrored and anchored at the actual
-      // fingertip pixel (~35%, ~7% of the cropped image) so the tip sits on
-      // the pointer. transformOrigin matches that anchor so the tilt
-      // rotation pivots around the click point.
+      // fingertip pixel — measured from press1.png the tip sits at ~(44%,
+      // 20%) of the image (the PNG has transparent padding top-left), so
+      // that point rides the pointer and the finger visually touches what
+      // you click. transformOrigin matches so the tilt pivots on the tip.
       gsap.set(hand, {
         scaleX: hit ? 1 : -1,
         scaleY: 1,
-        xPercent: hit ? -35 : -50,
-        yPercent: hit ? -7 : -50,
-        transformOrigin: hit ? "35% 7%" : "50% 50%",
+        xPercent: hit ? -44 : -50,
+        yPercent: hit ? -20 : -50,
+        transformOrigin: hit ? "44% 20%" : "50% 50%",
       });
     };
 

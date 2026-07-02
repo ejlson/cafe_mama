@@ -98,8 +98,19 @@ export default function TvHero({
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />
 
-      {/* The picture tube broadcast, gently fish-eyed */}
-      <div className="power-on absolute inset-0 crt-fisheye">
+      {/* The picture tube broadcast, gently fish-eyed. The poster is ALSO
+          painted as a CSS background so a slow/stalled video stream shows
+          the shopfront photo instead of a black hole — <video poster> alone
+          goes black once the element starts buffering on flaky mobile
+          connections. */}
+      <div
+        className="power-on absolute inset-0 crt-fisheye"
+        style={{
+          backgroundImage: `url(${cldUrl(poster)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         {videoSrc ? (
           <video
             ref={videoRef}

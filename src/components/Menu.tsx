@@ -370,7 +370,12 @@ function ItemRow({
       >
         <span
           style={{ color: body }}
-          className="min-w-0 flex-1 font-arialblack text-sm uppercase leading-tight tracking-tight [text-wrap:balance] sm:text-xl"
+          // NO flex-1 here — the name must size to its content so the dotted
+          // leader (the only flex-1 item) runs the full gap from name to
+          // price. With flex-1 on both, free space split 50/50 and the dots
+          // started halfway across the row. min-w-0 still lets long names
+          // wrap inside tight columns.
+          className="min-w-0 font-arialblack text-sm uppercase leading-tight tracking-tight [text-wrap:balance] sm:text-xl"
         >
           {item.name}
         </span>
