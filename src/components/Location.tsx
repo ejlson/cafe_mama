@@ -158,7 +158,12 @@ export default function Location() {
           // translate (in em so it scales with the title font-size) nudges
           // the visible ink back to true centre relative to the horizontal
           // rule beneath. Adjust the value if a viewport change shifts it.
-          className="title-shadow block tracking-[0.04em] -translate-x-[calc(0.15em-3px)] [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] text-[22vw] sm:text-[clamp(3rem,13vw,14rem)]"
+          // LOCATION is 8 letters — twice as many glyphs as MENU/BLOG. Its
+          // mobile size has to be smaller than the 17vw the other titles use
+          // or "LOCATION" overflows the viewport (was clipping at ~22vw). 13vw
+          // × 8 letters × ~0.7em glyph width fits inside 90vw with breathing
+          // room. Desktop clamp is unchanged.
+          className="title-shadow block tracking-[0.04em] -translate-x-[calc(0.15em-3px)] [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] text-[13vw] sm:text-[clamp(3rem,13vw,14rem)]"
         >
           LOCATION
         </span>

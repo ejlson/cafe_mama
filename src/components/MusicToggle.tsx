@@ -215,10 +215,11 @@ export default function MusicToggle() {
         aria-label={playing ? "Mute background music" : "Play background music"}
         aria-pressed={playing}
         title={playing ? "Mute music" : "Play music"}
-        // z-[90] sits above the FocusMode video panel (z-[80]) so the note
-        // stays visible when Focus Mode is toggled on — otherwise the panel's
-        // bottom-left position at bottom-4 left-4 covers the toggle.
-        className="fixed bottom-3 left-3 z-[90] p-2"
+        // z-[110] sits above every other overlay on the page (FocusMode
+        // panel z-[80], MenuReveal transition z-[90], GalleryOverlay z-[95])
+        // so the note is always reachable. Only the CustomCursor (z-[9999],
+        // pointer-events-none) draws above it.
+        className="fixed bottom-3 left-3 z-[110] p-2"
       >
         {/* A single note in the navbar's gold with its hard black drop — a
             black copy of the note offset 3px/3px behind the gold one, exactly

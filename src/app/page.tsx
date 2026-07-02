@@ -12,6 +12,7 @@ import W4WBadge from "@/components/W4WBadge";
 import GalleryOverlay from "@/components/GalleryOverlay";
 import OpeningClock from "@/components/OpeningClock";
 import FocusMode from "@/components/FocusMode";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Home() {
   return (
@@ -73,6 +74,10 @@ export default function Home() {
       <OpeningClock className="fixed bottom-[9.5rem] right-6 z-[55] h-28 w-28 sm:bottom-[10.5rem] sm:h-32 sm:w-32" />
       {/* Focus mode — square video bottom-left + AI-voice narration of the script. */}
       <FocusMode />
+      {/* Full-screen loading overlay — hides the site until the hero video's
+          first frame is ready (or 6s hardcap), so users don't see a half-
+          loaded page while assets stream in. */}
+      <LoadingScreen />
     </>
   );
 }

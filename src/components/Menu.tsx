@@ -429,7 +429,16 @@ const ABOUT_IMAGES = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(
 
 // Press / collab logos for the scrolling strip. Spaces are URL-encoded.
 // `alt` names each outlet for SEO / screen readers.
-const COLLABS: { src: string; alt: string }[] = [
+// Collab / press strip. Each entry is either an image logo (uploaded to
+// Cloudinary via cldUrl) or a text badge — the press outlets we don't have
+// bitmap logos for still deserve to be on the wall. Text badges render in the
+// site's Arial Black poster type inside a rounded outline that matches the
+// image slot dimensions, so the marquee looks intentional and dense.
+type CollabItem =
+  | { src: string; alt: string }
+  | { text: string; alt: string };
+const COLLABS: CollabItem[] = [
+  // ── Image logos we already have on disk ────────────────────────────────
   { src: "/media/collabs/Canva-logo-PNG-large-size.png", alt: "Canva" },
   { src: "/media/collabs/hotdinners.jpeg", alt: "Café Mama & Sons featured in Hot Dinners" },
   { src: "/media/collabs/feedthelion.png", alt: "Café Mama & Sons featured in Feed the Lion" },
@@ -443,6 +452,37 @@ const COLLABS: { src: string; alt: string }[] = [
   },
   { src: "/media/collabs/ldn.png", alt: "Café Mama & Sons featured in LDN" },
   { src: "/media/collabs/mamali.jpeg", alt: "Café Mama & Sons featured in Mamali" },
+  // ── Text badges for outlets from the Maginhawa press coverage tracker.
+  //    Order = rough recency / prominence. Swap for image logos as they
+  //    land in public/media/collabs. ─────────────────────────────────────
+  { text: "The Infatuation", alt: "Café Mama & Sons featured in The Infatuation" },
+  { text: "BBC Good Food", alt: "Café Mama & Sons featured in BBC Good Food" },
+  { text: "Time Out", alt: "Café Mama & Sons featured in Time Out" },
+  { text: "Forbes", alt: "Café Mama & Sons featured in Forbes" },
+  { text: "The Independent", alt: "Café Mama & Sons featured in The Independent" },
+  { text: "Metro", alt: "Café Mama & Sons featured in Metro" },
+  { text: "Square Meal", alt: "Café Mama & Sons featured in Square Meal" },
+  { text: "Michelin Guide", alt: "Café Mama & Sons featured in the Michelin Guide" },
+  { text: "London Standard", alt: "Café Mama & Sons featured in the London Standard" },
+  { text: "Sainsbury's Mag", alt: "Café Mama & Sons featured in Sainsbury's Magazine" },
+  { text: "Design My Night", alt: "Café Mama & Sons featured in Design My Night" },
+  { text: "Secret London", alt: "Café Mama & Sons featured in Secret London" },
+  { text: "The Upcoming", alt: "Café Mama & Sons featured in The Upcoming" },
+  { text: "London World", alt: "Café Mama & Sons featured in London World" },
+  { text: "About Time", alt: "Café Mama & Sons featured in About Time Magazine" },
+  { text: "Tasting Britain", alt: "Café Mama & Sons featured in Tasting Britain" },
+  { text: "The Wordrobe", alt: "Café Mama & Sons featured in The Wordrobe" },
+  { text: "Living 360", alt: "Café Mama & Sons featured in Living 360" },
+  { text: "Ham & High", alt: "Café Mama & Sons featured in the Ham & High" },
+  { text: "Kentishtowner", alt: "Café Mama & Sons featured in Kentishtowner" },
+  { text: "Cheapskate", alt: "Café Mama & Sons featured in Cheapskate London" },
+  { text: "Hello Magazine", alt: "Café Mama & Sons featured in Hello Magazine" },
+  { text: "On In London", alt: "Café Mama & Sons featured in On In London" },
+  { text: "Luxury Lifestyle", alt: "Café Mama & Sons featured in Luxury Lifestyle Mag" },
+  { text: "London Post", alt: "Café Mama & Sons featured in London Post" },
+  { text: "London TV", alt: "Café Mama & Sons featured in London TV" },
+  { text: "British Baker", alt: "Café Mama & Sons featured in British Baker" },
+  { text: "MSN", alt: "Café Mama & Sons featured on MSN" },
 ];
 const LOREM = [
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -565,15 +605,30 @@ function CollabMarquee({ accent }: { accent: string }) {
                 data-p
                 className="flex h-full w-full items-center justify-center will-change-transform"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  data-logo
-                  src={cldUrl(logo.src)}
-                  alt={logo.alt}
-                  loading="lazy"
-                  draggable={false}
-                  className="max-h-full max-w-full rounded-2xl object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
-                />
+                {"src" in logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    data-logo
+                    src={cldUrl(logo.src)}
+                    alt={logo.alt}
+                    loading="lazy"
+                    draggable={false}
+                    className="max-h-full max-w-full rounded-2xl object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
+                  />
+                ) : (
+                  <span
+                    data-logo
+                    aria-label={logo.alt}
+                    className="font-arialblack flex h-full w-full items-center justify-center rounded-2xl border-2 px-3 text-center text-[11px] uppercase leading-tight tracking-[0.14em] drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)] sm:text-sm"
+                    style={{
+                      color: accent,
+                      borderColor: accent,
+                      backgroundColor: `${accent}0F`,
+                    }}
+                  >
+                    {logo.text}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -1655,7 +1710,12 @@ export default function Menu() {
   const sectionRef = useRef<HTMLElement>(null);
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      // Skip the rise-and-fade reveal on touch/small screens too — the y:60
+      // stagger read as janky on mobile devices, so on <768px we render the
+      // title, tabs and list at their final position from the start.
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const mobile = window.matchMedia("(max-width: 767px)").matches;
+      if (reduce || mobile) return;
       const targets = gsap.utils.toArray<HTMLElement>(
         "[data-reveal]",
         sectionRef.current,
@@ -1845,7 +1905,7 @@ export default function Menu() {
               hugs the line to cap height so pt/pb match what you see. */}
           <nav
             data-reveal
-            className="flex flex-wrap items-baseline gap-x-5 gap-y-1 [text-box:trim-both_cap_alphabetic] pt-[5px] pb-[5px] sm:gap-x-10"
+            className="flex flex-wrap items-baseline justify-center gap-x-5 gap-y-1 [text-box:trim-both_cap_alphabetic] pt-[5px] pb-[5px] sm:gap-x-10"
           >
           {CATEGORIES.map((c, i) => {
             const isActive = active === c.key;

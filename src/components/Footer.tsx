@@ -376,7 +376,11 @@ export default function Footer() {
           glyphs line up vertically regardless of label length. */}
       <nav
         aria-label="Order online"
-        className="absolute right-6 top-10 z-[50] flex flex-col items-end gap-2 sm:right-10 sm:top-14 lg:right-16"
+        // Mobile top offset bumped 10 → 20 so the Instagram / delivery nav
+        // clears the shopfront navbar area and sits comfortably in the
+        // footer's upper zone instead of hugging the top edge. Desktop
+        // (sm:top-14, lg:right-16) unchanged.
+        className="absolute right-6 top-20 z-[50] flex flex-col items-end gap-2 sm:right-10 sm:top-14 lg:right-16"
       >
         {ORDER_LINKS.map(({ href, label, Icon }) => (
           <a
@@ -426,8 +430,10 @@ export default function Footer() {
       {/* centerpiece — clock disc dead-centre. Absolute + translate guarantees
           the wrap is centred even when its 715×715 contents overflow a
           mobile viewport; the scale shrinks the visual on small screens so
-          the dial, halo and "we're closed" caption all fit on-screen. */}
-      <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 scale-[0.42] sm:scale-100">
+          the dial, halo and "we're closed" caption all fit on-screen. Mobile
+          scale bumped 0.42 → 0.55 so the clock reads clearly at phone
+          widths — the previous size was too tight against the horizon. */}
+      <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 scale-[0.55] sm:scale-100">
         {time && <ClockFace t={time} />}
       </div>
 
