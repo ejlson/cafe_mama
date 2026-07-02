@@ -238,20 +238,46 @@ export default function FocusMode() {
   // the @cafe_mama_sons persona. The route falls back to a canned reply if
   // ANTHROPIC_API_KEY isn't set or the API call fails, so the UX still works
   // without config.
+  // Client-side fallback pool — if /api/cafe-reply times out or errors on
+  // Cloudflare (missing API keys, cold-start), we still hand back a warm,
+  // varied reply so the thread doesn't look broken with a repeating canned
+  // line. Same voice as the server-side pool in route.ts.
+  const CLIENT_FALLBACKS = [
+    "thanks for stopping by!! 🤍",
+    "see you again soon 🥺",
+    "salamat po! 🙏",
+    "ay grabe, thank you!!",
+    "you're the best 🥹",
+    "biggest hug from cafe mama 🫂",
+    "this made our day fr 🤧",
+    "noted!! we'll see you at the counter 👀",
+    "🟣🟡 see you next time!",
+    "mahal ka namin 💛",
+  ];
+  const pickClientFallback = () =>
+    CLIENT_FALLBACKS[Math.floor(Math.random() * CLIENT_FALLBACKS.length)]!;
+
   const fetchCafeReply = async (userText: string): Promise<string> => {
+    // AbortController with a 5s timeout so a hanging /api/cafe-reply never
+    // leaves a comment thread stuck in a limbo "waiting for reply" state.
+    const ctrl = new AbortController();
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 5000);
     try {
       const r = await fetch("/api/cafe-reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: userText }),
+        signal: ctrl.signal,
       });
+      window.clearTimeout(timeoutId);
       if (!r.ok) throw new Error("non-200");
       const data = (await r.json()) as { reply?: unknown };
       if (typeof data.reply === "string" && data.reply.trim()) return data.reply.trim();
     } catch {
-      /* fall through to canned reply */
+      window.clearTimeout(timeoutId);
+      /* fall through to a randomised canned reply */
     }
-    return "thanks for stopping by!! 🤍";
+    return pickClientFallback();
   };
 
   const scheduleCafeReply = (videoUrl: string, commentId: number, userText: string) => {

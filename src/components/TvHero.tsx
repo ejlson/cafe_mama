@@ -105,7 +105,11 @@ export default function TvHero({
             loop
             muted
             playsInline
-            preload="auto"
+            // preload="metadata" — the hero video is ~33 MB via Cloudinary,
+            // and "auto" was eating a big share of the initial connection
+            // budget which read as page-wide lag. Metadata lets autoplay
+            // still fire while the poster covers the gap.
+            preload="metadata"
             poster={cldUrl(poster)}
           >
             <source src={cldUrl(videoSrc)} type="video/mp4" />
