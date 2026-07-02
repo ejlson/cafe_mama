@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Full-screen loading overlay shown until the page's critical assets have
@@ -84,8 +85,8 @@ export default function LoadingScreen() {
       <span
         className="relative block h-12 w-12 animate-[note-bounce_1.1s_ease-in-out_infinite]"
         style={{
-          WebkitMaskImage: "url(/media/musical-note.png)",
-          maskImage: "url(/media/musical-note.png)",
+          WebkitMaskImage: `url(${cldUrl("/media/musical-note.png")})`,
+          maskImage: `url(${cldUrl("/media/musical-note.png")})`,
           WebkitMaskSize: "contain",
           maskSize: "contain",
           WebkitMaskRepeat: "no-repeat",

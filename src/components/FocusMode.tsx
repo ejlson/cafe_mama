@@ -258,10 +258,12 @@ export default function FocusMode() {
     CLIENT_FALLBACKS[Math.floor(Math.random() * CLIENT_FALLBACKS.length)]!;
 
   const fetchCafeReply = async (userText: string): Promise<string> => {
-    // AbortController with a 5s timeout so a hanging /api/cafe-reply never
-    // leaves a comment thread stuck in a limbo "waiting for reply" state.
+    // AbortController with a 10s timeout so a hanging /api/cafe-reply never
+    // leaves a comment thread stuck waiting — but generous enough that a
+    // Gemini cold start through the Worker doesn't get cut off and dumped
+    // to a canned reply when a real one was seconds away.
     const ctrl = new AbortController();
-    const timeoutId = window.setTimeout(() => ctrl.abort(), 5000);
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 10000);
     try {
       const r = await fetch("/api/cafe-reply", {
         method: "POST",

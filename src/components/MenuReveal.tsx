@@ -56,11 +56,12 @@ export default function MenuReveal() {
       render();
 
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      // Touch devices skip the wave morph entirely — that transition leans on
-      // ScrollSmoother (absent on touch) and is fragile on phones. They get a
-      // plain instant hide/show with native scroll instead. `simple` covers both.
       const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
-      const simple = reduce || isTouch;
+      // Touch runs the full wave morph too — every lock/scroll call below has
+      // a native-scroll fallback (overflow:hidden / window.scrollTo), so the
+      // transition doesn't actually need ScrollSmoother. Only users who asked
+      // for reduced motion get the instant hide/show.
+      const simple = reduce;
       const sm = () => ScrollSmoother.get();
       let at: "hero" | "menu" = "hero";
       let busy = false;
@@ -109,19 +110,28 @@ export default function MenuReveal() {
       const hideBtn = () =>
         gsap.to(btnRef.current, { autoAlpha: 0, duration: 0.2, overwrite: true });
 
-      // A quick staggered sweep of every point to `target` (0 = cover, 100 =
-      // uncover) — each point on its own random delay so the shape keeps morphing.
+      // A staggered sweep of every point to `target` (0 = cover, 100 =
+      // uncover) — each point on its own random delay so the shape keeps
+      // morphing. Easing differs by direction: the cover is a confident,
+      // symmetric power3.inOut (the page is leaving — commit to it); the
+      // uncover is expo.out, all its speed up front then a long gentle
+      // settle, so the incoming section reads as "landing" rather than
+      // sliding past at constant speed.
       const sweep = (target: number) => {
+        const covering = target === 0;
         const tl = gsap.timeline({
           onUpdate: render,
-          defaults: { ease: "power2.inOut", duration: 0.4 },
+          defaults: {
+            ease: covering ? "power3.inOut" : "expo.out",
+            duration: covering ? 0.45 : 0.6,
+          },
         });
         const pd = Array.from(
           { length: NUM_POINTS },
-          (_, j) => (j / (NUM_POINTS - 1)) * 0.1 + Math.random() * 0.14,
+          (_, j) => (j / (NUM_POINTS - 1)) * 0.08 + Math.random() * 0.1,
         );
         layers.forEach((layer, i) => {
-          const pathDelay = 0.1 * (target === 0 ? i : layers.length - 1 - i);
+          const pathDelay = 0.08 * (covering ? i : layers.length - 1 - i);
           layer.pts.forEach((_, j) => {
             tl.to(layer.pts, { [j]: target }, pd[j] + pathDelay);
           });
@@ -131,6 +141,8 @@ export default function MenuReveal() {
 
       // Freeze → cover → swap layers (under cover) → uncover. The page stays
       // frozen the whole time, so a section only appears once it's uncovered.
+      // No dead beat between cover and uncover — the swap happens on the same
+      // frame the cover completes, keeping the whole move under ~1.2s.
       const transition = (swap: () => void, done: () => void) => {
         busy = true;
         if (rootRef.current) rootRef.current.style.pointerEvents = "auto";
@@ -145,7 +157,6 @@ export default function MenuReveal() {
           })
           .add(sweep(0))
           .add(swap)
-          .to({}, { duration: 0.05 })
           .add(sweep(100));
       };
 
@@ -184,6 +195,13 @@ export default function MenuReveal() {
           () => {
             at = "menu";
             setLocked(false); // unlock menu scrolling
+            // Native scroll (no ScrollSmoother on touch): recompute
+            // ScrollTrigger start/end positions now the menu is laid out, so
+            // scroll-driven animations fire at the right spots.
+            if (isTouch)
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => ScrollTrigger.refresh()),
+              );
             after?.();
           },
         );

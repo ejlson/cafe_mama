@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
  * Looping background music with a music-note toggle pinned to the very
@@ -12,10 +13,14 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
  * first time playback begins we also fire a short synthesized CRT power-on
  * sound, so the page "switches on" like the TV in the hero.
  */
-// Mask the note PNG so we can paint it any solid colour (gold fill + black drop).
+// Mask the note PNG so we can paint it any solid colour (gold fill + black
+// drop). MUST be served via Cloudinary — /public/media is gitignored, so the
+// local path 404s in production and the masked note renders invisible (only
+// the unmasked mute-slash showed).
+const NOTE_URL = cldUrl("/media/musical-note.png");
 const NOTE_MASK: CSSProperties = {
-  WebkitMaskImage: "url(/media/musical-note.png)",
-  maskImage: "url(/media/musical-note.png)",
+  WebkitMaskImage: `url(${NOTE_URL})`,
+  maskImage: `url(${NOTE_URL})`,
   WebkitMaskSize: "contain",
   maskSize: "contain",
   WebkitMaskRepeat: "no-repeat",
@@ -206,9 +211,15 @@ export default function MusicToggle() {
 
   return (
     <>
-      {/* Served from /public directly so we always play the newest bounce of
-          the track — the Cloudinary-hosted copy can lag behind local edits. */}
-      <audio ref={audioRef} src="/media/videoplayback.mp3" loop preload="auto" />
+      {/* Served via Cloudinary — /public/media is gitignored so the local
+          file never reaches production. If the track is re-bounced, re-run
+          scripts/upload-to-cloudinary.mjs so the CDN copy stays current. */}
+      <audio
+        ref={audioRef}
+        src={cldUrl("/media/videoplayback.mp3")}
+        loop
+        preload="auto"
+      />
       <button
         type="button"
         onClick={toggle}
