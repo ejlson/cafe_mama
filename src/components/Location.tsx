@@ -107,9 +107,11 @@ function PillCTA({
         className="pointer-events-none absolute inset-[8px] rounded-full border-2"
         style={{ borderColor: "var(--loc-text, #FF1353)" }}
       />
-      {/* Label — sits above both blurred layers, stays sharp. */}
+      {/* Label — sits above both blurred layers, stays sharp. Mobile drops
+          to 10px + tighter tracking so "@cafe_mama_sons" fits a half-width
+          (~160px) pill without clipping. */}
       <span
-        className="relative inline-flex h-full items-center justify-center whitespace-nowrap font-arialblack text-xs uppercase tracking-[0.18em] sm:text-sm"
+        className="relative inline-flex h-full items-center justify-center whitespace-nowrap font-arialblack text-[10px] uppercase tracking-[0.1em] sm:text-sm sm:tracking-[0.18em]"
         style={{ color: RED }}
       >
         {children}
@@ -202,28 +204,36 @@ export default function Location() {
 
         {/* Right column — headline, two-column description, CTAs */}
         <div className="flex flex-col" style={{ color: RED }}>
+          {/* "Where are we?" — one line on mobile (7.5vw fits the full phrase
+              inside a 375px viewport), two stacked lines from sm: up where the
+              7rem poster size needs the split. */}
           <h3 className="font-arialblack uppercase leading-[0.92] text-left sm:text-right">
-            <span className="block text-[9vw] sm:text-[7rem]">Where</span>
-            <span className="block text-[9vw] sm:text-[7rem]">are we?</span>
+            <span className="block whitespace-nowrap text-[7.5vw] sm:hidden">
+              Where are we?
+            </span>
+            <span className="hidden sm:block sm:text-[7rem]">Where</span>
+            <span className="hidden sm:block sm:text-[7rem]">are we?</span>
           </h3>
 
           {/* Two-column description — left col is the address + hours, right
-              col is the brand copy. Body type matches the menu's allergen /
-              category-blurb pattern: Archivo (the page body font),
-              text-[11px] sm:text-xs, font-semibold, uppercase, tracking-wide,
-              opacity-70. */}
-          <div className="mt-5 grid gap-4 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:mt-8 sm:grid-cols-2 sm:gap-7 sm:text-xs">
-            <div className="space-y-3 sm:space-y-4">
+              col is the brand copy. Mobile shows a single condensed pair of
+              lines (address+hours / one-liner) so the section doesn't run the
+              full screen; the extended copy appears from sm: up. */}
+          <div className="mt-4 grid gap-3 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-90 sm:mt-8 sm:grid-cols-2 sm:gap-7 sm:text-xs">
+            <div className="space-y-2 sm:space-y-4">
               <p>
                 {ADDRESS}. A corner spot between Camden Lock and Kentish Town
                 Station — the bright shopfront is hard to miss.
               </p>
-              <p>
+              <p className="hidden sm:block">
                 Open Monday to Friday from 8am, Saturday and Sunday from 9am.
                 Kitchen serves all-day breakfast meals and sandos until close.
               </p>
+              <p className="sm:hidden">
+                Open Mon–Fri from 8am, Sat–Sun from 9am.
+              </p>
             </div>
-            <div className="space-y-3 sm:space-y-4">
+            <div className="hidden space-y-4 sm:block">
               <p>
                 Filipino-Japanese sandos, all-day pandesal breakfast meals,
                 house drinks, and freshly-baked goods. Made by mama, served
@@ -245,12 +255,16 @@ export default function Location() {
           {/* Column gap is larger than row gap because each PillCTA carries a
               25px glow halo on every side — a tight column gap makes the two
               top buttons' halos overlap into one continuous smear. */}
-          <div className="mt-5 grid grid-cols-1 items-center gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-x-16 sm:gap-y-4">
+          {/* Two columns on every viewport: Get Directions + @cafe_mama_sons
+              side by side, Leave a Review spanning the full row beneath.
+              Mobile column gap is tight (the pills' glow halos are scaled by
+              the button size, which is smaller on phones). */}
+          <div className="mt-5 grid grid-cols-2 items-center gap-x-4 gap-y-3 sm:mt-10 sm:gap-x-16 sm:gap-y-4">
             <PillCTA href={DIRECTIONS}>Get Directions</PillCTA>
             <PillCTA href={INSTAGRAM_URL} variant="pink">
               @cafe_mama_sons
             </PillCTA>
-            <PillCTA href={REVIEW_URL} className="sm:col-span-2">
+            <PillCTA href={REVIEW_URL} className="col-span-2">
               Leave a Review on Google
             </PillCTA>
           </div>
