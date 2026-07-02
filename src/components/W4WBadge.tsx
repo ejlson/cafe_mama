@@ -74,23 +74,35 @@ export default function W4WBadge() {
   return (
     <>
       {/* Standalone DONATE pill — sits UNDER the teardrop, slightly overlapping
-          its round belly so they read as one unit. z-[56] > teardrop's z-[55]
-          so the pill always floats on top of the overlap. Right-edge lines up
-          with the teardrop's right edge; bottom offset is small so the pill
-          hugs the bottom of the viewport with ~20px of overlap into the drop. */}
+          its round belly so they read as one unit. Same iOS-liquid-glass
+          treatment as the info card: dark blue-tinted translucent base,
+          backdrop-blur that picks up whatever's behind it, thin gold-tinted
+          border + top-lit rim, and a soft outer gold glow so it still reads
+          as a call-to-action. Text is bold gold with a stacked drop-shadow
+          so it pops against any page background. */}
       <a
         href={DONATE_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Donate to Waves For Water"
-        className="fixed bottom-1 right-4 z-[56] inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-arialblack text-[11px] uppercase tracking-[0.2em] shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-transform hover:scale-105 sm:bottom-2 sm:right-6 sm:text-xs"
+        className="fixed bottom-1 right-4 z-[56] inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-arialblack text-[11px] uppercase tracking-[0.22em] transition-transform hover:scale-105 sm:bottom-2 sm:right-6 sm:text-xs"
         style={{
-          background: GOLD,
-          color: "#0d4f8a",
-          border: "2px solid #ffffff",
+          background:
+            "linear-gradient(160deg, rgba(20,30,50,0.55) 0%, rgba(13,79,138,0.4) 100%)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: `1.5px solid rgba(244,195,60,0.65)`,
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.35), 0 0 22px rgba(244,195,60,0.35), 0 10px 24px rgba(0,0,0,0.5)",
+          color: GOLD,
+          textShadow:
+            "0 1px 2px rgba(0,0,0,0.75), 0 0 10px rgba(0,0,0,0.35)",
         }}
       >
-        <span aria-hidden>♥</span> Donate
+        <span aria-hidden style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }}>
+          ♥
+        </span>{" "}
+        Donate
       </a>
 
       {/* teardrop badge */}
