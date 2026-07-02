@@ -142,8 +142,6 @@ const BAKED: Item[] = [
   { name: "Ube Bow", price: "4.90" },
   { name: "Ube Pain Au Chocolat", price: "5.50" },
   { name: "Pain Au Chocolat", price: "3.00" },
-  { name: "Peanutsal", price: "4.00"},
-  { name: "Gianduja", price: "5.50"},
   { name: "Banana Pudding", price: "5.50" },
 ];
 
@@ -1388,7 +1386,11 @@ function GroupBlock({
       </div>
       {/* rule under the header + blurb */}
       <FullRule color={accent} className="mt-2" />
-      <ul className={`mt-3 ${twoCol ? "sm:grid sm:grid-cols-2 sm:gap-x-14" : ""}`}>
+      {/* Two-column list on ALL screen sizes when the group is Food/Drinks —
+          previously only kicked in at sm:. On mobile a single column was
+          leaving the menu feeling long and empty; two cols pack the items
+          into a scannable grid without pushing the type below legibility. */}
+      <ul className={`mt-3 ${twoCol ? "grid grid-cols-2 gap-x-4 sm:gap-x-14" : ""}`}>
         {group.items.map((it) => (
           <ItemRow
             key={it.name}
