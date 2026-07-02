@@ -1,47 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cldUrl } from "@/lib/cloudinary";
 
 /**
- * Full-screen loading overlay: a cup (the sketch-style rounded trapezoid,
- * black outline) on the food-menu gold, filling bottom-up with the drinks
- * menu's ube purple. Motion follows Emil Kowalski's principles:
+ * Full-screen loading overlay: a jug pours ube (drinks-menu purple) into a
+ * wide, round sketch-style cup on the food-menu gold, with the square Cafe
+ * Mama logo printed on the glass and a three-dot loading indicator beneath.
  *
- *  - The fill is REAL feedback, not decoration: it crawls to ~90% on a long
- *    decelerating curve while assets stream, then sprints to 100% with a
- *    short confident ease the moment the page is actually ready — so the
- *    animation's story matches what the browser is doing.
- *  - Custom cubic-beziers, nothing linear: crawl uses an easeOutQuint-style
- *    curve (fast early progress, long settle), completion uses
- *    cubic-bezier(0.32, 0.72, 0, 1) — his signature swift-in gentle-out.
- *  - The liquid surface is a gently looping wave (pure transform, GPU-only),
- *    disabled under prefers-reduced-motion.
- *
- * Ready = document `load` + hero <video> first frame, hard-capped at 6s so a
- * slow asset can never hold the user hostage.
+ * Motion (per Emil Kowalski's standards, .agents/skills/review-animations):
+ *  - The fill is real feedback: crawls to ~90% on a long ease-out while
+ *    assets stream, sprints to 100% with cubic-bezier(0.32,0.72,0,1) when
+ *    the page is actually ready. Then the stream shuts off (scaleY from the
+ *    spout), the jug rights itself, and the overlay fades.
+ *  - Constant motions (jug bob, dot pulse) are gentle and loop linearly;
+ *    everything else is transform/opacity only.
+ *  - prefers-reduced-motion: bob/dots/stream-wiggle stop; the fill (which
+ *    communicates progress) remains.
  */
 
-// Food-menu gold (--wave-f0 for the food palette in Menu.tsx).
-const GOLD = "#fbd400";
-// Food-menu accent — the pink/red used for menu text on gold.
-const PINK = "#FF1353";
-// Drinks-menu ube palette (--wave f0/f1/b1 for drinks in Menu.tsx).
-const UBE_LIGHT = "#c4afe6";
+const GOLD = "#fbd400"; // food-menu background
+const PINK = "#FF1353"; // food-menu accent
+const UBE_LIGHT = "#c4afe6"; // drinks-menu palette
 const UBE = "#9b81c9";
 const UBE_DEEP = "#7e63b0";
 
-// Cup interior: top edge y=30, floor y=240 → 210 units of fill travel.
-const FILL_TRAVEL = 210;
+// Cup interior: top y=76, floor ~y=282 → fill travel in viewBox units.
+const FILL_TRAVEL = 204;
+
+const LOGO_URL = cldUrl("/media/logo/CAFE MAMA SQUARE LOGO.png");
 
 export default function LoadingScreen() {
   const [gone, setGone] = useState(false);
   const [fading, setFading] = useState(false);
-  // 0 → empty cup, 1 → full. Drives a translateY on the liquid group.
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
 
-  // Kick the crawl on the first paint so the 4s CSS transition has a state
-  // change to animate (0 → 0.9).
+  // Kick the crawl on first paint so the long transition has a state change.
   useEffect(() => {
     const id = requestAnimationFrame(() => setProgress(0.9));
     return () => cancelAnimationFrame(id);
@@ -61,7 +56,6 @@ export default function LoadingScreen() {
           v.addEventListener("canplay", () => resolve(), { once: true });
           v.addEventListener("error", () => resolve(), { once: true });
         }, 100);
-        // stop polling for the element after 2s (static hero fallback)
         window.setTimeout(() => window.clearInterval(iv), 2000);
       });
 
@@ -78,15 +72,13 @@ export default function LoadingScreen() {
 
     Promise.race([Promise.all([docReady(), heroReady()]), hardCap]).then(() => {
       if (cancelled) return;
-      // Sprint the fill to 100% (0.45s), let the full cup register for a
-      // beat, then fade the overlay away.
       setReady(true);
       setProgress(1);
       window.setTimeout(() => {
         if (cancelled) return;
         setFading(true);
         window.setTimeout(() => setGone(true), 400);
-      }, 650);
+      }, 700);
     });
 
     return () => {
@@ -99,72 +91,110 @@ export default function LoadingScreen() {
   return (
     <div
       aria-hidden
-      className={`fixed inset-0 z-[9998] flex flex-col items-center justify-center gap-8 transition-opacity duration-[400ms] ease-out ${fading ? "pointer-events-none opacity-0" : "opacity-100"}`}
+      data-ready={ready || undefined}
+      className={`ls-root fixed inset-0 z-[9998] flex flex-col items-center justify-center gap-6 transition-opacity duration-[400ms] ease-out ${fading ? "pointer-events-none opacity-0" : "opacity-100"}`}
       style={{ backgroundColor: GOLD }}
     >
-      <svg
-        width="150"
-        height="195"
-        viewBox="0 0 200 260"
-        fill="none"
-        className="block"
-      >
-        <defs>
-          {/* Ube gradient — light at the surface, deep at the cup floor. */}
-          <linearGradient id="ls-ube" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={UBE_LIGHT} />
-            <stop offset="55%" stopColor={UBE} />
-            <stop offset="100%" stopColor={UBE_DEEP} />
-          </linearGradient>
-          {/* Interior of the cup, inset from the outline so the liquid never
-              bleeds over the stroke. */}
-          <clipPath id="ls-cup-clip">
-            <path d="M44 28 L156 28 L143 234 Q142 241 135 242 Q100 246 65 242 Q58 241 57 234 Z" />
-          </clipPath>
-        </defs>
+      <div className="relative">
+        <svg width="230" height="283" viewBox="0 0 260 320" fill="none">
+          <defs>
+            <linearGradient id="ls-ube" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={UBE_LIGHT} />
+              <stop offset="55%" stopColor={UBE} />
+              <stop offset="100%" stopColor={UBE_DEEP} />
+            </linearGradient>
+            {/* Cup interior — hugs the stroke's inner edge so the liquid
+                meets the outline with no yellow gap. */}
+            <clipPath id="ls-cup-clip">
+              <path d="M53 76 L207 76 L196 264 Q195 277 182 278.5 Q130 284 78 278.5 Q65 277 64 264 Z" />
+            </clipPath>
+          </defs>
 
-        {/* Liquid — a group that rises with progress. Inside it, a
-            double-width wave strip loops horizontally (transform-only) so the
-            surface reads as liquid, not a rising rectangle. */}
-        <g clipPath="url(#ls-cup-clip)">
-          <g
-            style={{
-              transform: `translateY(${(1 - progress) * FILL_TRAVEL}px)`,
-              // Crawl: long decelerating ease (fast early, gentle settle).
-              // Completion: Kowalski's swift cubic-bezier(0.32,0.72,0,1).
-              transition: ready
-                ? "transform 0.45s cubic-bezier(0.32, 0.72, 0, 1)"
-                : "transform 4s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-          >
-            {/* Wave surface + body. Path starts at the cup's top (y=22 in
-                group space) so translateY(0) = full cup. 400 wide = two wave
-                periods; the loop shifts it -200px for a seamless cycle. */}
-            <path
-              className="ls-wave"
-              d="M0 30 Q 25 22 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 V 300 H 0 Z"
-              fill="url(#ls-ube)"
-            />
+          {/* Liquid — rises with progress; wavy surface loops horizontally. */}
+          <g clipPath="url(#ls-cup-clip)">
+            <g
+              style={{
+                transform: `translateY(${(1 - progress) * FILL_TRAVEL}px)`,
+                transition: ready
+                  ? "transform 0.45s cubic-bezier(0.32, 0.72, 0, 1)"
+                  : "transform 4s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            >
+              <path
+                className="ls-wave"
+                d="M0 78 Q 25 70 50 78 T 100 78 T 150 78 T 200 78 T 250 78 T 300 78 T 350 78 T 400 78 V 400 H 0 Z"
+                fill="url(#ls-ube)"
+              />
+            </g>
           </g>
-        </g>
 
-        {/* Cup outline — drawn AFTER the liquid so the stroke stays crisp on
-            top. Rounded trapezoid matching the brand sketch. */}
-        <path
-          d="M40 22 Q36 22 36.5 28 L50 236 Q51 245 60 246 Q100 251 140 246 Q149 245 150 236 L163.5 28 Q164 22 160 22 Q100 15 40 22 Z"
-          stroke="#000"
-          strokeWidth="7"
-          strokeLinejoin="round"
-          fill="none"
+          {/* Pour stream — collapses from the spout when ready. */}
+          <path
+            className="ls-stream"
+            d="M150 30 L162 30 L158 120 Q154 128 150 120 Z"
+            fill="url(#ls-ube)"
+          />
+
+          {/* Jug — tilted top-right, gently bobbing while it pours; rights
+              itself when the cup is full. transform-box keeps the rotation
+              origin on the jug itself. */}
+          <g className="ls-jug" transform="translate(150 36)">
+            <g className="ls-jug-tilt">
+              <path
+                d="M0 0 L12 -10 L52 -10 Q62 -10 62 0 L62 30 Q62 40 52 40 L10 40 Q0 40 0 30 Z"
+                fill={GOLD}
+                stroke="#000"
+                strokeWidth="7"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M62 4 Q80 8 77 19 Q74 30 62 27"
+                fill="none"
+                stroke="#000"
+                strokeWidth="7"
+                strokeLinecap="round"
+              />
+            </g>
+          </g>
+
+          {/* Cup outline — wide, round, drawn last so the stroke stays crisp. */}
+          <path
+            d="M52 68 Q44 68 44.8 76 L56 266 Q57 280 71 282 Q130 288 189 282 Q203 280 204 266 L215.2 76 Q216 68 208 68 Q130 61 52 68 Z"
+            stroke="#000"
+            strokeWidth="8"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+
+        {/* Square Cafe Mama logo, printed on the glass. */}
+        <span
+          className="absolute left-1/2 top-[58%] h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2"
+          style={{
+            backgroundColor: "#000",
+            opacity: 0.82,
+            WebkitMaskImage: `url(${LOGO_URL})`,
+            maskImage: `url(${LOGO_URL})`,
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            maskPosition: "center",
+          }}
         />
-      </svg>
+      </div>
 
-      <span
-        className="font-arialblack text-[11px] uppercase tracking-[0.5em] sm:text-xs"
-        style={{ color: PINK }}
-      >
-        Now brewing
-      </span>
+      {/* Three-dot loading indicator. */}
+      <div className="flex gap-2">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="ls-dot h-[9px] w-[9px] rounded-full"
+            style={{ backgroundColor: PINK, animationDelay: `${i * 160}ms` }}
+          />
+        ))}
+      </div>
 
       <style>{`
         .ls-wave {
@@ -175,8 +205,36 @@ export default function LoadingScreen() {
           from { transform: translateX(0); }
           to   { transform: translateX(-200px); }
         }
+        /* Jug: slow, tiny rock around the pouring tilt. */
+        .ls-jug-tilt {
+          transform: rotate(-32deg);
+          transform-box: fill-box;
+          transform-origin: 20% 80%;
+          animation: ls-jug-bob 2.6s ease-in-out infinite;
+          transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        @keyframes ls-jug-bob {
+          0%, 100% { transform: rotate(-32deg); }
+          50%      { transform: rotate(-29deg); }
+        }
+        /* Stream: anchored at the spout; collapses downward when done. */
+        .ls-stream {
+          transform-box: fill-box;
+          transform-origin: top;
+          transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease-out;
+        }
+        /* Ready: shut off the pour, right the jug. */
+        .ls-root[data-ready] .ls-stream { transform: scaleY(0); opacity: 0; }
+        .ls-root[data-ready] .ls-jug-tilt { animation: none; transform: rotate(-12deg); }
+        .ls-dot {
+          animation: ls-dot-pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes ls-dot-pulse {
+          0%, 100% { opacity: 0.25; transform: translateY(0); }
+          35%      { opacity: 1;    transform: translateY(-3px); }
+        }
         @media (prefers-reduced-motion: reduce) {
-          .ls-wave { animation: none; }
+          .ls-wave, .ls-jug-tilt, .ls-dot { animation: none; }
         }
       `}</style>
     </div>

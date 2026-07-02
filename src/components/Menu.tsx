@@ -1097,6 +1097,20 @@ function CafeDescription({ accent }: { accent: string }) {
       };
       measure();
 
+      // Entrance: words SLIDE in horizontally from alternating sides as the
+      // section scrolls into view (restores the slide-in that was dropped in
+      // the Arial Black titles pass). Animates xPercent + autoAlpha, which
+      // compose with the physics engine below — physics owns `x`, so the two
+      // never fight. ease-out + 40ms stagger per the animation standards.
+      gsap.from(words, {
+        xPercent: (i) => (i % 2 === 0 ? -45 : 45),
+        autoAlpha: 0,
+        duration: 0.9,
+        ease: "power3.out",
+        stagger: 0.04,
+        scrollTrigger: { trigger: box, start: "top 85%", once: true },
+      });
+
       const dragging = new Set<HTMLElement>();
       let clientX = -9999;
       let clientY = -9999;
