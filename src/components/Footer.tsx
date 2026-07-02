@@ -440,10 +440,13 @@ export default function Footer() {
       {/* mobile-only stacked readout — sits between the Instagram nav and
           the top of the clock face. Bottom-anchored on mobile would collide
           with the W4WBadge / OpeningClock / FocusMode widget stack on the
-          right rail, so top-anchored keeps it visible and uncluttered. */}
+          right rail, so top-anchored keeps it visible and uncluttered.
+          top pushed 6.5 → 11 so the "HH:MM · BST" line clears the
+          Instagram / delivery nav (which sits at top-20 = 80px on mobile)
+          with comfortable breathing room. */}
       {time && (
         <div
-          className="font-arialblack pointer-events-none absolute left-1/2 top-[6.5rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
+          className="font-arialblack pointer-events-none absolute left-1/2 top-[11rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
         >
           {digital} · {time.tz}
         </div>
