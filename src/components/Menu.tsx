@@ -350,22 +350,28 @@ function ItemRow({
       }
       className="py-1"
     >
-      {/* name · leader · price */}
-      <p className="flex items-baseline gap-2">
+      {/* Mobile: name on its own line, price aligned bottom-right, no
+          dotted leader (a narrow 2-col grid killed the leader — it read
+          as 3 stray dots between wrapping words). Small viewports get
+          text-sm too, so 18-char names like "PAIN AU CHOCOLAT" fit on
+          one line inside a ~163 px column.
+          Desktop (sm+): unchanged — name · dotted leader · price on one
+          baseline. */}
+      <p className="flex flex-col items-stretch sm:flex-row sm:items-baseline sm:gap-2">
         <span
           style={{ color: body }}
-          className="font-arialblack text-lg uppercase tracking-tight sm:text-xl"
+          className="font-arialblack text-sm uppercase leading-tight tracking-tight sm:text-xl"
         >
           {item.name}
         </span>
         <span
           aria-hidden
           style={{ borderColor: dot }}
-          className="mx-1 flex-1 translate-y-[-4px] border-b-[3px] border-dotted"
+          className="mx-1 hidden flex-1 translate-y-[-4px] border-b-[3px] border-dotted sm:block"
         />
         <span
           style={{ color: body }}
-          className="font-arialblack text-lg sm:text-xl"
+          className="font-arialblack mt-0.5 self-end text-[13px] leading-none sm:mt-0 sm:self-auto sm:text-xl"
         >
           {item.price}
         </span>
