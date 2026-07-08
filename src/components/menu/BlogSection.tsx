@@ -179,8 +179,7 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
 // Blog — featured-first layout. The newest post sits big up top; everything
 // older drops into a horizontally-scrollable strip beneath it. Lives inside
 // the same menu wrapper width as the rest of the page (no pinned scroll, no
-// full-bleed breakout). Post data lives in src/lib/blog.ts so the indexable
-// /blog and /blog/[slug] routes render the same articles.
+// full-bleed breakout). Post data lives in src/lib/blog.ts.
 export default function BlogSection({ accent }: { accent: string }) {
   const [openPost, setOpenPost] = useState<BlogPost | null>(null);
   const stripRef = useRef<HTMLUListElement>(null);

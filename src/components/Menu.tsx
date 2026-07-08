@@ -10,7 +10,6 @@ import BestSellers from "@/components/BestSellers";
 import { CATEGORIES } from "@/lib/menu-data";
 import FullRule from "@/components/menu/FullRule";
 import GroupBlock from "@/components/menu/GroupBlock";
-import MenuImagePreview from "@/components/menu/MenuImagePreview";
 import CollabMarquee from "@/components/menu/CollabMarquee";
 import CafeDescription from "@/components/menu/CafeDescription";
 import MealDealBanner from "@/components/menu/MealDealBanner";
@@ -174,7 +173,6 @@ export default function Menu() {
   const theme = textTheme(drinks);
 
   return (
-    <MenuImagePreview>
     <section
       ref={sectionRef}
       id="menu"
@@ -315,6 +313,5 @@ export default function Menu() {
       </div>
 
     </section>
-    </MenuImagePreview>
   );
 }

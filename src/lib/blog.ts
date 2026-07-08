@@ -1,6 +1,5 @@
-// Single source of truth for Cafe Mama & Sons blog posts.
-// Consumed both by the on-page Blog section (Menu.tsx) and the indexable
-// /blog and /blog/[slug] routes that exist purely for SEO.
+// Single source of truth for Cafe Mama & Sons blog posts, consumed by the
+// homepage Blog section (the layered card row + fold-in modal).
 //
 // `body` paragraphs accept inline link segments so each post can backlink to
 // the press coverage that mentioned us — those external dofollow links signal

@@ -3,27 +3,15 @@
 import { useState } from "react";
 import type { Group, Item } from "@/lib/menu-data";
 import FullRule from "@/components/menu/FullRule";
-import { usePreview } from "@/components/menu/MenuImagePreview";
 
 function ItemRow({ item, body, dot }: { item: Item; body: string; dot: string }) {
   const hasDesc = Boolean(item.desc);
   const [expanded, setExpanded] = useState(false);
-  const preview = usePreview();
-
-  // Rows with a photo float it under the cursor on hover (fine pointers only
-  // — the preview provider no-ops on touch).
-  const hoverProps = item.img
-    ? {
-        onPointerEnter: () =>
-          preview?.show({ img: item.img!, w: item.w, h: item.h, angle: item.angle }),
-        onPointerLeave: () => preview?.hide(),
-      }
-    : {};
 
   return (
     // A touch more row air on mobile — the stacked name + leader layout needs
     // it to read as distinct rows in the two-column grid.
-    <li className="py-1.5 sm:py-1" {...hoverProps}>
+    <li className="py-1.5 sm:py-1">
       {/* Name + price header.
           sm+  — single row: name on the left, dotted leader filling the gap,
                  price anchored to the right baseline.

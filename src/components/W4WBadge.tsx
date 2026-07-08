@@ -237,9 +237,13 @@ export default function W4WBadge() {
             ✕
           </button>
 
-          {/* ── Row 1: Header (left) + big stats strip (right) ────────── */}
+          {/* ── Row 1: Header (left) + big stats strip (right) ──────────
+              pr keeps the eyebrow + headline clear of the absolute ✕ button
+              in the card's top-right corner (it was overlapping the title
+              on narrower cards); the lg grid puts the stats between the
+              header and the ✕ so the padding can relax there. */}
           <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-8">
-            <header className="flex items-start gap-4">
+            <header className="flex items-start gap-4 pr-12 lg:pr-0">
               <div
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
                 style={{
@@ -311,7 +315,16 @@ export default function W4WBadge() {
             clean-water, sanitation and hygiene solutions where they&apos;re
             needed most. In the Philippines they&apos;ve been on the ground
             since Typhoon Yolanda in 2013 — every peso we send keeps a filter
-            running.
+            running.{" "}
+            <a
+              href="https://www.canva.com/design/DAGLLQJIxf4/yV5Luo_zexcI7-6WW-fhbA/view?utm_content=DAGLLQJIxf4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h64793d6800"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-75"
+              style={{ color: GOLD }}
+            >
+              See the full Cafe Mama × W4W deck for more information →
+            </a>
           </p>
 
           {/* ── Row 3: Problem / System — two columns, tight rhythm ───── */}

@@ -50,7 +50,7 @@ export default function NotFound() {
         </li>
         <li>
           <Link
-            href="/blog"
+            href="/#blog"
             className="inline-block rounded-full border-[3px] border-current px-5 py-3 transition-transform hover:-translate-y-0.5"
           >
             Read the blog
