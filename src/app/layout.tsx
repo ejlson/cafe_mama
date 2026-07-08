@@ -93,7 +93,16 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
-  icons: { icon: "/favicon.ico" },
+  // Square Cafe Mama wordmark on brand gold — generated from
+  // public/media/logo/CAFE MAMA SQUARE LOGO.png into src/app/favicon.ico,
+  // icon.png (512) and apple-icon.png (180).
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -116,7 +125,7 @@ const RESTAURANT_JSONLD = {
     cldUrl("/media/g-shopfront-full.jpg"),
     cldUrl("/media/drinks/ubematcha-web.jpg"),
   ],
-  logo: `${SITE_URL}/favicon.ico`,
+  logo: `${SITE_URL}/icon.png`,
   email: "hello@cafemamasons.com",
   priceRange: "££",
   servesCuisine: ["Filipino", "Japanese", "Cafe", "Bakery"],
