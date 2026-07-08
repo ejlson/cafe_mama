@@ -52,3 +52,6 @@ next-env.d.ts
 /vidoes
 /public/media
 /public/focusvideos
+
+# Claude files (local agent config — never committed)
+CLAUDE.md

@@ -74,8 +74,11 @@ export default function LoadingScreen() {
             window.addEventListener("load", () => resolve(), { once: true });
           });
 
+    // Hard cap trimmed 12s → 7s: the hero paints its poster frame while the
+    // video streams, so there's no reason to hold visitors hostage on the
+    // overlay when a connection stalls.
     const hardCap = new Promise<void>((resolve) =>
-      window.setTimeout(resolve, 12000),
+      window.setTimeout(resolve, 7000),
     );
 
     // Minimum display time — on fast connections everything is ready in a
@@ -110,11 +113,12 @@ export default function LoadingScreen() {
 
   return (
     <div
-      aria-hidden
-      className={`fixed inset-0 z-[9998] flex flex-col items-center justify-center gap-6 transition-opacity duration-[400ms] ease-out ${fading ? "pointer-events-none opacity-0" : "opacity-100"}`}
+      role="status"
+      aria-label="Loading Cafe Mama & Sons"
+      className={`fixed inset-0 z-[9998] flex flex-col items-center justify-center gap-6 px-6 transition-opacity duration-[400ms] ease-out ${fading ? "pointer-events-none opacity-0" : "opacity-100"}`}
       style={{ backgroundColor: GOLD }}
     >
-      <div className="relative">
+      <div className="ls-pop relative">
         <svg width="220" height="304" viewBox="0 0 260 360" fill="none">
           <defs>
             <linearGradient id="ls-ube" x1="0" y1="0" x2="0" y2="1">
@@ -177,7 +181,7 @@ export default function LoadingScreen() {
       </div>
 
       {/* Three-dot loading indicator. */}
-      <div className="flex gap-2">
+      <div aria-hidden className="flex gap-2">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
@@ -187,7 +191,25 @@ export default function LoadingScreen() {
         ))}
       </div>
 
+      {/* Brand wordmark — anchors the overlay while the cup fills. */}
+      <p
+        aria-hidden
+        className="font-arialblack text-center text-sm uppercase tracking-[0.28em]"
+        style={{ color: PINK }}
+      >
+        Cafe Mama &amp; Sons
+      </p>
+
       <style>{`
+        /* Cup pops in softly on first paint so the overlay reads as a
+           deliberate brand moment rather than a flash of bare gold. */
+        .ls-pop {
+          animation: ls-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes ls-pop-in {
+          from { opacity: 0; transform: scale(0.92) translateY(8px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
         .ls-wave {
           animation: ls-wave-x 2.2s linear infinite;
           will-change: transform;
@@ -204,7 +226,7 @@ export default function LoadingScreen() {
           35%      { opacity: 1;    transform: translateY(-3px); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .ls-wave, .ls-dot { animation: none; }
+          .ls-wave, .ls-dot, .ls-pop { animation: none; }
         }
       `}</style>
     </div>

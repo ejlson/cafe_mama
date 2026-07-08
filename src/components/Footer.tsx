@@ -70,12 +70,26 @@ function isOpenNow(t: Time) {
 function useLondonTime() {
   const [t, setT] = useState<Time | null>(null);
   useEffect(() => {
+    // The footer sits BEHIND the menu card and is only revealed once the
+    // card scrolls off the bottom of the viewport. Re-rendering the whole
+    // clock face every animation frame while it's covered was a constant
+    // main-thread tax (and a big source of page-wide lag) — so the per-frame
+    // update only runs while the footer is actually peeking out. One initial
+    // set keeps the dial mounted and ready for the reveal.
+    const card = document.querySelector<HTMLElement>("[data-menu-card]");
     let raf = 0;
+    let first = true;
     const tick = () => {
-      setT(londonNow(new Date()));
       raf = requestAnimationFrame(tick);
+      const revealed =
+        !card || card.getBoundingClientRect().bottom < window.innerHeight - 1;
+      // First frame always sets, so the dial exists before its reveal.
+      if (first || revealed) {
+        first = false;
+        setT(londonNow(new Date()));
+      }
     };
-    tick();
+    raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, []);
   return t;

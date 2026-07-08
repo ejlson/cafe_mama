@@ -21,7 +21,6 @@ const INSTAGRAM_URL = "https://www.instagram.com/cafe_mama_sons/";
 // are the food-tab values so the panel renders correctly before Menu's
 // useGSAP effect installs the live values on first mount.
 const RED = "var(--loc-text, #FF1353)";
-const YELLOW = "var(--loc-card, #f4c33c)";
 
 /**
  * Glowing gold pill CTA — two-layer SVG construction matching the artwork
@@ -182,9 +181,13 @@ export default function Location() {
       <div className="grid items-stretch gap-6 pb-8 pt-3 sm:grid-cols-[42%_1fr] sm:gap-10 sm:pb-12 sm:pt-4">
         {/* Map — TODO: swap for the Google Maps JS 3D photorealistic view.
             Aspect-square on mobile, stretched to grid row height on desktop
-            (sm:!aspect-auto forces the override). */}
+            (sm:!aspect-auto forces the override).
+            On mobile the card spans the full content width — the same
+            w-[calc(100%+2rem)] span as the FullRule separators — so the map
+            lines up with the rules that frame the section instead of sitting
+            1rem inset from them. Reset to the plain grid cell from sm: up. */}
         <div
-          className="relative aspect-square overflow-hidden rounded-2xl bg-[#dcd5cf] sm:!aspect-auto sm:h-full sm:min-h-[480px]"
+          className="relative left-1/2 w-[calc(100%+2rem)] -translate-x-1/2 aspect-square overflow-hidden rounded-2xl bg-[#dcd5cf] sm:left-0 sm:w-auto sm:translate-x-0 sm:!aspect-auto sm:h-full sm:min-h-[480px]"
         >
           <iframe
             title="Map to Cafe Mama & Sons"

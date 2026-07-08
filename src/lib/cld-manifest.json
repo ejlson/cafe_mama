@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T16:44:19.669Z",
+  "generatedAt": "2026-07-08T21:20:59.608Z",
   "cloudName": "mmia7qfr",
   "folder": "cafemama",
   "assets": {
@@ -213,10 +213,103 @@
       "width": 1500,
       "height": 1000
     },
-    "/media/videoplayback.mp3": {
-      "kind": "video",
-      "publicId": "cafemama/media/videoplayback",
-      "ext": ".mp3"
+    "/media/blog/adoboduck-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/adoboduck-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/bakery-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/bakery-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/bakeryfront-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/bakeryfront-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/coffee-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/coffee-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/hojicha-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/hojicha-web",
+      "ext": ".jpg",
+      "width": 1200,
+      "height": 1800
+    },
+    "/media/blog/longanisa-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/longanisa-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/longanisa2-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/longanisa2-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
+    },
+    "/media/blog/mondayblues-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/mondayblues-web",
+      "ext": ".jpg",
+      "width": 1200,
+      "height": 1800
+    },
+    "/media/blog/mondayblues2-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/mondayblues2-web",
+      "ext": ".jpg",
+      "width": 1200,
+      "height": 1800
+    },
+    "/media/blog/mondayblues3.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/mondayblues3",
+      "ext": ".jpg",
+      "width": 4000,
+      "height": 6000
+    },
+    "/media/blog/mondayblues4.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/mondayblues4",
+      "ext": ".jpg",
+      "width": 6000,
+      "height": 4000
+    },
+    "/media/blog/storefront.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/storefront",
+      "ext": ".jpg",
+      "width": 3840,
+      "height": 2160
+    },
+    "/media/blog/ubebow-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/ubebow-web",
+      "ext": ".jpg",
+      "width": 1200,
+      "height": 1800
+    },
+    "/media/blog/ubeheart-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/blog/ubeheart-web",
+      "ext": ".jpg",
+      "width": 1800,
+      "height": 1200
     },
     "/media/collabs/Canva-logo-PNG-large-size.png": {
       "kind": "image",
@@ -379,6 +472,76 @@
       "width": 1000,
       "height": 1517
     },
+    "/media/gallery/web/DSC07056-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSC07056-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSC07722-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSC07722-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSC07739-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSC07739-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF2296-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF2296-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF2298-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF2298-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF2472-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF2472-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF2995-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF2995-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF3015-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF3015-web",
+      "ext": ".jpg",
+      "width": 1100,
+      "height": 733
+    },
+    "/media/gallery/web/DSCF3035-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF3035-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
+    "/media/gallery/web/DSCF3052-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/media/gallery/web/DSCF3052-web",
+      "ext": ".jpg",
+      "width": 733,
+      "height": 1100
+    },
     "/media/hero-draft3-web.mp4": {
       "kind": "video",
       "publicId": "cafemama/media/hero-draft3-web",
@@ -491,6 +654,11 @@
       "width": 1000,
       "height": 1517
     },
+    "/media/videoplayback.mp3": {
+      "kind": "video",
+      "publicId": "cafemama/media/videoplayback",
+      "ext": ".mp3"
+    },
     "/media/videos/website adobo mushroom.mp4": {
       "kind": "video",
       "publicId": "cafemama/media/videos/website_adobo_mushroom",
@@ -516,6 +684,20 @@
       "kind": "video",
       "publicId": "cafemama/sfx/rizz",
       "ext": ".mp3"
+    },
+    "/w4wcharity/DSC05407-web.jpg": {
+      "kind": "image",
+      "publicId": "cafemama/w4wcharity/DSC05407-web",
+      "ext": ".jpg",
+      "width": 1400,
+      "height": 933
+    },
+    "/w4wcharity/w4w.png": {
+      "kind": "image",
+      "publicId": "cafemama/w4wcharity/w4w",
+      "ext": ".png",
+      "width": 1024,
+      "height": 1024
     }
   }
 }

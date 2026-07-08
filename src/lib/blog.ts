@@ -40,7 +40,7 @@ export const BLOG_POSTS: BlogPost[] = [
     date: "17 April 2026",
     isoDate: "2026-04-17",
     // img: "/media/about%20us/web/about4-web.jpg",
-    img: "/media/blog/longanisa.jpg",
+    img: "/media/blog/longanisa-web.jpg",
     alt: "Cafe Mama & Sons Filipino-Japanese cafe interior on Kentish Town Road",
     excerpt:
       "The Infatuation's full review of our Kentish Town cafe — the sandos, the ube matcha, and the bakery counter that keeps people queuing on Kentish Town Road.",
@@ -76,7 +76,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Named one of London's best bakeries by BBC Good Food",
     date: "8 April 2026",
     isoDate: "2026-04-08",
-    img: "/media/blog/bakeryfront.jpg",
+    img: "/media/blog/bakeryfront-web.jpg",
     alt: "Tray of freshly baked pandesal, ube pain au chocolat and ube mochi croissants at Cafe Mama & Sons",
     excerpt:
       "BBC Good Food's 2026 round-up of London's best bakeries includes Cafe Mama & Sons — and Time Out picked up the list a few days later.",
@@ -115,7 +115,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Heart-shaped Filipino croissants for Valentine's Day",
     date: "3 February 2026",
     isoDate: "2026-02-03",
-    img: "/media/blog/ubeheart.jpg",
+    img: "/media/blog/ubeheart-web.jpg",
     alt: "Heart-shaped ube and chocolate croissants on a marble counter at Cafe Mama & Sons",
     excerpt:
       "Forbes, MSN, Metro, London World and The Upcoming all picked up our Valentine's Day heart-shaped Filipino-inspired croissants — here's what's on the counter for February.",
@@ -157,7 +157,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Hojicha at Cafe Mama & Sons — featured in Design My Night",
     date: "28 January 2026",
     isoDate: "2026-01-28",
-    img: "/media/blog/hojicha.jpg",
+    img: "/media/blog/hojicha-web.jpg",
     alt: "Iced Spanish hojicha latte on the Cafe Mama & Sons counter",
     excerpt:
       "Design My Night included Cafe Mama & Sons in its piece on the rise of hojicha in the UK. Here's what's in our cup — and why roasted green tea pairs so well with our bakery.",
@@ -188,7 +188,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Blue Monday round-up: free coffee, cheap eats and a soft landing",
     date: "19 January 2026",
     isoDate: "2026-01-19",
-    img: "/media/blog/mondayblues2.jpg",
+    img: "/media/blog/mondayblues2-web.jpg",
     alt: "Filter coffee being poured at Cafe Mama & Sons on a January morning",
     excerpt:
       "Secret London, Cheapskate, The London Standard and Living 360 all included our Blue Monday offer in their 2026 round-ups. Here's the deal — and why January is a good time to come and sit in.",
@@ -219,7 +219,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Free coffee for UK Coffee Week — thank you to everyone who showed up",
     date: "3 October 2025",
     isoDate: "2025-10-03",
-    img: "/media/blog/coffee.jpg",
+    img: "/media/blog/coffee-web.jpg",
     alt: "Espresso shot being pulled on the Cafe Mama & Sons espresso machine",
     excerpt:
       "We ran a Free Coffee Friday for UK Coffee Week 2025 — and The Upcoming, London Post, Metro Slice and Cheapskate all helped get the secret code out.",
@@ -256,7 +256,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Introducing the Ube Mochi Croissant",
     date: "12 August 2025",
     isoDate: "2025-08-12",
-    img: "/media/blog/ubebow.jpg",
+    img: "/media/blog/ubebow-web.jpg",
     alt: "Ube mochi croissants dusted with sugar on the Cafe Mama & Sons bakery counter",
     excerpt:
       "The Ube Mochi Croissant — laminated butter pastry, soft mochi centre, Filipino purple-yam custard — covered by London TV, Tasting Britain, About Time and The Wordrobe.",
@@ -334,7 +334,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Featured on London on the Inside",
     date: "7 August 2025",
     isoDate: "2025-08-07",
-    img: "/media/blog/longanisa2.jpg",
+    img: "/media/blog/longanisa2-web.jpg",
     alt: "Cafe Mama & Sons shopfront on Kentish Town Road in Camden",
     excerpt:
       "London on the Inside spotlighted Cafe Mama & Sons as part of its Camden picks — focusing on the sandos, the Filipino bakery counter and the corn latte that nobody saw coming.",
@@ -401,7 +401,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "British Sandwich Week: the Adobo Duck Sando with Mama Li",
     date: "14 May 2026",
     isoDate: "2026-05-14",
-    img: "/media/blog/adoboduck.jpg",
+    img: "/media/blog/adoboduck-web.jpg",
     alt: "Adobo duck sando with crispy skin and pickled cucumber at Cafe Mama & Sons",
     excerpt:
       "For British Sandwich Week 2026 we teamed up with Chinatown's Mama Li on a limited Adobo Duck Sando — covered by London TV, British Baker, Hardens, Feast London and more.",
@@ -438,7 +438,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "On In London and Luxury Lifestyle Mag put us on London's bakery trail",
     date: "15 May 2026",
     isoDate: "2026-05-15",
-    img: "/media/blog/bakery.jpg",
+    img: "/media/blog/bakery-web.jpg",
     alt: "Pastry counter at Cafe Mama & Sons stacked with ube croissants, cookie croissants and pandesal",
     excerpt:
       "On In London built a National Baking Day trail of London's best sweet treats — we made the cut, and Luxury Lifestyle Mag picked the list up the following week.",

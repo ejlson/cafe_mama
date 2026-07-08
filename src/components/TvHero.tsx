@@ -89,11 +89,13 @@ export default function TvHero({
       // the menu has scrolled out of the way. The hero has no interactive
       // elements of its own; Navbar / MusicToggle / etc. sit at higher z and
       // re-enable pointer events on themselves.
-      // h-[100dvh] (with h-full fallback) — on mobile Safari/Chrome, `100%`
-      // of a fixed element resolves against the SMALL viewport (URL bar
-      // visible); when the bar collapses the viewport grows and a sliver of
-      // the menu peeked out below the hero. dvh tracks the dynamic viewport.
-      className="pointer-events-none fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black supports-[height:100dvh]:h-[100dvh]"
+      // h-[100lvh] (with h-full fallback) — on iOS Safari/Chrome the browser
+      // chrome (back/forward arrows, share, tabs bar) sits over the bottom of
+      // the layout viewport. 100% and 100dvh both resolve against the SMALL
+      // viewport while that toolbar is up, leaving a visible band below the
+      // hero. lvh is the LARGE viewport: the hero extends behind the toolbar
+      // so the video always reaches the bottom of the screen, toolbar or not.
+      className="pointer-events-none fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black supports-[height:100lvh]:h-[100lvh]"
     >
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />

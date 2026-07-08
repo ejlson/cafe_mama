@@ -29,21 +29,24 @@ export default function Scrollbar() {
     let vh = window.innerHeight;
     let thumbH = 40;
     let last = -1;
+    let max = 0;
 
+    // maxScroll reads the document's scrollHeight — a forced layout. Cache it
+    // here instead of paying that read every animation frame; re-measure on
+    // resize and whenever ScrollTrigger recalculates layout (refresh fires
+    // after images/fonts load and after the hero↔menu transitions).
     const measure = () => {
       vh = window.innerHeight;
-      const max = ScrollTrigger.maxScroll(window);
+      max = ScrollTrigger.maxScroll(window);
       const doc = max + vh;
       thumbH = Math.max(36, Math.round((vh / doc) * (vh - INSET * 2)));
       thumb.style.height = `${thumbH}px`;
     };
     measure();
+    ScrollTrigger.addEventListener("refresh", measure);
 
-    // Read the live scroll every frame (ScrollTrigger.maxScroll is computed on
-    // demand, so it survives the smoother's late sizing). Show the thumb while
-    // scrolling, fade it ~1s after it stops — Apple-style.
+    // Show the thumb while scrolling, fade it ~1s after it stops — Apple-style.
     const tick = () => {
-      const max = ScrollTrigger.maxScroll(window);
       const scroll = smoother ? smoother.scrollTop() : window.scrollY;
       const p = max > 0 ? Math.min(1, Math.max(0, scroll / max)) : 0;
       setY(p * (vh - thumbH - INSET * 2));
@@ -63,6 +66,7 @@ export default function Scrollbar() {
 
     return () => {
       gsap.ticker.remove(tick);
+      ScrollTrigger.removeEventListener("refresh", measure);
       window.removeEventListener("resize", onResize);
       if (idle) clearTimeout(idle);
     };

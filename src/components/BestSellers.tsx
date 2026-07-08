@@ -182,7 +182,7 @@ export default function BestSellers() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={cldUrl(d.img)}
+              src={cldUrl(d.img, { transform: "w_900,c_limit" })}
               alt={d.name.join(" ")}
               loading="lazy"
               decoding="async"
