@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cafeBrainReply } from "@/lib/cafe-brain";
 
+// Cloudflare Pages only deploys route handlers that run on the edge runtime
+// — without this the route 404s in production and every comment falls back
+// to the client's canned pool. The handler is edge-safe: fetch + pure data,
+// no Node APIs.
+export const runtime = "edge";
+
 /**
  * POST /api/cafe-reply
  *
@@ -160,6 +166,15 @@ async function tryAnthropic(userText: string): Promise<string | null> {
   }
 }
 
+// `x-reply-source` names the engine that produced the reply (visible in the
+// browser's network tab) — makes "why is the bot canned?" diagnosable in
+// production: brain-<intent> = the local engine answered a recognised
+// question; groq/gemini/anthropic = a hosted model personalised it;
+// brain-fallback = no hosted key set in this deployment (or all calls
+// failed) and the warm default pool answered.
+const reply = (text: string, source: string) =>
+  NextResponse.json({ reply: text }, { headers: { "x-reply-source": source } });
+
 export async function POST(req: NextRequest) {
   let userText = "";
   try {
@@ -174,19 +189,19 @@ export async function POST(req: NextRequest) {
   // Recognised intent → the brain's answer is grounded in real menu/hours
   // data. Return it directly; a hosted model could only make it less true.
   if (brain.intent !== "default" || !userText.trim()) {
-    return NextResponse.json({ reply: brain.reply });
+    return reply(brain.reply, `brain-${brain.intent}`);
   }
 
   // Free-form comment → optionally let a hosted model personalise, falling
   // back to the brain's warm default if no key is set or the calls fail.
   const groq = await tryGroq(userText);
-  if (groq) return NextResponse.json({ reply: groq });
+  if (groq) return reply(groq, "groq");
 
   const gemini = await tryGemini(userText);
-  if (gemini) return NextResponse.json({ reply: gemini });
+  if (gemini) return reply(gemini, "gemini");
 
   const anthropic = await tryAnthropic(userText);
-  if (anthropic) return NextResponse.json({ reply: anthropic });
+  if (anthropic) return reply(anthropic, "anthropic");
 
-  return NextResponse.json({ reply: brain.reply });
+  return reply(brain.reply, "brain-fallback");
 }
