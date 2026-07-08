@@ -108,6 +108,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#f4c33c",
   colorScheme: "light",
+  // Let the page extend into the iOS safe areas (behind the translucent
+  // Safari bottom toolbar / home indicator). Without this, iOS paints those
+  // zones by sampling page background — which flashed the gold menu below
+  // the black hero. With it, the fixed hero itself reaches the screen edge.
+  viewportFit: "cover",
 };
 
 // Schema.org Restaurant — gives Google rich-result eligibility for opening

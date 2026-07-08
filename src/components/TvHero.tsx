@@ -89,13 +89,17 @@ export default function TvHero({
       // the menu has scrolled out of the way. The hero has no interactive
       // elements of its own; Navbar / MusicToggle / etc. sit at higher z and
       // re-enable pointer events on themselves.
-      // h-[100lvh] (with h-full fallback) — on iOS Safari/Chrome the browser
-      // chrome (back/forward arrows, share, tabs bar) sits over the bottom of
-      // the layout viewport. 100% and 100dvh both resolve against the SMALL
-      // viewport while that toolbar is up, leaving a visible band below the
-      // hero. lvh is the LARGE viewport: the hero extends behind the toolbar
-      // so the video always reaches the bottom of the screen, toolbar or not.
-      className="pointer-events-none fixed inset-0 z-[40] h-full w-full overflow-hidden bg-black supports-[height:100lvh]:h-[100lvh]"
+      // No explicit height — an explicit h-full/h-[100dvh] overrides the
+      // bottom:0 anchor (top + height wins when a fixed box is
+      // over-constrained), and every fixed-height unit misjudges SOME iOS
+      // toolbar state, letting the gold menu peek out beneath the hero.
+      // inset-0 alone anchors the box to BOTH viewport edges so it tracks
+      // the toolbar as it expands/collapses; min-h-[100lvh] additionally
+      // guarantees large-viewport coverage (extends behind the bottom bar,
+      // together with viewport-fit=cover in layout.tsx) so the area under
+      // Safari's translucent toolbar is always the hero's black, not the
+      // menu behind it.
+      className="pointer-events-none fixed inset-0 z-[40] w-full overflow-hidden bg-black supports-[min-height:100lvh]:min-h-[100lvh]"
     >
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />

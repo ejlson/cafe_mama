@@ -55,3 +55,8 @@ next-env.d.ts
 
 # Claude files (local agent config — never committed)
 CLAUDE.md
+
+# cloudflare (OpenNext build output + wrangler state + local worker secrets)
+/.open-next
+/.wrangler
+.dev.vars
