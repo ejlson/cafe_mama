@@ -71,7 +71,9 @@ export default function Home() {
       {/* Swipe-in horizontal gallery page, opened by the navbar Gallery link. */}
       <GalleryOverlay />
       {/* Opening-hours watch — drag to spin; sat above the gallery badge. */}
-      <OpeningClock className="fixed bottom-[9.5rem] right-6 z-[55] h-28 w-28 sm:bottom-[10.5rem] sm:h-32 sm:w-32" />
+      {/* Sized down on phones so the right-rail widget stack doesn't cover
+          menu content; desktop keeps the original scale. */}
+      <OpeningClock className="fixed bottom-[7.5rem] right-4 z-[55] h-20 w-20 sm:bottom-[10.5rem] sm:right-6 sm:h-32 sm:w-32" />
       {/* Focus mode — square video bottom-left + AI-voice narration of the script. */}
       <FocusMode />
       {/* Full-screen loading overlay — hides the site until the hero video's

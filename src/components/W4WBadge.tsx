@@ -24,6 +24,10 @@ export default function W4WBadge() {
   const pillRef = useRef<HTMLAnchorElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const wasPaused = useRef(false);
+  // The hero lock (MenuReveal) also drives <html> overflow on mobile —
+  // remember whatever value was there so closing the card restores it
+  // instead of unlocking the hero.
+  const prevOverflow = useRef("");
 
   // Idle bob — teardrop + pill share one tween so they hang together in
   // perfect sync. Same 1.8s sine.inOut yoyo the drop had before.
@@ -42,10 +46,12 @@ export default function W4WBadge() {
     return () => t.kill();
   }, []);
 
-  // pause the smooth scroller under the modal, and slide the card in from
-  // below on open. The backdrop is React-controlled (Tailwind classes) so
-  // the initial hidden state is set purely in markup without a mount-time
-  // GSAP tween racing the click.
+  // Freeze the page under the modal — pause ScrollSmoother on desktop AND
+  // set overflow:hidden on <html> so native scrolling (mobile, where there
+  // is no smoother) can't move the page behind the card either. Slide the
+  // card in from below on open. The backdrop is React-controlled (Tailwind
+  // classes) so the initial hidden state is set purely in markup without a
+  // mount-time GSAP tween racing the click.
   useEffect(() => {
     const sm = ScrollSmoother.get?.();
     if (open) {
@@ -53,6 +59,8 @@ export default function W4WBadge() {
         wasPaused.current = sm.paused();
         sm.paused(true);
       }
+      prevOverflow.current = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = "hidden";
       if (card.current) {
         gsap.fromTo(
           card.current,
@@ -60,9 +68,11 @@ export default function W4WBadge() {
           { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" },
         );
       }
-    } else {
-      sm?.paused(wasPaused.current);
+      return () => {
+        document.documentElement.style.overflow = prevOverflow.current;
+      };
     }
+    sm?.paused(wasPaused.current);
   }, [open]);
 
   // ESC to close
@@ -90,7 +100,7 @@ export default function W4WBadge() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Donate to Waves For Water"
-        className="fixed bottom-1 right-4 z-[56] inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-arialblack text-[11px] uppercase tracking-[0.22em] transition-transform hover:scale-105 sm:bottom-2 sm:right-6 sm:text-xs"
+        className="fixed bottom-1 right-3 z-[56] inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-6 sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em]"
         style={{
           // Near-clear glass — barely-there translucent tint so whatever's
           // behind the pill shows through the backdrop-blur. The gold border,
@@ -127,7 +137,9 @@ export default function W4WBadge() {
             setOpen(true);
           }
         }}
-        className="fixed bottom-6 right-6 z-[55] h-28 w-28 cursor-pointer sm:h-32 sm:w-32"
+        // Mobile shrinks the whole widget stack (drop, clock, focus toggle)
+        // ~30% — at h-28 the column was covering menu prices on phones.
+        className="fixed bottom-6 right-4 z-[55] h-20 w-20 cursor-pointer transition-transform duration-150 ease-out active:scale-95 sm:right-6 sm:h-32 sm:w-32"
       >
         <svg
           viewBox="0 0 100 100"
@@ -196,7 +208,7 @@ export default function W4WBadge() {
           // card fits on a laptop screen without scrolling. Native scrollbar
           // stays hidden as a safety net for smaller viewports (custom cursor
           // wouldn't survive a real scrollbar thumb).
-          className="relative max-h-[92vh] w-full max-w-[68rem] overflow-y-auto rounded-[28px] p-5 sm:p-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative max-h-[92vh] w-full max-w-[68rem] overflow-y-auto overscroll-contain rounded-[28px] p-5 sm:p-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{
             background:
               "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 45%, rgba(13,79,138,0.35) 100%)",
@@ -213,7 +225,7 @@ export default function W4WBadge() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close"
-            className="font-arialblack absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-sm transition-transform hover:scale-105 sm:right-5 sm:top-5"
+            className="font-arialblack absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95 sm:right-5 sm:top-5"
             style={{
               background: "rgba(255,255,255,0.15)",
               border: "1px solid rgba(255,255,255,0.25)",
@@ -421,7 +433,7 @@ export default function W4WBadge() {
                 href={DONATE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center justify-between gap-4 rounded-2xl px-6 py-4 transition-transform hover:scale-[1.015]"
+                className="group inline-flex items-center justify-between gap-4 rounded-2xl px-6 py-4 transition-transform duration-150 ease-out hover:scale-[1.015] active:scale-[0.98]"
                 style={{
                   background: GOLD,
                   color: "#0d3e6d",

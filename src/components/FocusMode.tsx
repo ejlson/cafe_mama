@@ -727,7 +727,7 @@ export default function FocusMode() {
         // to the bottom of the box (rather than vertically centring it)
         // so the visible art hugs the watch instead of floating 50px above
         // it. object-contain still centres each PNG horizontally.
-        className="fixed bottom-[15rem] right-6 z-[56] flex h-28 w-28 select-none items-end justify-center transition-transform hover:-translate-y-0.5 active:scale-95 sm:bottom-[17rem] sm:h-32 sm:w-32"
+        className="fixed bottom-[12.5rem] right-4 z-[56] flex h-20 w-20 select-none items-end justify-center transition-transform duration-150 ease-out hover:-translate-y-0.5 active:scale-95 sm:bottom-[17rem] sm:right-6 sm:h-32 sm:w-32"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

@@ -234,7 +234,10 @@ export default function Menu() {
                 <button
                   onClick={() => switchCategory(c.key)}
                   style={{ color: theme.accent }}
-                  className={`font-cheee text-2xl uppercase leading-none tracking-tight transition-opacity sm:text-6xl ${
+                  // Press feedback (scale 0.97, 150ms ease-out) so the tab
+                  // answers the tap instantly, even while the list dissolve
+                  // is still running.
+                  className={`font-cheee text-2xl uppercase leading-none tracking-tight transition-[opacity,transform] duration-150 ease-out active:scale-[0.97] sm:text-6xl ${
                     isActive ? "opacity-100" : "opacity-40 hover:opacity-70"
                   }`}
                 >

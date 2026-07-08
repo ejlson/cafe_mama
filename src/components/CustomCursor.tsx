@@ -21,7 +21,8 @@ const HAND_FRAMES = [1, 2, 3, 4, 5].map((n) => `/media/cursor/hand${n}.png`);
 const PRESS_FRAMES = [1, 2, 3, 4, 5].map((n) => `/media/cursor/press${n}.png`);
 const PRESS_REST = 1;
 const PRESS_PRESSED = 5;
-const TARGET_SELECTOR = "button, a[href], [data-cursor-target]";
+const TARGET_SELECTOR =
+  'button, a[href], [role="button"], [data-cursor-target]';
 
 export default function CustomCursor() {
   const handRef = useRef<HTMLImageElement>(null);

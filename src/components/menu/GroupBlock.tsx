@@ -21,7 +21,9 @@ function ItemRow({ item, body, dot }: { item: Item; body: string; dot: string })
     : {};
 
   return (
-    <li className="py-1" {...hoverProps}>
+    // A touch more row air on mobile — the stacked name + leader layout needs
+    // it to read as distinct rows in the two-column grid.
+    <li className="py-1.5 sm:py-1" {...hoverProps}>
       {/* Name + price header.
           sm+  — single row: name on the left, dotted leader filling the gap,
                  price anchored to the right baseline.
@@ -68,7 +70,7 @@ function ItemRow({ item, body, dot }: { item: Item; body: string; dot: string })
         <span className="block w-full sm:hidden">
           <span
             style={{ color: body }}
-            className="block font-arialblack text-sm uppercase leading-tight tracking-tight [text-wrap:balance]"
+            className="block font-arialblack text-[15px] uppercase leading-tight tracking-tight [text-wrap:balance]"
           >
             {item.name}
           </span>

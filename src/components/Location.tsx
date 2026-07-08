@@ -181,13 +181,10 @@ export default function Location() {
       <div className="grid items-stretch gap-6 pb-8 pt-3 sm:grid-cols-[42%_1fr] sm:gap-10 sm:pb-12 sm:pt-4">
         {/* Map — TODO: swap for the Google Maps JS 3D photorealistic view.
             Aspect-square on mobile, stretched to grid row height on desktop
-            (sm:!aspect-auto forces the override).
-            On mobile the card spans the full content width — the same
-            w-[calc(100%+2rem)] span as the FullRule separators — so the map
-            lines up with the rules that frame the section instead of sitting
-            1rem inset from them. Reset to the plain grid cell from sm: up. */}
+            (sm:!aspect-auto forces the override). Spans the grid cell, i.e.
+            exactly the menu content width — flush with the text above it. */}
         <div
-          className="relative left-1/2 w-[calc(100%+2rem)] -translate-x-1/2 aspect-square overflow-hidden rounded-2xl bg-[#dcd5cf] sm:left-0 sm:w-auto sm:translate-x-0 sm:!aspect-auto sm:h-full sm:min-h-[480px]"
+          className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#dcd5cf] sm:!aspect-auto sm:h-full sm:min-h-[480px]"
         >
           <iframe
             title="Map to Cafe Mama & Sons"

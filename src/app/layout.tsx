@@ -396,6 +396,10 @@ export default function RootLayout({
       className={`${anton.variable} ${archivo.variable} ${caveat.variable} ${archivoBlack.variable} h-full antialiased`}
     >
       <head>
+        {/* Every image + the hero video streams from Cloudinary — opening
+            the connection during HTML parse shaves the DNS/TLS handshake off
+            the LCP image (poster) and the hero stream. */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
         {/* Cheee T-Bone (and the rest of the Typekit kit) for the poster
             titles. Loaded ahead of body so the title swap doesn't flash. */}
         <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
