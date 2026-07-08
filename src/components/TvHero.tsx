@@ -99,7 +99,12 @@ export default function TvHero({
       // together with viewport-fit=cover in layout.tsx) so the area under
       // Safari's translucent toolbar is always the hero's black, not the
       // menu behind it.
-      className="pointer-events-none fixed inset-0 z-[40] w-full overflow-hidden bg-black supports-[min-height:100lvh]:min-h-[100lvh]"
+      // Mobile over-covers by 6lvh (top-anchored, so the extra extends BELOW
+      // the screen) — belt-and-braces against any iOS toolbar/safe-area state
+      // leaving a sliver at the bottom. The SCROLL cue, navbar and widgets
+      // are separate fixed elements, so nothing shifts. sm+ keeps exact
+      // viewport height.
+      className="pointer-events-none fixed inset-0 z-[40] w-full overflow-hidden bg-black supports-[min-height:100lvh]:min-h-[106lvh] sm:supports-[min-height:100lvh]:min-h-[100lvh]"
     >
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />

@@ -50,12 +50,15 @@ export default function Menu() {
       const play = () =>
         gsap.fromTo(
           targets,
-          { y: mobile ? 36 : 60, autoAlpha: 0 },
+          { y: mobile ? 32 : 60, autoAlpha: 0 },
           {
             y: 0,
             autoAlpha: 1,
-            duration: mobile ? 0.65 : 0.85,
-            stagger: mobile ? 0.08 : 0.12,
+            // Mobile stays inside the ~500ms transition budget with a tight
+            // 60ms stagger — all speed up front (strong ease-out), so the
+            // menu answers the swipe instead of trailing it.
+            duration: mobile ? 0.55 : 0.85,
+            stagger: mobile ? 0.06 : 0.12,
             ease: "power3.out",
             overwrite: true,
           },

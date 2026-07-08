@@ -106,7 +106,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4c33c",
+  // iOS Safari tints its bottom toolbar with theme-color — the previous gold
+  // (#f4c33c) painted a gold band under the black hero that read as "the
+  // menu peeking through". Near-black matches the html background, so both
+  // ends of the screen frame the page in the same solid dark.
+  themeColor: "#120d08",
   colorScheme: "light",
   // Let the page extend into the iOS safe areas (behind the translucent
   // Safari bottom toolbar / home indicator). Without this, iOS paints those
