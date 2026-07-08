@@ -18,14 +18,16 @@ import { cafeBrainReply } from "@/lib/cafe-brain";
  *
  * Optional polish: when the brain doesn't recognise a specific intent (a
  * generic/free-form comment), the route can hand the comment to a hosted
- * model for a more personalised line — Gemini, then Anthropic — before
- * falling back to the brain's warm default. Factual intents are ALWAYS
- * answered by the brain so a hosted model can't hallucinate our hours or
- * prices.
+ * model for a more personalised line — Groq, then Gemini, then Anthropic —
+ * before falling back to the brain's warm default. Factual intents are
+ * ALWAYS answered by the brain so a hosted model can't hallucinate our
+ * hours or prices.
  *
- * Env vars (set in .env.local — never shipped to the browser):
- *   GEMINI_API_KEY=AIza...          ← optional, aistudio.google.com/apikey
- *   ANTHROPIC_API_KEY=sk-ant-...    ← optional, console.anthropic.com
+ * Env vars (set in .env.local — never shipped to the browser). All are
+ * optional; set whichever you have, the route tries them in this order:
+ *   GROQ_API_KEY=gsk_...            ← free, console.groq.com/keys
+ *   GEMINI_API_KEY=AIza...          ← free, aistudio.google.com/apikey
+ *   ANTHROPIC_API_KEY=sk-ant-...    ← paid, console.anthropic.com
  */
 
 const SYSTEM_PROMPT = `You are the person running the @cafe_mama_sons Instagram account.
@@ -49,6 +51,43 @@ Output: the reply text only.`;
 // wraps replies in quotes or adds a sign-off newline despite the prompt.
 const sanitize = (s: string): string =>
   s.replace(/^["'`\s]+|["'`\s]+$/g, "").split(/\n+/)[0]!.slice(0, 200);
+
+// Groq — free tier via console.groq.com, OpenAI-compatible API. The most
+// dependable of the free hosted tiers (generous per-day limits, no billing
+// required, sub-second responses). llama-3.3-70b-versatile writes the most
+// natural casual replies; swap to llama-3.1-8b-instant if the 70B model's
+// free quota ever tightens.
+async function tryGroq(userText: string): Promise<string | null> {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return null;
+  try {
+    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 80,
+        temperature: 0.9,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userText.slice(0, 280) },
+        ],
+      }),
+    });
+    if (!r.ok) return null;
+    const data = (await r.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) return null;
+    return sanitize(text);
+  } catch {
+    return null;
+  }
+}
 
 // Google Gemini — free tier via aistudio.google.com. Generous quotas, no
 // credit card. Uses gemini-flash-lite-latest because gemini-2.0-flash and
@@ -139,7 +178,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Free-form comment → optionally let a hosted model personalise, falling
-  // back to the brain's warm default if no key is set or the call fails.
+  // back to the brain's warm default if no key is set or the calls fail.
+  const groq = await tryGroq(userText);
+  if (groq) return NextResponse.json({ reply: groq });
+
   const gemini = await tryGemini(userText);
   if (gemini) return NextResponse.json({ reply: gemini });
 

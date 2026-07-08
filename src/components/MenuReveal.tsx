@@ -102,7 +102,7 @@ export default function MenuReveal() {
       // Start on the hero: it's shown, the menu scroll is locked behind it.
       setLocked(true);
 
-      // The hero "Menu ⌄" cue must only ever be visible on the hero. overwrite
+      // The hero "Scroll ⌄" cue must only ever be visible on the hero. overwrite
       // ensures the latest show/hide wins, so a rapid hero↔menu gesture (e.g.
       // trackpad momentum firing onDown+onUp) can't leave a stale show running.
       const showBtn = () =>
@@ -321,31 +321,33 @@ export default function MenuReveal() {
       </div>
 
       {/* Minimal "enter" cue, low-centre of the hero — matched to the navbar
-          (gold Arial Black). The arrow only bounces on hover. */}
+          (gold Arial Black). The bounce lives on a wrapper around BOTH the
+          word and the arrow so they move together on hover. */}
       <button
         ref={btnRef}
         type="button"
-        className="group fixed bottom-3 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 text-[#f4c33c]"
+        className="group fixed bottom-3 left-1/2 z-[60] -translate-x-1/2 text-[#f4c33c]"
       >
-        <span className="nav-blackface text-lg uppercase tracking-wide sm:text-xl">
-          Menu
+        <span className="flex items-center gap-2 group-hover:animate-bounce">
+          <span className="nav-blackface text-lg uppercase tracking-wide sm:text-xl">
+            Scroll
+          </span>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            style={{ filter: "drop-shadow(2px 2px 0 #000)" }}
+          >
+            <path
+              d="M6 9l6 6 6-6"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="group-hover:animate-bounce"
-          style={{ filter: "drop-shadow(2px 2px 0 #000)" }}
-        >
-          <path
-            d="M6 9l6 6 6-6"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
       </button>
     </>
   );
