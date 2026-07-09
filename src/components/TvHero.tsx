@@ -50,15 +50,21 @@ export default function TvHero({
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Pick the video rendition client-side: phones get a 720px-wide Cloudinary
-  // derivation — decoding the full-size stream fullscreen was one of the
-  // biggest sources of mobile lag (the poster covers the beat before
-  // hydration chooses a source).
+  // Pick the video rendition client-side (the poster covers the beat before
+  // hydration chooses a source):
+  //  - phones get a 1080×1920 PORTRAIT centre-crop — a plain width-capped
+  //    landscape rendition looked terrible because portrait cover-cropping
+  //    only shows a slice of the frame, magnified. The portrait crop is
+  //    native phone resolution (sharp), properly centred, and ~5 MB vs the
+  //    ~33 MB full stream, so it also decodes cheaply.
+  //  - desktop keeps the full landscape stream.
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   useEffect(() => {
     if (!videoSrc) return;
     const small = window.matchMedia("(max-width: 640px)").matches;
-    setResolvedSrc(cldUrl(videoSrc, small ? { transform: "w_720" } : {}));
+    setResolvedSrc(
+      cldUrl(videoSrc, small ? { transform: "w_1080,h_1920,c_fill" } : {}),
+    );
   }, [videoSrc]);
 
   useEffect(() => {
@@ -115,7 +121,7 @@ export default function TvHero({
       // leaving a sliver at the bottom. The SCROLL cue, navbar and widgets
       // are separate fixed elements, so nothing shifts. sm+ keeps exact
       // viewport height.
-      className="pointer-events-none fixed inset-0 z-[40] w-full overflow-hidden bg-black supports-[min-height:100lvh]:min-h-[106lvh] sm:supports-[min-height:100lvh]:min-h-[100lvh]"
+      className="pointer-events-none fixed inset-0 z-[40] w-full overflow-hidden bg-black supports-[min-height:100lvh]:min-h-[115lvh] sm:supports-[min-height:100lvh]:min-h-[100lvh]"
     >
       {/* Soft warm sun glow rising behind the broadcast */}
       <div className="pointer-events-none absolute left-1/2 top-[34%] h-[60vw] w-[60vw] max-h-[520px] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(240,169,43,0.45)_0%,rgba(232,155,118,0.35)_45%,transparent_70%)] opacity-60" />

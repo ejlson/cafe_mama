@@ -38,7 +38,11 @@ html::-webkit-scrollbar {
 }
 
 body {
-  background: var(--color-cream);
+  /* Near-black, matching <html> and theme-color — iOS Safari derives its
+     toolbar/safe-area tinting from the page's root backgrounds, and the old
+     cream here could surface as a light band under the dark hero. Sections
+     all paint their own backgrounds, so this never shows inside the page. */
+  background: #120d08;
   color: var(--color-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

@@ -105,7 +105,12 @@ export default function W4WBadge() {
         // frame — one of the biggest mobile lag sources. Phones get a simple
         // translucent dark base (the gold border + text-shadow keep the pill
         // legible on any backdrop); sm+ keeps the near-clear iOS glass.
-        className="fixed bottom-1 right-3 z-[56] inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-6 sm:gap-2 sm:bg-transparent sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em] sm:[background:linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] sm:[backdrop-filter:blur(22px)_saturate(180%)] sm:[-webkit-backdrop-filter:blur(22px)_saturate(180%)]"
+        // Centred under the teardrop: the drop's centre sits 56px from the
+        // right edge on mobile (right-4 + w-20/2) and 88px on sm+ (right-6 +
+        // w-32/2) — anchor the pill's right edge there and shift it right by
+        // half its own width. GSAP's idle bob only tweens y, so the x
+        // translate survives.
+        className="fixed bottom-1 right-14 z-[56] inline-flex translate-x-1/2 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-[5.5rem] sm:gap-2 sm:bg-transparent sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em] sm:[background:linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] sm:[backdrop-filter:blur(22px)_saturate(180%)] sm:[-webkit-backdrop-filter:blur(22px)_saturate(180%)]"
         style={{
           border: `1.5px solid rgba(244,195,60,0.75)`,
           boxShadow:
