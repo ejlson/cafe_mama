@@ -58,13 +58,31 @@ Output: the reply text only.`;
 const sanitize = (s: string): string =>
   s.replace(/^["'`\s]+|["'`\s]+$/g, "").split(/\n+/)[0]!.slice(0, 200);
 
+// Resolve a secret across runtimes (per developers.cloudflare.com/workers/
+// configuration/environment-variables): Node (next dev/start) exposes it on
+// process.env; on Cloudflare Workers, process.env is only populated when the
+// nodejs_compat_populate_process_env flag is active (default for compat
+// dates after 2025-04-01) — otherwise secrets live solely on the Workers
+// `env` binding object, which the OpenNext/Workers adapters stash on a
+// well-known global symbol. Checking both means the key is found however
+// the Worker is configured.
+type CfContext = { env?: Record<string, string | undefined> };
+const getEnv = (name: string): string | undefined => {
+  const fromProcess = process.env[name];
+  if (fromProcess) return fromProcess;
+  const ctx = (globalThis as unknown as Record<symbol, CfContext | undefined>)[
+    Symbol.for("__cloudflare-context__")
+  ];
+  return ctx?.env?.[name];
+};
+
 // Groq — free tier via console.groq.com, OpenAI-compatible API. The most
 // dependable of the free hosted tiers (generous per-day limits, no billing
 // required, sub-second responses). llama-3.3-70b-versatile writes the most
 // natural casual replies; swap to llama-3.1-8b-instant if the 70B model's
 // free quota ever tightens.
 async function tryGroq(userText: string): Promise<string | null> {
-  const key = process.env.GROQ_API_KEY;
+  const key = getEnv("GROQ_API_KEY");
   if (!key) return null;
   try {
     const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -101,7 +119,7 @@ async function tryGroq(userText: string): Promise<string | null> {
 // or return 503 "high demand"; flash-lite-latest has the most stable free
 // quota.
 async function tryGemini(userText: string): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key = getEnv("GEMINI_API_KEY");
   if (!key) return null;
   try {
     const url =
@@ -136,7 +154,7 @@ async function tryGemini(userText: string): Promise<string | null> {
 
 // Anthropic Claude — paid, used if no Gemini key is set but Anthropic is.
 async function tryAnthropic(userText: string): Promise<string | null> {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = getEnv("ANTHROPIC_API_KEY");
   if (!key) return null;
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
