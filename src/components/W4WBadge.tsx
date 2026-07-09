@@ -94,37 +94,40 @@ export default function W4WBadge() {
           border + top-lit rim, and a soft outer gold glow so it still reads
           as a call-to-action. Text is bold gold with a stacked drop-shadow
           so it pops against any page background. */}
-      <a
-        ref={pillRef}
-        href={DONATE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Donate to Waves For Water"
-        // Glass treatment is desktop-only: a fixed backdrop-blur sitting over
-        // the PLAYING hero video forces the GPU to re-blur that region every
-        // frame — one of the biggest mobile lag sources. Phones get a simple
-        // translucent dark base (the gold border + text-shadow keep the pill
-        // legible on any backdrop); sm+ keeps the near-clear iOS glass.
-        // Centred under the teardrop: the drop's centre sits 56px from the
-        // right edge on mobile (right-4 + w-20/2) and 88px on sm+ (right-6 +
-        // w-32/2) — anchor the pill's right edge there and shift it right by
-        // half its own width. GSAP's idle bob only tweens y, so the x
-        // translate survives.
-        className="fixed bottom-1 right-14 z-[56] inline-flex translate-x-1/2 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-[5.5rem] sm:gap-2 sm:bg-transparent sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em] sm:[background:linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] sm:[backdrop-filter:blur(22px)_saturate(180%)] sm:[-webkit-backdrop-filter:blur(22px)_saturate(180%)]"
-        style={{
-          border: `1.5px solid rgba(244,195,60,0.75)`,
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.5), 0 0 22px rgba(244,195,60,0.4), 0 10px 24px rgba(0,0,0,0.45)",
-          color: GOLD,
-          textShadow:
-            "0 1px 2px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55), 0 0 16px rgba(0,0,0,0.35)",
-        }}
-      >
-        <span aria-hidden style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))" }}>
-          ♥
-        </span>{" "}
-        Donate
-      </a>
+      {/* Wrapper occupies exactly the teardrop's horizontal box (same right
+          offset + width), so flex-centring the pill inside it pins the pill's
+          centre to the drop's centre on every breakpoint — no transforms
+          involved, so GSAP's idle bob (which owns the pill's transform for
+          the y float) can't knock it off-centre. The pill may be wider than
+          the wrapper; it overflows both sides equally. */}
+      <div className="pointer-events-none fixed bottom-1 right-4 z-[56] flex w-20 justify-center sm:bottom-2 sm:right-6 sm:w-32">
+        <a
+          ref={pillRef}
+          href={DONATE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Donate to Waves For Water"
+          // Glass treatment is desktop-only: a fixed backdrop-blur sitting
+          // over the PLAYING hero video forces the GPU to re-blur that region
+          // every frame — one of the biggest mobile lag sources. Phones get a
+          // simple translucent dark base (the gold border + text-shadow keep
+          // the pill legible on any backdrop); sm+ keeps the near-clear glass.
+          className="pointer-events-auto inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-black/40 px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:gap-2 sm:bg-transparent sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em] sm:[background:linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] sm:[backdrop-filter:blur(22px)_saturate(180%)] sm:[-webkit-backdrop-filter:blur(22px)_saturate(180%)]"
+          style={{
+            border: `1.5px solid rgba(244,195,60,0.75)`,
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.5), 0 0 22px rgba(244,195,60,0.4), 0 10px 24px rgba(0,0,0,0.45)",
+            color: GOLD,
+            textShadow:
+              "0 1px 2px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55), 0 0 16px rgba(0,0,0,0.35)",
+          }}
+        >
+          <span aria-hidden style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.7))" }}>
+            ♥
+          </span>{" "}
+          Donate
+        </a>
+      </div>
 
       {/* teardrop badge */}
       <div
@@ -325,7 +328,7 @@ export default function W4WBadge() {
               className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-75"
               style={{ color: GOLD }}
             >
-              See the full Cafe Mama × W4W deck for more information →
+              See the full W4W deck for more information →
             </a>
           </p>
 
