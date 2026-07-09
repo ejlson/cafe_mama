@@ -163,6 +163,11 @@ export default function CollabMarquee({ accent }: { accent: string }) {
               data-p
               className="flex h-full w-full items-center justify-center will-change-transform"
             >
+              {/* Shadow is sm+ only — iOS Safari mis-rasterises drop-shadow
+                  filters on elements inside a continuously-transformed
+                  container (the smooothy track), clipping them to stale
+                  boxes. It's also per-frame filter work the phone GPU can
+                  skip; on the flat gold band the logos read fine without. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 data-logo
@@ -170,7 +175,7 @@ export default function CollabMarquee({ accent }: { accent: string }) {
                 alt={logo.alt}
                 loading="lazy"
                 draggable={false}
-                className="max-h-full max-w-full rounded-2xl object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
+                className="max-h-full max-w-full rounded-2xl object-contain sm:drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]"
               />
             </div>
           </div>
