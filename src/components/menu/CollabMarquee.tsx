@@ -42,6 +42,12 @@ export default function CollabMarquee({ accent }: { accent: string }) {
       const reduce = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
+      // The proximity scale-up reads every logo's bounding rect per frame —
+      // fine on desktop, needless jank on phones (and there's no cursor to
+      // chase the centre anyway).
+      const fine = window.matchMedia(
+        "(hover: hover) and (pointer: fine)",
+      ).matches;
 
       // The [data-p] inner wrappers get a velocity-driven parallax nudge
       // (smooothy docs → Parallax and Speed). The [data-logo] images scale up
@@ -69,7 +75,7 @@ export default function CollabMarquee({ accent }: { accent: string }) {
             p.style.transform = `translateX(${offset}%)`;
           });
 
-          if (reduce) return;
+          if (reduce || !fine) return;
           // Distance of each logo from the centre of the screen → proximity
           // scale (1 at the FOCUS edge, MAX_SCALE dead centre).
           const mid = window.innerWidth / 2;

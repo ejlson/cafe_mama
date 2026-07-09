@@ -100,16 +100,13 @@ export default function W4WBadge() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Donate to Waves For Water"
-        className="fixed bottom-1 right-3 z-[56] inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-6 sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em]"
+        // Glass treatment is desktop-only: a fixed backdrop-blur sitting over
+        // the PLAYING hero video forces the GPU to re-blur that region every
+        // frame — one of the biggest mobile lag sources. Phones get a simple
+        // translucent dark base (the gold border + text-shadow keep the pill
+        // legible on any backdrop); sm+ keeps the near-clear iOS glass.
+        className="fixed bottom-1 right-3 z-[56] inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 font-arialblack text-[10px] uppercase tracking-[0.18em] transition-transform duration-150 ease-out hover:scale-105 active:scale-[0.97] sm:bottom-2 sm:right-6 sm:gap-2 sm:bg-transparent sm:px-4 sm:py-2.5 sm:text-xs sm:tracking-[0.22em] sm:[background:linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] sm:[backdrop-filter:blur(22px)_saturate(180%)] sm:[-webkit-backdrop-filter:blur(22px)_saturate(180%)]"
         style={{
-          // Near-clear glass — barely-there translucent tint so whatever's
-          // behind the pill shows through the backdrop-blur. The gold border,
-          // top-lit inset rim and soft gold outer glow define the pill shape
-          // on their own; text-shadow keeps the label crisp on any backdrop.
-          background:
-            "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)",
-          backdropFilter: "blur(22px) saturate(180%)",
-          WebkitBackdropFilter: "blur(22px) saturate(180%)",
           border: `1.5px solid rgba(244,195,60,0.75)`,
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.5), 0 0 22px rgba(244,195,60,0.4), 0 10px 24px rgba(0,0,0,0.45)",

@@ -418,6 +418,12 @@ video {
   .wordart-3d::after {
     display: none;
   }
+  /* The power-on sweep animates filter: brightness over the fullscreen
+     hero video — 1.4s of expensive per-frame re-filtering that reads as
+     load jank on phones. Desktop keeps the TV switch-on moment. */
+  .power-on {
+    animation: none !important;
+  }
 }
 
 /* Classic Word 97 "WordArt" — gold metallic gradient fill, dark outline and a

@@ -50,6 +50,17 @@ export default function TvHero({
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Pick the video rendition client-side: phones get a 720px-wide Cloudinary
+  // derivation — decoding the full-size stream fullscreen was one of the
+  // biggest sources of mobile lag (the poster covers the beat before
+  // hydration chooses a source).
+  const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (!videoSrc) return;
+    const small = window.matchMedia("(max-width: 640px)").matches;
+    setResolvedSrc(cldUrl(videoSrc, small ? { transform: "w_720" } : {}));
+  }, [videoSrc]);
+
   useEffect(() => {
     // Hold each caption long enough to read both lines, then advance.
     const { en, tl } = SUBTITLES[line];
@@ -117,12 +128,12 @@ export default function TvHero({
       <div
         className="power-on absolute inset-0 crt-fisheye"
         style={{
-          backgroundImage: `url(${cldUrl(poster)})`,
+          backgroundImage: `url(${cldUrl(poster, { transform: "w_1600,c_limit" })})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        {videoSrc ? (
+        {videoSrc && resolvedSrc ? (
           <video
             ref={videoRef}
             className="h-full w-full scale-[1.06] object-cover"
@@ -131,23 +142,23 @@ export default function TvHero({
             loop
             muted
             playsInline
-            // preload="metadata" — the hero video is ~33 MB via Cloudinary,
-            // and "auto" was eating a big share of the initial connection
-            // budget which read as page-wide lag. Metadata lets autoplay
-            // still fire while the poster covers the gap.
+            // preload="metadata" — the full hero video is ~33 MB via
+            // Cloudinary, and "auto" was eating a big share of the initial
+            // connection budget which read as page-wide lag. Metadata lets
+            // autoplay still fire while the poster covers the gap.
             preload="metadata"
-            poster={cldUrl(poster)}
+            poster={cldUrl(poster, { transform: "w_1600,c_limit" })}
           >
-            <source src={cldUrl(videoSrc)} type="video/mp4" />
+            <source src={resolvedSrc} type="video/mp4" />
           </video>
-        ) : (
+        ) : !videoSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={cldUrl(poster)}
+            src={cldUrl(poster, { transform: "w_1600,c_limit" })}
             alt="Cafe Mama & Sons shopfront on Kentish Town Road"
             className="h-full w-full scale-[1.06] object-cover"
           />
-        )}
+        ) : null}
         {/* Light broadcast grade — kept subtle so the video reads clearly */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/25" />
       </div>
