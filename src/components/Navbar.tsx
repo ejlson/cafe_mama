@@ -96,21 +96,16 @@ export default function Navbar() {
       className="fixed z-[70]"
     >
       <nav className="relative flex w-full items-start justify-between px-3 py-3 sm:px-4">
-        {/* Brand — two-layer masked logo: a black silhouette offset down-right
-            behind a yellow silhouette in front, so it carries the same
-            hard-shadow-on-yellow look as the rest of the navbar text. */}
         <a
           href="#top"
           aria-label="Cafe Mama & Sons"
           className="relative block leading-none"
         >
-          {/* black backdrop (behind, offset 2px / 3px down-right) */}
           <span
             aria-hidden
             className="absolute left-[2px] top-[2px] block aspect-[7024/970] h-6 sm:left-[3px] sm:top-[3px] sm:h-8 lg:h-10"
             style={{ backgroundColor: "#000", ...LOGO_MASK }}
           />
-          {/* yellow foreground */}
           <span
             aria-hidden
             className="relative block aspect-[7024/970] h-6 sm:h-8 lg:h-10"
@@ -118,7 +113,6 @@ export default function Navbar() {
           />
         </a>
 
-        {/* Right links (desktop) */}
         <ul
           className="nav-blackface hidden items-center gap-5 pt-1 text-xl md:flex lg:gap-8 lg:text-2xl"
           style={{ color: navColor }}
