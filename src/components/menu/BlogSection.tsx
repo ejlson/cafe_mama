@@ -183,18 +183,24 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
 export default function BlogSection({ accent }: { accent: string }) {
   const [openPost, setOpenPost] = useState<BlogPost | null>(null);
   const stripRef = useRef<HTMLUListElement>(null);
+  // Which edges of the strip the user has reached — drives the right-edge
+  // "more content this way" fade (it disappears at the end, and the end-cap
+  // card tells the reader they're caught up).
+  const [atEnd, setAtEnd] = useState(false);
+  const atEndRef = useRef(false);
 
   // BLOG_POSTS is sorted newest-first in src/lib/blog.ts.
   const [featured, ...older] = BLOG_POSTS;
 
   // The older-posts strip scrolls natively on touch (pan-x), but on desktop
   // ScrollSmoother owns the wheel and a mouse can't drag a native overflow
-  // container — so the strip felt completely stuck. Two fixes:
-  //  1. Mouse drag-to-scroll with pointer capture; scroll-snap is suspended
-  //     during the drag (mandatory snap fights scrollLeft) and a click that
-  //     ends a drag is swallowed so cards don't open mid-scrub.
-  //  2. Horizontal wheel/trackpad deltas over the strip scroll IT, not the
-  //     page (stopPropagation keeps them away from ScrollSmoother).
+  // container — so the strip felt completely stuck. What runs here:
+  //  1. Mouse drag-to-scroll with pointer capture and momentum: release
+  //     velocity carries the strip on a friction glide (damped, clamped at
+  //     the edges), then it eases into the nearest card. A new pointerdown
+  //     interrupts the glide mid-flight, so it never fights the user.
+  //  2. Horizontal wheel/trackpad deltas scroll the strip, not the page.
+  //  3. Scroll position is tracked to flag the end of the entries.
   useEffect(() => {
     const el = stripRef.current;
     if (!el) return;
@@ -204,14 +210,69 @@ export default function BlogSection({ accent }: { accent: string }) {
     let startX = 0;
     let startLeft = 0;
     let pointerId = 0;
+    // velocity in px/ms, EMA-smoothed so a jittery last frame can't spike it
+    let vel = 0;
+    let lastX = 0;
+    let lastT = 0;
+    let glideRaf = 0;
+    let settleTimer = 0;
+
+    const maxScroll = () => el.scrollWidth - el.clientWidth;
+
+    const stopGlide = () => {
+      if (glideRaf) cancelAnimationFrame(glideRaf);
+      glideRaf = 0;
+      if (settleTimer) window.clearTimeout(settleTimer);
+      settleTimer = 0;
+    };
+
+    // Ease into the nearest card edge (fast, ease-out via native smooth
+    // scrolling), then hand control back to CSS snap once we're parked.
+    const settle = () => {
+      const cards = Array.from(el.children) as HTMLElement[];
+      let target = 0;
+      for (const c of cards) {
+        if (
+          Math.abs(c.offsetLeft - el.scrollLeft) <
+          Math.abs(target - el.scrollLeft)
+        )
+          target = c.offsetLeft;
+      }
+      el.scrollTo({
+        left: Math.min(target, maxScroll()),
+        behavior: "smooth",
+      });
+      settleTimer = window.setTimeout(() => {
+        el.style.scrollSnapType = "";
+      }, 450);
+    };
+
+    // Friction glide — the release velocity decays ~6%/frame; hitting an
+    // edge kills it (no rebound, per the site's no-bounce walls). Below a
+    // gentle floor we ease into the nearest card instead of dead-stopping.
+    const glide = () => {
+      let v = vel * 16; // px/ms → px/frame at ~60fps
+      const step = () => {
+        el.scrollLeft += v;
+        v *= 0.94;
+        if (el.scrollLeft <= 0 || el.scrollLeft >= maxScroll() - 1) v = 0;
+        if (Math.abs(v) > 0.5) glideRaf = requestAnimationFrame(step);
+        else settle();
+      };
+      glideRaf = requestAnimationFrame(step);
+    };
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== "mouse" || e.button !== 0) return; // touch pans natively
+      stopGlide(); // interruptible: grabbing mid-glide takes over instantly
       down = true;
       dragging = false;
       startX = e.clientX;
       startLeft = el.scrollLeft;
       pointerId = e.pointerId;
+      vel = 0;
+      lastX = e.clientX;
+      lastT = performance.now();
     };
     const onPointerMove = (e: PointerEvent) => {
       if (!down) return;
@@ -222,7 +283,19 @@ export default function BlogSection({ accent }: { accent: string }) {
         el.style.scrollSnapType = "none";
         el.style.cursor = "grabbing";
       }
-      if (dragging) el.scrollLeft = startLeft - dx;
+      if (dragging) {
+        el.scrollLeft = startLeft - dx;
+        const now = performance.now();
+        const dt = Math.max(now - lastT, 1);
+        // capped at ±4 px/ms so one violent frame can't fling the strip
+        // across its full width
+        vel = Math.max(
+          -4,
+          Math.min(4, 0.75 * vel + 0.25 * ((lastX - e.clientX) / dt)),
+        );
+        lastX = e.clientX;
+        lastT = now;
+      }
     };
     const endDrag = () => {
       if (!down) return;
@@ -231,8 +304,10 @@ export default function BlogSection({ accent }: { accent: string }) {
         try {
           el.releasePointerCapture(pointerId);
         } catch {}
-        el.style.scrollSnapType = "";
         el.style.cursor = "";
+        // a flick keeps travelling; a slow release just tidies into a card
+        if (Math.abs(vel) > 0.15) glide();
+        else settle();
       }
     };
     // Capture-phase click guard — a drag release must not open the card
@@ -250,19 +325,38 @@ export default function BlogSection({ accent }: { accent: string }) {
       e.stopPropagation();
     };
 
+    // End-of-entries tracking (rAF-throttled; only re-renders on change).
+    let scrollRaf = 0;
+    const onScroll = () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        const end = el.scrollLeft >= maxScroll() - 8;
+        if (end !== atEndRef.current) {
+          atEndRef.current = end;
+          setAtEnd(end);
+        }
+      });
+    };
+    onScroll();
+
     el.addEventListener("pointerdown", onPointerDown);
     el.addEventListener("pointermove", onPointerMove);
     el.addEventListener("pointerup", endDrag);
     el.addEventListener("pointercancel", endDrag);
     el.addEventListener("click", onClickCapture, true);
     el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      stopGlide();
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
       el.removeEventListener("pointerdown", onPointerDown);
       el.removeEventListener("pointermove", onPointerMove);
       el.removeEventListener("pointerup", endDrag);
       el.removeEventListener("pointercancel", endDrag);
       el.removeEventListener("click", onClickCapture, true);
       el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("scroll", onScroll);
     };
   }, []);
 
@@ -348,18 +442,32 @@ export default function BlogSection({ accent }: { accent: string }) {
               aria-hidden
               className="font-arialblack text-xs uppercase tracking-[0.3em] opacity-60"
             >
-              ← scroll →
+              {atEnd ? "that's the lot!" : "← scroll →"}
             </span>
           </div>
 
-          {/* Native horizontal overflow scroll + scroll snap so cards settle
-              cleanly. Cards have a fixed width so they read as a strip.
-              touch-action pan-x keeps horizontal swipes on the strip while
-              vertical swipes still scroll the page; cursor-grab signals the
-              desktop drag-to-scroll wired up in the effect above. */}
+          {/* Native horizontal overflow scroll + PROXIMITY snap (mandatory
+              fought the momentum glide with abrupt stops — proximity only
+              tidies when a card is already close). Cards have a fixed width
+              so they read as a strip. The right-edge fade masks the content
+              while there's more to scroll and vanishes at the end — together
+              with the end-cap card it makes "you've seen everything"
+              unmistakable. touch-action pan-x keeps horizontal swipes on the
+              strip while vertical swipes still scroll the page; cursor-grab
+              signals the desktop drag-to-scroll wired up in the effect. */}
           <ul
             ref={stripRef}
-            className="no-scrollbar mt-5 flex cursor-grab snap-x snap-mandatory gap-5 overflow-x-auto pb-1 [touch-action:pan-x_pan-y] sm:gap-7"
+            className="no-scrollbar mt-5 flex cursor-grab snap-x snap-proximity gap-5 overflow-x-auto pb-1 [touch-action:pan-x_pan-y] sm:gap-7"
+            style={
+              atEnd
+                ? undefined
+                : {
+                    WebkitMaskImage:
+                      "linear-gradient(to right, black calc(100% - 64px), rgba(0,0,0,0.15) 100%)",
+                    maskImage:
+                      "linear-gradient(to right, black calc(100% - 64px), rgba(0,0,0,0.15) 100%)",
+                  }
+            }
           >
             {older.map((p) => (
               <li
@@ -395,6 +503,25 @@ export default function BlogSection({ accent }: { accent: string }) {
                 </button>
               </li>
             ))}
+
+            {/* End cap — the explicit "no more entries" marker the strip
+                glides into. Doubles as a nudge to the Instagram feed. */}
+            <li className="flex w-[50%] shrink-0 snap-start items-center justify-center sm:w-[24%]">
+              <a
+                href="https://www.instagram.com/cafe_mama_sons/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-center transition-opacity hover:opacity-70"
+                style={{ color: accent }}
+              >
+                <span className="font-arialblack block text-sm uppercase tracking-[0.2em]">
+                  You&apos;re all caught up 🤍
+                </span>
+                <span className="mt-2 block text-[11px] font-semibold uppercase tracking-wide opacity-70">
+                  Follow @cafe_mama_sons for more
+                </span>
+              </a>
+            </li>
           </ul>
         </div>
       )}

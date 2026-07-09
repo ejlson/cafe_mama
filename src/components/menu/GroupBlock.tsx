@@ -110,10 +110,11 @@ function ItemRow({ item, body, dot }: { item: Item; body: string; dot: string })
   );
 }
 
-// Split a group title into two stacked lines so the blurb can sit beside it:
-// break AFTER the "/" when there is one ("Sando/" + "Sandwiches"), otherwise
-// at the last space ("All-Day" + "Breakfast", "Baked" + "Goods").
-// Single-word titles ("Sides", "Coffee") stay on one line.
+// Split a group title into two stacked lines — MOBILE ONLY — so the blurb can
+// sit beside it in the narrow column: break AFTER the "/" when there is one
+// ("Sando/" + "Sandwiches"), otherwise at the last space ("All-Day" +
+// "Breakfast", "Baked" + "Goods"). Single-word titles stay on one line.
+// From sm: up the title renders as a single unbroken line.
 function splitTitle(title: string): string[] {
   const slash = title.indexOf("/");
   if (slash > 0 && slash < title.length - 1)
@@ -138,11 +139,22 @@ function GroupTitle({
       className="font-cheee min-w-0 shrink-0 text-3xl uppercase leading-[0.95] tracking-tight sm:text-6xl"
       style={{ color: accent }}
     >
-      {lines.map((line, i) => (
-        <span key={i} className="block">
-          {line}
-        </span>
-      ))}
+      {split && lines.length > 1 ? (
+        <>
+          {/* mobile: two stacked lines */}
+          <span className="sm:hidden">
+            {lines.map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))}
+          </span>
+          {/* desktop: one unbroken line */}
+          <span className="hidden whitespace-nowrap sm:block">{children}</span>
+        </>
+      ) : (
+        children
+      )}
     </h3>
   );
 }
@@ -162,18 +174,18 @@ export default function GroupBlock({
 }) {
   return (
     <div className="mt-1">
-      {/* Header row — title stacked on two lines at the LEFT (split after the
-          "/" or at the last space), the blurb filling the space to its RIGHT.
-          Never wraps below: the two-line title keeps the left column narrow
-          enough for the blurb on every viewport. */}
-      <div className="flex items-start gap-x-4 sm:gap-x-8">
+      {/* Header row — mobile: two-line title left, blurb beside it (nowrap
+          keeps them side by side in the narrow column). sm+: single-line
+          title with the blurb to its right; if a mid-size viewport can't fit
+          both, the blurb (basis-64) wraps below rather than crushing. */}
+      <div className="flex flex-nowrap items-start gap-x-4 gap-y-1 sm:flex-wrap sm:gap-x-8">
         <GroupTitle accent={accent} split={Boolean(group.blurb)}>
           {group.title}
         </GroupTitle>
         {group.blurb && (
           <p
             style={{ color: body }}
-            className="min-w-0 flex-1 pt-1 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-70 sm:pt-1.5 sm:text-xs"
+            className="min-w-0 flex-1 pt-1 text-[11px] font-semibold uppercase leading-snug tracking-wide opacity-70 sm:basis-64 sm:pt-1.5 sm:text-xs"
           >
             {group.blurb}
           </p>
