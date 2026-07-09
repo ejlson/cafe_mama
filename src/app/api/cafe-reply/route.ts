@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cafeBrainReply } from "@/lib/cafe-brain";
 
-// Cloudflare Pages only deploys route handlers that run on the edge runtime
-// — without this the route 404s in production and every comment falls back
-// to the client's canned pool. The handler is edge-safe: fetch + pure data,
-// no Node APIs.
-export const runtime = "edge";
+// Deployed via the OpenNext Cloudflare Workers adapter (the production
+// response carries `x-opennext: 1`), which runs routes on the NODE runtime
+// under nodejs_compat and does NOT support `export const runtime = "edge"`
+// — declaring it made this route 500 in production. Do not add it back.
 
 /**
  * POST /api/cafe-reply
