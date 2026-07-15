@@ -387,7 +387,21 @@ export default function BlogSection({ accent }: { accent: string }) {
             {/* Hover timings per the animation standards: the lift answers the
                 pointer (250ms), the zoom settles just behind it (400ms). The
                 old 500/700ms read as laggy. */}
-            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-2xl transition-transform duration-250 ease-out group-hover:-translate-y-1">
+            <div
+              className="
+                relative
+                aspect-[3/2]
+                overflow-hidden
+                rounded-2xl
+
+                before:absolute
+                before:inset-0
+                before:z-10
+                before:rounded-2xl
+                before:bg-[linear-gradient(to_top,rgba(0,0,0,.42),rgba(0,0,0,.08)_40%,transparent)]
+                before:content-['']
+              "
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cldUrl(featured.img, { transform: "w_1400,c_limit" })}
@@ -480,7 +494,23 @@ export default function BlogSection({ accent }: { accent: string }) {
                   className="group flex w-full flex-col gap-3 text-left"
                   style={{ color: accent }}
                 >
-                  <div className="aspect-[3/2] w-full overflow-hidden rounded-xl">
+                  <div
+                    className="
+                      relative
+                      aspect-[3/2]
+                      w-full
+                      overflow-hidden
+                      rounded-xl
+
+                      before:pointer-events-none
+                      before:absolute
+                      before:inset-0
+                      before:z-10
+                      before:rounded-xl
+                      before:shadow-[inset_0_0_80px_rgba(0,0,0,0.28)]
+                      before:content-['']
+                    "
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={cldUrl(p.img, { transform: "w_800,c_limit" })}

@@ -62,8 +62,11 @@ export default function TvHero({
   useEffect(() => {
     if (!videoSrc) return;
     const small = window.matchMedia("(max-width: 640px)").matches;
+    // setResolvedSrc(
+    //   cldUrl(videoSrc, small ? { transform: "w_1080,h_1920,c_fill" } : {}),
+    // );
     setResolvedSrc(
-      cldUrl(videoSrc, small ? { transform: "w_1080,h_1920,c_fill" } : {}),
+      cldUrl(videoSrc, small ? { transform: "w_540,h_1920,c_fill" } : {}),
     );
   }, [videoSrc]);
 
@@ -78,9 +81,7 @@ export default function TvHero({
     return () => clearTimeout(hold);
   }, [line]);
 
-  // The hero is a fixed layer that MenuReveal fades out (opacity/visibility)
-  // when you enter the menu — but a hidden <video> keeps decoding 4K frames the
-  // whole time, which is a big drain. Pause it while hidden, resume when shown.
+
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
