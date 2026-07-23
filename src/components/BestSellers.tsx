@@ -119,6 +119,7 @@ export default function BestSellers() {
       // compositor. Per-card random duration + phase offset keeps the three
       // from bobbing in lockstep.
       const grounds = gsap.utils.toArray<HTMLElement>(".bs-ground", root.current);
+      const idle: gsap.core.Tween[] = [];
       cards.forEach((c, i) => {
         // Random slight tilt with a guaranteed minimum so no card lands at
         // ~0° and reads as accidentally straight next to its tilted peers.
@@ -127,29 +128,50 @@ export default function BestSellers() {
         });
         const dur = gsap.utils.random(1.7, 2.3);
         const delay = i * 0.35;
-        gsap.to(c, {
-          y: -9,
-          duration: dur,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-          delay,
-        });
-        const g = grounds[i];
-        if (g) {
-          gsap.set(g, { transformOrigin: "50% 50%" });
-          gsap.to(g, {
-            scaleX: 0.8,
-            scaleY: 0.85,
-            opacity: 0.5,
+        idle.push(
+          gsap.to(c, {
+            y: -9,
             duration: dur,
             ease: "sine.inOut",
             yoyo: true,
             repeat: -1,
             delay,
-          });
+          }),
+        );
+        const g = grounds[i];
+        if (g) {
+          gsap.set(g, { transformOrigin: "50% 50%" });
+          idle.push(
+            gsap.to(g, {
+              scaleX: 0.8,
+              scaleY: 0.85,
+              opacity: 0.5,
+              duration: dur,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+              delay,
+            }),
+          );
         }
       });
+
+      // The levitation loops only tick while the section is on screen —
+      // same off-screen gating as the marquee and description physics, so
+      // the drinks tab doesn't keep six infinite tweens alive while the
+      // user is reading the menu list far below.
+      let idleIo: IntersectionObserver | undefined;
+      if (root.current) {
+        idleIo = new IntersectionObserver(
+          ([entry]) => {
+            const on = entry?.isIntersecting ?? false;
+            idle.forEach((t) => (on ? t.play() : t.pause()));
+          },
+          { rootMargin: "100px" },
+        );
+        idleIo.observe(root.current);
+      }
+      return () => idleIo?.disconnect();
     },
     { scope: root, dependencies: [] },
   );

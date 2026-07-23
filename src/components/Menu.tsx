@@ -103,12 +103,18 @@ export default function Menu() {
     });
 
     // Cross-dissolve the list out; the swap + fade-in happens in useGSAP below.
+    // onInterrupt releases the `switching` latch if this tween is ever killed
+    // (overwrite, unmount mid-switch) — without it the guard stayed true
+    // forever and the tabs stopped responding.
     gsap.to(catRef.current, {
       autoAlpha: 0,
       y: 8,
       duration: 0.28,
       ease: "power2.in",
       onComplete: () => setActive(key),
+      onInterrupt: () => {
+        switching.current = false;
+      },
     });
   };
 
@@ -131,6 +137,9 @@ export default function Menu() {
           duration: 0.5,
           ease: "power2.out",
           onComplete: () => {
+            switching.current = false;
+          },
+          onInterrupt: () => {
             switching.current = false;
           },
         },
