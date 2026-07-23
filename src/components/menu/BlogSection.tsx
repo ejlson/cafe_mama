@@ -116,7 +116,7 @@ function BlogModal({ post, onClose }: { post: BlogPost; onClose: () => void }) {
       <article
         ref={sheet}
         onClick={(e) => e.stopPropagation()}
-        className="no-scrollbar relative max-h-[88vh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl bg-cream text-pine shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+        className="no-scrollbar relative max-h-full w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl bg-cream text-pine shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
       >
         {/* Sheen that rakes across the sheet as it peels flat. */}
         <div
@@ -227,7 +227,9 @@ export default function BlogSection({ accent }: { accent: string }) {
     };
 
     // Ease into the nearest card edge (fast, ease-out via native smooth
-    // scrolling), then hand control back to CSS snap once we're parked.
+    // scrolling). There is deliberately NO CSS scroll-snap on the strip —
+    // snap re-targeting mid-glide fought the JS friction glide and read as
+    // stutter; this is the only tidy-up pass.
     const settle = () => {
       const cards = Array.from(el.children) as HTMLElement[];
       let target = 0;
@@ -242,20 +244,34 @@ export default function BlogSection({ accent }: { accent: string }) {
         left: Math.min(target, maxScroll()),
         behavior: "smooth",
       });
-      settleTimer = window.setTimeout(() => {
-        el.style.scrollSnapType = "";
-      }, 450);
     };
 
-    // Friction glide — the release velocity decays ~6%/frame; hitting an
-    // edge kills it (no rebound, per the site's no-bounce walls). Below a
-    // gentle floor we ease into the nearest card instead of dead-stopping.
+    // Friction glide — the release velocity decays ~6% per 60fps-frame,
+    // time-normalised so 120Hz displays glide the same distance; hitting an
+    // edge kills it (no rebound, per the site's no-bounce walls). Position
+    // accumulates in a float so low speeds don't quantise to whole-pixel
+    // steps (scrollLeft alone rounds, which read as end-of-glide jitter).
+    // Below a gentle floor we ease into the nearest card instead of
+    // dead-stopping.
     const glide = () => {
-      let v = vel * 16; // px/ms → px/frame at ~60fps
-      const step = () => {
-        el.scrollLeft += v;
-        v *= 0.94;
-        if (el.scrollLeft <= 0 || el.scrollLeft >= maxScroll() - 1) v = 0;
+      let v = vel * 16; // px/ms → px per 60fps-frame
+      let pos = el.scrollLeft;
+      let last = performance.now();
+      const step = (now: number) => {
+        const frames = Math.min((now - last) / (1000 / 60), 3);
+        last = now;
+        pos += v * frames;
+        v *= Math.pow(0.94, frames);
+        const max = maxScroll();
+        if (pos <= 0) {
+          pos = 0;
+          v = 0;
+        }
+        if (pos >= max) {
+          pos = max;
+          v = 0;
+        }
+        el.scrollLeft = pos;
         if (Math.abs(v) > 0.5) glideRaf = requestAnimationFrame(step);
         else settle();
       };
@@ -280,7 +296,6 @@ export default function BlogSection({ accent }: { accent: string }) {
       if (!dragging && Math.abs(dx) > 4) {
         dragging = true;
         el.setPointerCapture(pointerId);
-        el.style.scrollSnapType = "none";
         el.style.cursor = "grabbing";
       }
       if (dragging) {
@@ -398,7 +413,7 @@ export default function BlogSection({ accent }: { accent: string }) {
                 before:inset-0
                 before:z-10
                 before:rounded-2xl
-                before:bg-[linear-gradient(to_top,rgba(0,0,0,.42),rgba(0,0,0,.08)_40%,transparent)]
+                before:bg-[linear-gradient(to_top,rgba(0,0,0,.22),rgba(0,0,0,.04)_40%,transparent)]
                 before:content-['']
               "
             >
@@ -460,18 +475,20 @@ export default function BlogSection({ accent }: { accent: string }) {
             </span>
           </div>
 
-          {/* Native horizontal overflow scroll + PROXIMITY snap (mandatory
-              fought the momentum glide with abrupt stops — proximity only
-              tidies when a card is already close). Cards have a fixed width
-              so they read as a strip. The right-edge fade masks the content
-              while there's more to scroll and vanishes at the end — together
-              with the end-cap card it makes "you've seen everything"
+          {/* Native horizontal overflow scroll, deliberately WITHOUT CSS
+              scroll-snap — snap (even proximity) re-targets mid-momentum and
+              fought both native touch flings and the desktop friction glide,
+              which read as stutter. The JS settle() pass eases into the
+              nearest card only once a glide has decayed. Cards have a fixed
+              width so they read as a strip. The right-edge fade masks the
+              content while there's more to scroll and vanishes at the end —
+              together with the end-cap card it makes "you've seen everything"
               unmistakable. touch-action pan-x keeps horizontal swipes on the
               strip while vertical swipes still scroll the page; cursor-grab
               signals the desktop drag-to-scroll wired up in the effect. */}
           <ul
             ref={stripRef}
-            className="no-scrollbar mt-5 flex cursor-grab snap-x snap-proximity gap-5 overflow-x-auto pb-1 [touch-action:pan-x_pan-y] sm:gap-7"
+            className="no-scrollbar mt-5 flex cursor-grab gap-5 overflow-x-auto pb-1 [touch-action:pan-x_pan-y] sm:gap-7"
             style={
               atEnd
                 ? undefined
@@ -486,7 +503,7 @@ export default function BlogSection({ accent }: { accent: string }) {
             {older.map((p) => (
               <li
                 key={p.slug}
-                className="w-[68%] shrink-0 snap-start sm:w-[36%] lg:w-[28%]"
+                className="w-[68%] shrink-0 sm:w-[36%] lg:w-[28%]"
               >
                 <button
                   type="button"
@@ -536,7 +553,7 @@ export default function BlogSection({ accent }: { accent: string }) {
 
             {/* End cap — the explicit "no more entries" marker the strip
                 glides into. Doubles as a nudge to the Instagram feed. */}
-            <li className="flex w-[50%] shrink-0 snap-start items-center justify-center sm:w-[24%]">
+            <li className="flex w-[50%] shrink-0 items-center justify-center sm:w-[24%]">
               <a
                 href="https://www.instagram.com/cafe_mama_sons/"
                 target="_blank"

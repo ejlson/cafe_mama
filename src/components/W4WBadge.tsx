@@ -213,7 +213,11 @@ export default function W4WBadge() {
           // card fits on a laptop screen without scrolling. Native scrollbar
           // stays hidden as a safety net for smaller viewports (custom cursor
           // wouldn't survive a real scrollbar thumb).
-          className="relative max-h-[92vh] w-full max-w-[68rem] overflow-y-auto overscroll-contain rounded-[28px] p-5 sm:p-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          // max-h-full (not a vh cap) — the backdrop is inset-0 + p-4, so
+          // "full" is exactly the VISIBLE viewport minus padding. 92vh
+          // overshot the real viewport on iOS (vh ignores the toolbars),
+          // pushing the card's top edge off-screen and unreachable.
+          className="relative max-h-full w-full max-w-[68rem] overflow-y-auto overscroll-contain rounded-[28px] p-5 sm:p-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{
             background:
               "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 45%, rgba(13,79,138,0.35) 100%)",

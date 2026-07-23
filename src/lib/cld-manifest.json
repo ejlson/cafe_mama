@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-08T21:20:59.608Z",
+  "generatedAt": "2026-07-23T10:04:27.242Z",
   "cloudName": "mmia7qfr",
   "folder": "cafemama",
   "assets": {
@@ -310,6 +310,13 @@
       "ext": ".jpg",
       "width": 1800,
       "height": 1200
+    },
+    "/media/budots.mp3": {
+      "kind": "video",
+      "publicId": "cafemama/media/budots",
+      "ext": ".mp3",
+      "width": 500,
+      "height": 500
     },
     "/media/collabs/Canva-logo-PNG-large-size.png": {
       "kind": "image",
@@ -653,11 +660,6 @@
       "ext": ".jpg",
       "width": 1000,
       "height": 1517
-    },
-    "/media/videoplayback.mp3": {
-      "kind": "video",
-      "publicId": "cafemama/media/videoplayback",
-      "ext": ".mp3"
     },
     "/media/videos/website adobo mushroom.mp4": {
       "kind": "video",

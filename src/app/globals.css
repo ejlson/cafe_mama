@@ -179,6 +179,35 @@ video {
   }
 }
 
+/* Collab-marquee edge fade — logos dissolve exactly at the edges of the menu
+   content column. The column is px-4 wide on mobile and 80% of the viewport
+   (capped at 1500px) from sm: up, so --edge mirrors that. Fully transparent
+   AT the column edge, fully opaque --fade inside it. */
+.collab-fade {
+  --edge: 1rem;
+  --fade: 48px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent var(--edge),
+    #000 calc(var(--edge) + var(--fade)),
+    #000 calc(100% - var(--edge) - var(--fade)),
+    transparent calc(100% - var(--edge))
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent var(--edge),
+    #000 calc(var(--edge) + var(--fade)),
+    #000 calc(100% - var(--edge) - var(--fade)),
+    transparent calc(100% - var(--edge))
+  );
+}
+@media (min-width: 640px) {
+  .collab-fade {
+    --edge: max(10vw, (100vw - 1500px) / 2);
+    --fade: 96px;
+  }
+}
+
 /* Power-on sweep used when the page first loads */
 @keyframes power-on {
   0% {
@@ -411,7 +440,8 @@ video {
   .crt-rollbar,
   .crt-scanlines,
   .crt-static,
-  .crt-rollwrap {
+  .crt-rollwrap,
+  .crt-vignette {
     display: none !important;
   }
   .grid-floor {

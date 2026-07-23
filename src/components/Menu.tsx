@@ -30,44 +30,10 @@ export default function Menu() {
   const [active, setActive] = useState("sandos");
   const current = CATEGORIES.find((c) => c.key === active) ?? CATEGORIES[0];
 
-  // The title, tabs and list rise + fade in each time the menu is revealed by
-  // the hero→menu transition (which dispatches "menu:reveal"). They start hidden
-  // so nothing shows behind the hero.
+  // The menu content renders in place with no entrance animation — the
+  // hero→menu morph transition provides all the motion, so the title, tabs
+  // and list are simply there once it completes.
   const sectionRef = useRef<HTMLElement>(null);
-  useGSAP(
-    () => {
-      // Slide-up entrance runs on EVERY viewport — mobile gets a shorter
-      // travel + tighter stagger so it stays snappy on touch hardware, while
-      // desktop keeps the fuller rise. Only prefers-reduced-motion skips it.
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
-      const mobile = window.matchMedia("(max-width: 767px)").matches;
-      const targets = gsap.utils.toArray<HTMLElement>(
-        "[data-reveal]",
-        sectionRef.current,
-      );
-      gsap.set(targets, { autoAlpha: 0 });
-      const play = () =>
-        gsap.fromTo(
-          targets,
-          { y: mobile ? 32 : 60, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            // Mobile stays inside the ~500ms transition budget with a tight
-            // 60ms stagger — all speed up front (strong ease-out), so the
-            // menu answers the swipe instead of trailing it.
-            duration: mobile ? 0.55 : 0.85,
-            stagger: mobile ? 0.06 : 0.12,
-            ease: "power3.out",
-            overwrite: true,
-          },
-        );
-      window.addEventListener("menu:reveal", play);
-      return () => window.removeEventListener("menu:reveal", play);
-    },
-    { scope: sectionRef },
-  );
 
   // Mála-Project-style tab transition: the list cross-dissolves while the
   // background gradient smoothly morphs to the new palette.
@@ -201,7 +167,6 @@ export default function Menu() {
               Letter gap set with tracking so Arial Black fits on a single line
               at narrower desktop widths. */}
           <h2
-            data-reveal
             aria-label="Menu"
             style={{ color: theme.accent }}
             className="title-shadow menu-title block w-full whitespace-nowrap text-center font-arialblack tracking-[0.04em] text-[17vw] leading-none [text-box:trim-both_cap_alphabetic] pt-[7px] pb-[17px] sm:text-[14rem]"
@@ -215,10 +180,7 @@ export default function Menu() {
           {/* Category tabs — 5px breathing room above/below the tab caps so
               the surrounding rules sit at a consistent gap. text-box trim
               hugs the line to cap height so pt/pb match what you see. */}
-          <nav
-            data-reveal
-            className="flex flex-wrap items-baseline justify-center gap-x-5 gap-y-1 [text-box:trim-both_cap_alphabetic] pt-[5px] pb-[5px] sm:gap-x-10"
-          >
+          <nav className="flex flex-wrap items-baseline justify-center gap-x-5 gap-y-1 [text-box:trim-both_cap_alphabetic] pt-[5px] pb-[5px] sm:gap-x-10">
           {CATEGORIES.map((c, i) => {
             const isActive = active === c.key;
             return (
@@ -255,7 +217,7 @@ export default function Menu() {
           {/* end header rail */}
 
         {/* Active category */}
-        <div data-reveal className="mt-8">
+        <div className="mt-8">
           <div ref={catRef}>
             {active === "sandos" && <MealDealBanner />}
             {active === "drinks" && <BestSellers />}

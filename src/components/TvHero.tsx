@@ -61,13 +61,24 @@ export default function TvHero({
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   useEffect(() => {
     if (!videoSrc) return;
-    const small = window.matchMedia("(max-width: 640px)").matches;
-    // setResolvedSrc(
-    //   cldUrl(videoSrc, small ? { transform: "w_1080,h_1920,c_fill" } : {}),
-    // );
-    setResolvedSrc(
-      cldUrl(videoSrc, small ? { transform: "w_540,h_1920,c_fill" } : {}),
-    );
+    const mq = window.matchMedia("(max-width: 640px)");
+    // Desktop gets q_auto:best — the default q_auto visibly softens the
+    // full-screen stream; :best keeps Cloudinary's format auto-negotiation
+    // but backs off the compression to the highest automatic tier.
+    const resolve = () =>
+      setResolvedSrc(
+        cldUrl(
+          videoSrc,
+          mq.matches
+            ? { transform: "w_540,h_1920,c_fill" }
+            : { quality: "q_auto:best" },
+        ),
+      );
+    resolve();
+    // Re-resolve if the viewport crosses the breakpoint (tablet rotation,
+    // window resize) so a desktop-sized screen never keeps the phone crop.
+    mq.addEventListener("change", resolve);
+    return () => mq.removeEventListener("change", resolve);
   }, [videoSrc]);
 
   useEffect(() => {
@@ -142,6 +153,10 @@ export default function TvHero({
       >
         {videoSrc && resolvedSrc ? (
           <video
+            // Keyed by the resolved URL — swapping a <source> child never
+            // reloads an already-playing video, so crossing the mobile/desktop
+            // breakpoint would silently keep the wrong rendition.
+            key={resolvedSrc}
             ref={videoRef}
             className="h-full w-full scale-[1.06] object-cover"
             aria-label="Café Mama & Sons — Filipino-Japanese café, bakery & sandos on Kentish Town Road, London"

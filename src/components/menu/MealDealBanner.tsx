@@ -176,7 +176,7 @@ export default function MealDealBanner() {
           alt="Cafe Mama meal deal tray"
           loading="lazy"
           decoding="async"
-          className="pointer-events-none absolute bottom-[-60%] right-[-12.5%] z-10 w-[62.5%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-45%] right-[-12.5%] z-10 w-[62.5%] rotate-[3deg] drop-shadow-[0_12px_18px_rgba(0,0,0,0.4)] sm:bottom-[-60%]"
         />
         <img
           data-md-item
@@ -184,7 +184,7 @@ export default function MealDealBanner() {
           alt="Spanish latte"
           loading="lazy"
           decoding="async"
-          className="pointer-events-none absolute bottom-[-32.5%] left-[-17.5%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-17.5%] left-[-17.5%] z-20 w-[45%] -rotate-[8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)] sm:bottom-[-32.5%]"
         />
         <img
           data-md-item
@@ -192,7 +192,7 @@ export default function MealDealBanner() {
           alt="Jonas portrait"
           loading="lazy"
           decoding="async"
-          className="pointer-events-none absolute bottom-[-27.5%] left-[55%] z-50 aspect-square w-[15%] rounded-full object-cover -rotate-[-8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-12.5%] left-[55%] z-50 aspect-square w-[15%] rounded-full object-cover -rotate-[-8deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)] sm:bottom-[-27.5%]"
         />
         <img
           data-md-item
@@ -200,7 +200,7 @@ export default function MealDealBanner() {
           alt="Toasted sando"
           loading="lazy"
           decoding="async"
-          className="pointer-events-none absolute bottom-[-70%] left-[-2.5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-55%] left-[-2.5%] z-40 w-[60%] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)] sm:bottom-[-70%]"
         />
         <img
           data-md-item
@@ -208,7 +208,7 @@ export default function MealDealBanner() {
           alt="Flat white"
           loading="lazy"
           decoding="async"
-          className="pointer-events-none absolute bottom-[-47.5%] left-[52.5%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)]"
+          className="pointer-events-none absolute bottom-[-32.5%] left-[52.5%] z-30 w-[40%] -translate-x-1/2 -rotate-[-4deg] drop-shadow-[0_12px_16px_rgba(0,0,0,0.4)] sm:bottom-[-47.5%]"
         />
 
         {/* eslint-disable-next-line @next/next/no-img-element */}

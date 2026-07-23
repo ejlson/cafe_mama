@@ -39,6 +39,9 @@ type UrlOpts = {
   // Cloudinary transformation segment, e.g. "w_800,c_fill,g_auto".
   // f_auto/q_auto are applied automatically for image+video.
   transform?: string;
+  // Overrides the default q_auto, e.g. "q_auto:best" for hero media where
+  // compression artefacts would show. Ignored for raw assets.
+  quality?: string;
 };
 
 export function cldUrl(localPath: string, opts: UrlOpts = {}): string {
@@ -46,7 +49,7 @@ export function cldUrl(localPath: string, opts: UrlOpts = {}): string {
   if (!entry) return localPath; // fall back to /public during dev/migration
   const base = `https://res.cloudinary.com/${m.cloudName}`;
   const transforms: string[] = [];
-  if (entry.kind !== "raw") transforms.push("f_auto", "q_auto");
+  if (entry.kind !== "raw") transforms.push("f_auto", opts.quality ?? "q_auto");
   if (opts.transform) transforms.push(opts.transform);
   const tx = transforms.length ? `${transforms.join(",")}/` : "";
   return `${base}/${entry.kind}/upload/${tx}${entry.publicId}${entry.ext}`;

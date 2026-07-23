@@ -15,10 +15,13 @@ export default function CrtOverlay() {
       <div className="screen-box crt-rollwrap" aria-hidden>
         <div className="crt-rollbar" />
       </div>
-      {/* Soft tube vignette around the full-screen picture */}
+      {/* Soft tube vignette around the full-screen picture. Hidden on mobile
+          with the rest of the CRT layers (globals.css perf/clean pass) — the
+          big soft inset shadow reads as visible banding lines on phone
+          screens and darkens the content edges. */}
       <div
         aria-hidden
-        className="screen-box"
+        className="screen-box crt-vignette"
         style={{
           zIndex: 82,
           boxShadow: "inset 0 0 26vw rgba(0,0,0,0.4)",

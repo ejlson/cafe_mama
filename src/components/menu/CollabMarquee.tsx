@@ -137,22 +137,16 @@ export default function CollabMarquee({ accent }: { accent: string }) {
         as seen in or collaborated with
       </p>
       {/* smooothy wrapper: flex + overflow-hidden, direct children are slides.
-          Mask aligns the fully-opaque band with the horizontal rules that
-          frame this section: FullRule is `w-[calc(100%+2rem)]` of the
-          1500 px content container, so its max span is 1532 px (1500 +
-          2×16 px overhang). Fade spans 60 px OUTSIDE that boundary for a
-          soft dissolve past the rule ends.
+          .collab-fade (globals.css) masks the strip so logos dissolve exactly
+          at the edges of the menu content column on every viewport — fully
+          transparent at the column edge, fully opaque a short fade inside it —
+          so nothing (logo OR its drop-shadow) is ever hard-cropped by the
+          viewport edge.
           py-10 gives the drop-shadows enough vertical room that the parent
           menu section's overflow-hidden doesn't clip them. */}
       <div
         ref={track}
-        className="flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
-        style={{
-          WebkitMaskImage:
-            "linear-gradient(to right, transparent 0, transparent calc(max(0px, (100vw - 1532px) / 2) - 60px), black max(0px, calc((100vw - 1532px) / 2)), black calc(100% - max(0px, (100vw - 1532px) / 2)), transparent calc(100% - max(0px, (100vw - 1532px) / 2) + 60px), transparent 100%)",
-          maskImage:
-            "linear-gradient(to right, transparent 0, transparent calc(max(0px, (100vw - 1532px) / 2) - 60px), black max(0px, calc((100vw - 1532px) / 2)), black calc(100% - max(0px, (100vw - 1532px) / 2)), transparent calc(100% - max(0px, (100vw - 1532px) / 2) + 60px), transparent 100%)",
-        }}
+        className="collab-fade flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
       >
         {logos.map((logo, i) => (
           <div
