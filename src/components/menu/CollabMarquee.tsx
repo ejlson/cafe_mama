@@ -146,12 +146,15 @@ export default function CollabMarquee({ accent }: { accent: string }) {
           menu section's overflow-hidden doesn't clip them. */}
       <div
         ref={track}
-        className="collab-fade flex cursor-grab overflow-x-clip overflow-y-visible py-10 active:cursor-grabbing"
+        // py-14: at the larger slide size the centre scale-up (×1.45) plus
+        // the 8px-offset/14px-blur drop-shadow reaches ~50px past the slide
+        // box — py-10 was clipping the shadow's soft tail.
+        className="collab-fade flex cursor-grab overflow-x-clip overflow-y-visible py-14 active:cursor-grabbing"
       >
         {logos.map((logo, i) => (
           <div
             key={i}
-            className="h-16 w-36 shrink-0 select-none px-3 sm:h-24 sm:w-56 sm:px-6"
+            className="h-20 w-44 shrink-0 select-none px-3 sm:h-28 sm:w-64 sm:px-6"
           >
             <div
               data-p
@@ -165,7 +168,15 @@ export default function CollabMarquee({ accent }: { accent: string }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 data-logo
-                src={cldUrl(logo.src, { transform: "w_400,c_limit" })}
+                // Animated GIFs cap at w_400 — Cloudinary refuses to derive
+                // larger animated renditions (every frame counts against the
+                // megapixel limit, so w_600 400s). Static logos get w_600 to
+                // stay sharp at the larger slide size.
+                src={cldUrl(logo.src, {
+                  transform: logo.src.toLowerCase().endsWith(".gif")
+                    ? "w_400,c_limit"
+                    : "w_600,c_limit",
+                })}
                 alt={logo.alt}
                 loading="lazy"
                 draggable={false}

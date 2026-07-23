@@ -40,10 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local tooling / agent scratch
-/.claude
-/.agents
-/skills-lock.json
+# local tooling scratch
 /_m.mjs
 
 # large media (kept out of git — source + served binaries)
@@ -52,9 +49,6 @@ next-env.d.ts
 /vidoes
 /public/media
 /public/focusvideos
-
-# Claude files (local agent config — never committed)
-CLAUDE.md
 
 # cloudflare (OpenNext build output + wrangler state + local worker secrets)
 /.open-next

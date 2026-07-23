@@ -27,10 +27,15 @@ export default function CafeDescription({ accent }: { accent: string }) {
       // Interactive physics: motion is horizontal-only. The cursor shoves words
       // left/right and they collide with each other (resolved along x) so they
       // slide their neighbours aside instead of overlapping, then spring back
-      // home. Words can also be dragged left/right. Skip on touch / reduced.
+      // home. Words can also be dragged left/right.
+      // Touch devices run the SAME sim minus the pointer extras: the entrance
+      // slide-in, scroll shove and random self-nudges all work (they only
+      // inject velocity), while the cursor-follow shove and Draggable — which
+      // need a hovering pointer — stay desktop-only. Only reduced motion
+      // skips everything.
       const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
       const box = root.current?.querySelector<HTMLElement>(".cafe-box");
-      if (reduce || !fine || !words.length || !box) return;
+      if (reduce || !words.length || !box) return;
 
       const n = words.length;
       const dispX = new Array(n).fill(0); // physics target offset from home
@@ -267,30 +272,39 @@ export default function CafeDescription({ accent }: { accent: string }) {
       const onLeave = () => {
         hot = false;
       };
-      el.addEventListener("pointermove", onMove);
-      el.addEventListener("pointerleave", onLeave);
+      // Cursor shove + drag are hover-pointer interactions — desktop only.
+      // (On touch, `hot` stays false and `dragging` stays empty, so the sim
+      // just runs the scroll/self-nudge slides.)
+      if (fine) {
+        el.addEventListener("pointermove", onMove);
+        el.addEventListener("pointerleave", onLeave);
+      }
       window.addEventListener("resize", measure);
 
       // Drag: grab a word and slide it left/right through the others; on release
       // the sim springs it back home.
-      const draggables = words.flatMap((w) =>
-        Draggable.create(w, {
-          type: "x",
-          inertia: false,
-          onPress() {
-            dragging.add(w);
-          },
-          onRelease() {
-            dragging.delete(w);
-          },
-        }),
-      );
+      const draggables = fine
+        ? words.flatMap((w) =>
+            Draggable.create(w, {
+              type: "x",
+              inertia: false,
+              onPress() {
+                dragging.add(w);
+              },
+              onRelease() {
+                dragging.delete(w);
+              },
+            }),
+          )
+        : [];
 
       return () => {
         physIo.disconnect();
         gsap.ticker.remove(tick);
-        el.removeEventListener("pointermove", onMove);
-        el.removeEventListener("pointerleave", onLeave);
+        if (fine) {
+          el.removeEventListener("pointermove", onMove);
+          el.removeEventListener("pointerleave", onLeave);
+        }
         window.removeEventListener("resize", measure);
         window.removeEventListener("scroll", onScrollSlide);
         draggables.forEach((d) => d.kill());
@@ -313,7 +327,9 @@ export default function CafeDescription({ accent }: { accent: string }) {
         >
           {CAFE_DESC.split(" ").map((word, wi) => (
             <span key={wi} aria-hidden>
-              <span className="cafe-word inline-block cursor-grab touch-none select-none whitespace-nowrap will-change-transform active:cursor-grabbing">
+              {/* pan-y (not touch-none) — a swipe starting on a word must
+                  still scroll the page on mobile; Draggable is mouse-only. */}
+              <span className="cafe-word inline-block cursor-grab select-none whitespace-nowrap will-change-transform [touch-action:pan-y] active:cursor-grabbing">
                 {word.split("").map((ch, ci) => (
                   <span key={ci} className="cafe-char inline-block">
                     {ch}

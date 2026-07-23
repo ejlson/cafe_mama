@@ -147,7 +147,7 @@ export const DRINKS_GROUPS: Group[] = [
   {
     title: "Tea",
     items: [
-      { name: "Calamansi Ade/Tea", price: "4.70" },
+      { name: "Calamansi Tea", price: "4.70" },
       { name: "Honey Peach Mango", price: "4.70" },
       { name: "Strawberry Tea", price: "4.70" },
       { name: "Spanish Hojicha (Iced/Hot)", price: "6.00" },
@@ -159,7 +159,7 @@ export const DRINKS_GROUPS: Group[] = [
     items: [
       { name: "Mango Float", price: "8.50" },
       { name: "Chocnut", price: "8.50" },
-      { name: "Avocado Pandan", price: "8.50" },
+      { name: "Ube-rry", price: "8.50" },
     ],
   },
 ];
