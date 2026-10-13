@@ -1,0 +1,10 @@
+{
+  "project": "xts9qlfm",
+  "dataset": "production",
+  "apiVersion": "2025-02-19",
+  "site": "cafemama",
+  "query": "*[_type == \"post\" && kind == \"ours\" && $site in restaurants && defined(slug.current)] | order(date desc) { \"slug\": slug.current, title, date, summary, author, keywords, \"featured\": $site in featuredOn, \"image\": image{ alt, \"asset\": asset->{ _id, url, \"w\": metadata.dimensions.width, \"h\": metadata.dimensions.height } }, body }",
+  "snapshot": "src/lib/cms-blog.json",
+  "imageDir": "public/cms",
+  "imagePath": "/cms"
+}
