@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/pull-cms.mjs --dev && next dev",
+    "build": "node scripts/pull-cms.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "remotion": "remotion studio src/remotion/index.ts",
     "remotion:render": "remotion render src/remotion/index.ts HeroBroadcast out/hero.mp4",
-    "cloudinary:upload": "node --env-file=.env.local scripts/upload-to-cloudinary.mjs"
+    "cloudinary:upload": "node --env-file=.env.local scripts/upload-to-cloudinary.mjs",
+    "pull-cms": "node scripts/pull-cms.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

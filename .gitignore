@@ -54,3 +54,9 @@ next-env.d.ts
 /.open-next
 /.wrangler
 .dev.vars
+
+# the blog, pulled from the Maginhawa Group's CMS by scripts/pull-cms.mjs
+# before every `npm run dev` and `npm run build` — never committed
+/src/lib/cms-blog.json
+/public/cms
+/public/cms.partial
