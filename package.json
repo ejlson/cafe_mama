@@ -10,10 +10,13 @@
     "remotion": "remotion studio src/remotion/index.ts",
     "remotion:render": "remotion render src/remotion/index.ts HeroBroadcast out/hero.mp4",
     "cloudinary:upload": "node --env-file=.env.local scripts/upload-to-cloudinary.mjs",
-    "pull-cms": "node scripts/pull-cms.mjs"
+    "pull-cms": "node scripts/pull-cms.mjs",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@opennextjs/cloudflare": "1.20.2",
     "@react-three/fiber": "^9.6.1",
     "@remotion/cli": "^4.0.474",
     "@remotion/media": "^4.0.474",
@@ -37,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.11",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.113.0"
   }
 }
