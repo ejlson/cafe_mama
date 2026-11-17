@@ -396,22 +396,40 @@ export default function Footer() {
         // clears the shopfront navbar area and sits comfortably in the
         // footer's upper zone instead of hugging the top edge. Desktop
         // (sm:top-14, lg:right-16) unchanged.
-        className="absolute right-6 top-20 z-[50] flex flex-col items-end gap-2 sm:right-10 sm:top-14 lg:right-16"
+        className="absolute right-6 top-20 z-[50] flex flex-col items-end text-right [color:var(--foot-brand,#f4c33c)] sm:right-10 sm:top-14 lg:right-16"
       >
-        {ORDER_LINKS.map(({ href, label, Icon }) => (
-          <a
-            key={label}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] [color:var(--foot-brand,#f4c33c)] transition-opacity hover:opacity-70 sm:text-sm"
-          >
-            <span>{label}</span>
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
+        {/* contact block — heading, address, then the socials row. A
+            hairline rule separates the email from the icons so the three
+            read as one grouped unit rather than loose lines. */}
+        {/* -mr cancels the trailing letter-spacing so the heading's last
+            letter lines up flush with the email's right edge */}
+        <span className="-mr-[0.25em] text-[10px] font-semibold uppercase tracking-[0.25em] opacity-75 sm:text-xs">
+          Contact us here
+        </span>
+        <a
+          href="mailto:info@mgnhw.com"
+          className="mt-1.5 text-sm font-semibold tracking-[0.06em] transition-opacity hover:opacity-70 sm:text-base"
+        >
+          info@mgnhw.com
+        </a>
+        <span
+          aria-hidden
+          className="mt-3 h-px w-10 bg-current opacity-40"
+        />
+        <div className="mt-3 flex items-center gap-3">
+          {ORDER_LINKS.map(({ href, label, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={label}
+              className="flex h-5 w-5 shrink-0 items-center justify-center transition-opacity hover:opacity-70 sm:h-6 sm:w-6"
+            >
               <Icon className="h-full w-full" />
-            </span>
-          </a>
-        ))}
+            </a>
+          ))}
+        </div>
       </nav>
 
       {/* left rail — digital readout, edge-aligned, vertically centred with clock.
@@ -457,12 +475,12 @@ export default function Footer() {
           the top of the clock face. Bottom-anchored on mobile would collide
           with the W4WBadge / OpeningClock / FocusMode widget stack on the
           right rail, so top-anchored keeps it visible and uncluttered.
-          top pushed 6.5 → 11 so the "HH:MM · BST" line clears the
+          top pushed 6.5 → 11 → 12 so the "HH:MM · BST" line clears the
           Instagram / delivery nav (which sits at top-20 = 80px on mobile)
           with comfortable breathing room. */}
       {time && (
         <div
-          className="font-arialblack pointer-events-none absolute left-1/2 top-[11rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
+          className="font-arialblack pointer-events-none absolute left-1/2 top-[12rem] z-10 -translate-x-1/2 select-none whitespace-nowrap text-lg leading-none tracking-[0.12em] [color:var(--foot-brand,#f4c33c)] md:hidden"
         >
           {digital} · {time.tz}
         </div>
