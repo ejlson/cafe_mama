@@ -1,0 +1,269 @@
+{
+  "menus": {
+    "menu-cafemama-food": {
+      "restaurant": "cafemama",
+      "title": "Food",
+      "sections": [
+        {
+          "title": "Sando/Sandwiches",
+          "intro": "Japanese-style milk-bread sandos built around Filipino flavours — adobo, longanisa, jerk chicken — all on house-baked pandesal.",
+          "items": [
+            {
+              "name": "Chilli Kimchi Chicken",
+              "price": "9.00",
+              "description": "Crispy chicken, chilli crisp, kimchi mayo, American cheese, tomatoes and lettuce.",
+              "allergens": "crustacean, fish",
+              "photo": {
+                "src": "/cms-menu/8a8a75a216ddbb8853d9a3594e64806c36161f3a.jpg",
+                "alt": "Chilli Kimchi Chicken"
+              }
+            },
+            {
+              "name": "Egg Mayo",
+              "price": "8.50",
+              "description": "Creamy egg mayo with chives and onion.",
+              "photo": {
+                "src": "/cms-menu/6ca1e81584f7d85896a412380d9b6ec54b5289d7.jpg",
+                "alt": "Egg Mayo"
+              }
+            },
+            {
+              "name": "Tuna Melt",
+              "price": "8.50",
+              "description": "Tuna mayo with sweetcorn, topped with crispy melted cheddar.",
+              "photo": {
+                "src": "/cms-menu/aae2d0fa3f719389ea815d4722ecb2cb8b287a7c.jpg",
+                "alt": "Tuna Melt"
+              }
+            },
+            {
+              "name": "Jerk Chicken",
+              "price": "9.50",
+              "description": "Jerk chicken with mayo, fresh tomato and pesto.",
+              "photo": {
+                "src": "/cms-menu/bced3bcb33307812a766af77ff99e66b2206b865.jpg",
+                "alt": "Jerk Chicken"
+              }
+            },
+            {
+              "name": "Adobo Mushroom",
+              "price": "9.00",
+              "description": "Crispy croquette stuffed with creamy adobo mushrooms and rich pesto.",
+              "allergens": "soya",
+              "photo": {
+                "src": "/cms-menu/3f83b34fa1c1a537151e9366d5a8207973c18789.jpg",
+                "alt": "Adobo Mushroom"
+              }
+            },
+            {
+              "name": "Corned Beef",
+              "price": "10.50",
+              "description": "Corned beef croquette with lettuce and mayo.",
+              "allergens": "nuts, celery & crustaceans",
+              "photo": {
+                "src": "/cms-menu/5eab263d6b8fd19c0d5821f2dfc5703f4ca68989.jpg",
+                "alt": "Corned Beef"
+              }
+            }
+          ]
+        },
+        {
+          "title": "All-Day Breakfast",
+          "intro": "All-day pandesal breakfast: longanisa, egg mayo and Filipino classics, served from open to close.",
+          "items": [
+            {
+              "name": "Egg Pandesal",
+              "price": "5.50"
+            },
+            {
+              "name": "Longanisa Pandesal",
+              "price": "9.00"
+            }
+          ]
+        },
+        {
+          "title": "Sides",
+          "intro": "Quick bites to round the meal deal out — golden tater-tots and a rotating box of house-made nori crisps.",
+          "items": [
+            {
+              "name": "Box of Tater-Tots",
+              "price": "4.50"
+            },
+            {
+              "name": "Box of Crisps",
+              "price": "4.00"
+            }
+          ]
+        },
+        {
+          "title": "Baked Goods",
+          "intro": "Daily bakes from our Kentish Town counter: ube mochi croissant, cookie croissant, milo tiramisu, ensaymada and more.",
+          "items": [
+            {
+              "name": "Honey Toast",
+              "price": "2.99"
+            },
+            {
+              "name": "Honey Garlic Twist",
+              "price": "4.80"
+            },
+            {
+              "name": "Spanish Bread",
+              "price": "3.50"
+            },
+            {
+              "name": "Croissant",
+              "price": "2.90"
+            },
+            {
+              "name": "Cookie Croissant",
+              "price": "6.00"
+            },
+            {
+              "name": "Almond Croissant",
+              "price": "3.50"
+            },
+            {
+              "name": "Miso Cookie",
+              "price": "3.99"
+            },
+            {
+              "name": "Ube Bow",
+              "price": "4.90"
+            },
+            {
+              "name": "Ube Pain Au Chocolat",
+              "price": "5.50"
+            },
+            {
+              "name": "Pain Au Chocolat",
+              "price": "3.00"
+            },
+            {
+              "name": "Banana Pudding",
+              "price": "5.50"
+            }
+          ]
+        }
+      ]
+    },
+    "menu-cafemama-drinks": {
+      "restaurant": "cafemama",
+      "title": "Drinks",
+      "sections": [
+        {
+          "title": "Coffee",
+          "items": [
+            {
+              "name": "Espresso",
+              "price": "3.20"
+            },
+            {
+              "name": "Cortado",
+              "price": "3.50"
+            },
+            {
+              "name": "Macchiato",
+              "price": "3.50"
+            },
+            {
+              "name": "Flat White",
+              "price": "3.70"
+            },
+            {
+              "name": "Latte (Iced/Hot)",
+              "price": "3.90"
+            },
+            {
+              "name": "Cappuccino",
+              "price": "3.90"
+            },
+            {
+              "name": "Americano (Iced/Hot)",
+              "price": "3.5"
+            },
+            {
+              "name": "Spanish Latte (Iced/Hot)",
+              "price": "5.20"
+            },
+            {
+              "name": "Ube Latte (Iced/Hot)",
+              "price": "6.20"
+            },
+            {
+              "name": "Milo Latte (Iced/Hot)",
+              "price": "6.20"
+            }
+          ]
+        },
+        {
+          "title": "Matcha",
+          "items": [
+            {
+              "name": "Mango Matcha",
+              "price": "5.70"
+            },
+            {
+              "name": "Strawberry Matcha",
+              "price": "5.70"
+            },
+            {
+              "name": "Spanish Matcha (Iced/Hot)",
+              "price": "5.20"
+            },
+            {
+              "name": "Ube Matcha (Iced/Hot)",
+              "price": "6.20"
+            },
+            {
+              "name": "Milo Matcha (Iced/Hot)",
+              "price": "6.20"
+            }
+          ]
+        },
+        {
+          "title": "Tea",
+          "items": [
+            {
+              "name": "Calamansi Tea",
+              "price": "4.70"
+            },
+            {
+              "name": "Honey Peach Mango",
+              "price": "4.70"
+            },
+            {
+              "name": "Strawberry Tea",
+              "price": "4.70"
+            },
+            {
+              "name": "Spanish Hojicha (Iced/Hot)",
+              "price": "6.00"
+            },
+            {
+              "name": "Milo Hojicha (Iced/Hot)",
+              "price": "6.00"
+            }
+          ]
+        },
+        {
+          "title": "Protein Shake",
+          "items": [
+            {
+              "name": "Mango Float",
+              "price": "8.50"
+            },
+            {
+              "name": "Chocnut",
+              "price": "8.50"
+            },
+            {
+              "name": "Ube-rry",
+              "price": "8.50"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
