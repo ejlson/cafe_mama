@@ -140,7 +140,8 @@ function checkMenu(id, doc) {
       if (!isStr(i.price) || !i.price.trim()) fail(`${dish} has no price.`);
       if (!optStr(i.description) || !optStr(i.allergens)) fail(`${dish} has a malformed field.`);
       if (i.hide != null && typeof i.hide !== "boolean") fail(`${dish} has a malformed "hide".`);
-      if (i.photo != null && !i.photo.asset) fail(`${dish} has a photo with no image.`);
+      // A photo with no image is no photo: removing an image in the Studio
+      // keeps its alt text behind, and that must not stop every build.
       if (i.photo?.asset) hashOf(i.photo.asset); // the id and host checks
     });
   });
