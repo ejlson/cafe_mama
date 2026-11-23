@@ -21,5 +21,23 @@
   },
   "observability": {
     "enabled": true
+  },
+  "env": {
+    // `npm run preview:deploy`: a separate Worker, cafemama-preview, on its
+    // workers.dev address only, to check a change before it goes live. The
+    // top-level Worker above, cafemama, is the live site. Bindings are not
+    // inherited by an environment, so they are repeated here.
+    "preview": {
+      "name": "cafemama-preview",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "cafemama-preview"
+        }
+      ],
+      "images": {
+        "binding": "IMAGES"
+      }
+    }
   }
 }

@@ -13,7 +13,8 @@
     "cloudinary:upload": "node --env-file=.env.local scripts/upload-to-cloudinary.mjs",
     "pull-cms": "node scripts/pull-cms.mjs",
     "preview": "npm run build && opennextjs-cloudflare preview",
-    "deploy": "npm run build && opennextjs-cloudflare deploy"
+    "deploy": "npm run build && opennextjs-cloudflare deploy",
+    "preview:deploy": "npm run build && opennextjs-cloudflare deploy --env preview"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

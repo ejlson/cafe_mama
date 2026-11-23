@@ -60,3 +60,4 @@ next-env.d.ts
 /src/lib/cms-blog.json
 /public/cms
 /public/cms.partial
+/public/cms-menu.partial

@@ -1,4 +1,4 @@
-// Single source of truth for the cafe's menu. Rendered by the Menu section
+// The cafe's menu, as the site's code sees it. Rendered by the Menu section
 // and read by the cafe-reply "mini LLM" (src/lib/cafe-brain.ts) so comment
 // replies always quote real items, prices and hours.
 
@@ -22,161 +22,97 @@ export type Category = {
   soon?: boolean;
 };
 
-// Short, descriptive blurbs sat to the right of each food group header — these
-// are the first menu copy Google sees on the page, so each one names what the
-// section is and the standout item in it.
-export const BLURB_SANDOS =
-  "Japanese-style milk-bread sandos built around Filipino flavours — adobo, longanisa, jerk chicken — all on house-baked pandesal.";
-export const BLURB_BREAKFAST =
-  "All-day pandesal breakfast: longanisa, egg mayo and Filipino classics, served from open to close.";
-export const BLURB_SIDES =
-  "Quick bites to round the meal deal out — golden tater-tots and a rotating box of house-made nori crisps.";
-export const BLURB_BAKED =
-  "Daily bakes from our Kentish Town counter: ube mochi croissant, cookie croissant, milo tiramisu, ensaymada and more.";
+// SINCE 2026-11-23 THE MENU IS EDITED IN THE CMS, not here: the Maginhawa
+// Group's shared Sanity Studio, documents menu-cafemama-food (the Food tab)
+// and menu-cafemama-drinks (Drinks). scripts/pull-cms.mjs saves them into the
+// committed src/lib/menu.snapshot.json, dish photos into public/cms-menu,
+// before every `npm run dev` and `npm run build`. This file only turns that
+// snapshot back into the shapes below, which the components and the brain
+// already read. Section heading -> group title, intro -> blurb,
+// description -> desc. A dish ticked "Hide for now" is left out, and so is a
+// section with nothing left in it.
+//
+// What stays in code: the tab keys and labels, each photo's tilt and size,
+// CAFE_DESC and CAFE_FACTS (hours and the meal deal are not in the CMS).
 
-export const SANDOS: Item[] = [
-  {
-    name: "Chilli Kimchi Chicken",
-    price: "9.00",
-    desc: "Crispy chicken, chilli crisp, kimchi mayo, American cheese, tomatoes and lettuce.",
-    allergens: "crustacean, fish",
-    img: "/media/sandos/chilli-kimchi-chicken.jpg",
-    angle: -7,
-    w: 230,
-    h: 300,
-  },
-  {
-    name: "Egg Mayo",
-    price: "8.50",
-    desc: "Creamy egg mayo with chives and onion.",
-    img: "/media/sandos/egg-mayo.jpg",
-    angle: 5,
-    w: 290,
-    h: 200,
-  },
-  {
-    name: "Tuna Melt",
-    price: "8.50",
-    desc: "Tuna mayo with sweetcorn, topped with crispy melted cheddar.",
-    img: "/media/sandos/tuna-melt.jpg",
-    angle: -3,
-    w: 220,
-    h: 260,
-  },
-  {
-    name: "Jerk Chicken",
-    price: "9.50",
-    desc: "Jerk chicken with mayo, fresh tomato and pesto.",
-    img: "/media/sandos/jerk-chicken.jpg",
-    angle: 8,
-    w: 310,
-    h: 215,
-  },
-  {
-    name: "Adobo Mushroom",
-    price: "9.00",
-    desc: "Crispy croquette stuffed with creamy adobo mushrooms and rich pesto.",
-    allergens: "soya",
-    img: "/media/sandos/adobo-mushroom.jpg",
-    angle: -9,
-    w: 240,
-    h: 295,
-  },
-  {
-    name: "Corned Beef",
-    price: "10.50",
-    desc: "Corned beef croquette with lettuce and mayo.",
-    allergens: "nuts, celery & crustaceans",
-    img: "/media/sandos/corned-beef.jpg",
-    angle: 4,
-    w: 265,
-    h: 205,
-  },
-];
+import snapshot from "./menu.snapshot.json";
 
-export const SIDES: Item[] = [
-  { name: "Box of Tater-Tots", price: "4.50" },
-  { name: "Box of Crisps", price: "4.00" },
-];
+type SnapshotItem = {
+  name: string;
+  price: string;
+  description?: string;
+  allergens?: string;
+  photo?: { src: string; alt: string };
+  hide?: boolean;
+};
+type SnapshotSection = { title: string; intro?: string; items: SnapshotItem[] };
+type SnapshotMenu = { restaurant: string; title: string; sections: SnapshotSection[] };
 
-export const PANDESAL: Item[] = [
-  { name: "Egg Pandesal", price: "5.50" },
-  { name: "Longanisa Pandesal", price: "9.00" },
-];
+const MENUS = (snapshot as { menus: Record<string, SnapshotMenu> }).menus;
 
-export const BAKED: Item[] = [
-  { name: "Honey Toast", price: "2.99" },
-  { name: "Honey Garlic Twist", price: "4.80" },
-  { name: "Spanish Bread", price: "3.50" },
-  { name: "Croissant", price: "2.90" },
-  { name: "Cookie Croissant", price: "6.00" },
-  { name: "Almond Croissant", price: "3.50" },
-  { name: "Miso Cookie", price: "3.99" },
-  { name: "Ube Bow", price: "4.90" },
-  { name: "Ube Pain Au Chocolat", price: "5.50" },
-  { name: "Pain Au Chocolat", price: "3.00" },
-  { name: "Banana Pudding", price: "5.50" },
-];
+// Tilt and size of a dish photo. The six sandos keep the values they were
+// hand-placed with; any other dish with a photo takes the next one from this
+// same pattern, by its place among the photographed dishes on its tab, so a
+// new dish looks deliberate rather than random.
+type Pose = Required<Pick<Item, "angle" | "w" | "h">>;
+const POSES: Record<string, Pose> = {
+  "Chilli Kimchi Chicken": { angle: -7, w: 230, h: 300 },
+  "Egg Mayo": { angle: 5, w: 290, h: 200 },
+  "Tuna Melt": { angle: -3, w: 220, h: 260 },
+  "Jerk Chicken": { angle: 8, w: 310, h: 215 },
+  "Adobo Mushroom": { angle: -9, w: 240, h: 295 },
+  "Corned Beef": { angle: 4, w: 265, h: 205 },
+};
+const POSE_PATTERN = Object.values(POSES);
 
-export const DRINKS_GROUPS: Group[] = [
-  {
-    title: "Coffee",
-    items: [
-      { name: "Espresso", price: "3.20" },
-      { name: "Cortado", price: "3.50" },
-      { name: "Macchiato", price: "3.50" },
-      { name: "Flat White", price: "3.70" },
-      { name: "Latte (Iced/Hot)", price: "3.90" },
-      { name: "Cappuccino", price: "3.90" },
-      { name: "Americano (Iced/Hot)", price: "3.5" },
-      { name: "Spanish Latte (Iced/Hot)", price: "5.20" },
-      { name: "Ube Latte (Iced/Hot)", price: "6.20" },
-      { name: "Milo Latte (Iced/Hot)", price: "6.20" },
-    ],
-  },
-  {
-    title: "Matcha",
-    items: [
-      { name: "Mango Matcha", price: "5.70" },
-      { name: "Strawberry Matcha", price: "5.70" },
-      { name: "Spanish Matcha (Iced/Hot)", price: "5.20" },
-      { name: "Ube Matcha (Iced/Hot)", price: "6.20" },
-      { name: "Milo Matcha (Iced/Hot)", price: "6.20" },
-    ],
-  },
-  {
-    title: "Tea",
-    items: [
-      { name: "Calamansi Tea", price: "4.70" },
-      { name: "Honey Peach Mango", price: "4.70" },
-      { name: "Strawberry Tea", price: "4.70" },
-      { name: "Spanish Hojicha (Iced/Hot)", price: "6.00" },
-      { name: "Milo Hojicha (Iced/Hot)", price: "6.00" },
-    ],
-  },
-  {
-    title: "Protein Shake",
-    items: [
-      { name: "Mango Float", price: "8.50" },
-      { name: "Chocnut", price: "8.50" },
-      { name: "Ube-rry", price: "8.50" },
-    ],
-  },
-];
+function toGroups(id: string): Group[] {
+  const menu = MENUS[id];
+  if (!menu) throw new Error(`menu-data: ${id} is missing from menu.snapshot.json`);
+  let photo = 0;
+  const groups: Group[] = [];
+  for (const s of menu.sections) {
+    const items: Item[] = [];
+    for (const i of s.items) {
+      if (i.hide) continue;
+      const item: Item = { name: i.name, price: i.price };
+      if (i.description) item.desc = i.description;
+      if (i.allergens) item.allergens = i.allergens;
+      if (i.photo) {
+        item.img = i.photo.src;
+        Object.assign(item, POSES[i.name] ?? POSE_PATTERN[photo % POSE_PATTERN.length]);
+        photo++;
+      }
+      items.push(item);
+    }
+    if (items.length === 0) continue;
+    groups.push(s.intro ? { title: s.title, items, blurb: s.intro } : { title: s.title, items });
+  }
+  return groups;
+}
 
 export const CATEGORIES: Category[] = [
-  {
-    key: "sandos",
-    label: "Food",
-    groups: [
-      { title: "Sando/Sandwiches", items: SANDOS, blurb: BLURB_SANDOS },
-      { title: "All-Day Breakfast", items: PANDESAL, blurb: BLURB_BREAKFAST },
-      { title: "Sides", items: SIDES, blurb: BLURB_SIDES },
-      { title: "Baked Goods", items: BAKED, blurb: BLURB_BAKED },
-    ],
-  },
-  { key: "drinks", label: "Drinks", groups: DRINKS_GROUPS },
+  { key: "sandos", label: "Food", groups: toGroups("menu-cafemama-food") },
+  { key: "drinks", label: "Drinks", groups: toGroups("menu-cafemama-drinks") },
 ];
+
+// The older per-section exports, kept so nothing that imports them breaks.
+// They follow the section headings the menu had when it moved into the CMS;
+// a section that has been renamed, hidden or removed comes back empty.
+const FOOD = CATEGORIES[0].groups ?? [];
+const group = (title: string) => FOOD.find((g) => g.title === title);
+
+export const SANDOS: Item[] = group("Sando/Sandwiches")?.items ?? [];
+export const PANDESAL: Item[] = group("All-Day Breakfast")?.items ?? [];
+export const SIDES: Item[] = group("Sides")?.items ?? [];
+export const BAKED: Item[] = group("Baked Goods")?.items ?? [];
+export const DRINKS_GROUPS: Group[] = CATEGORIES[1].groups ?? [];
+
+// The blurbs beside each food group header are the first menu copy Google
+// sees on the page, so each one names what the section is and its standout.
+export const BLURB_SANDOS = group("Sando/Sandwiches")?.blurb ?? "";
+export const BLURB_BREAKFAST = group("All-Day Breakfast")?.blurb ?? "";
+export const BLURB_SIDES = group("Sides")?.blurb ?? "";
+export const BLURB_BAKED = group("Baked Goods")?.blurb ?? "";
 
 export const CAFE_DESC =
   "Cafe Mama & Sons is a Filipino-Japanese café serving freshly made sandos, all-day pandesal breakfast meals, unique drinks, and baked goods.";
