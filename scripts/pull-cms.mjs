@@ -163,6 +163,10 @@ async function pullMenus() {
     for (const s of doc.sections) {
       const items = [];
       for (const i of s.items) {
+        /* A dish ticked "Hide for now" never reaches the snapshot, nor its
+           photo the site: both are committed, and the menu ships in the
+           page's public JavaScript, where a hidden dish would be readable. */
+        if (i.hide) continue;
         const a = i.photo?.asset;
         if (a && !saved.has(a._id)) {
           saved.set(
@@ -177,10 +181,9 @@ async function pullMenus() {
           ...(i.description ? { description: i.description } : {}),
           ...(i.allergens ? { allergens: i.allergens } : {}),
           ...(a ? { photo: { src: saved.get(a._id), alt: i.photo.alt ?? "" } } : {}),
-          ...(i.hide ? { hide: true } : {}),
         });
       }
-      sections.push({ title: s.title, ...(s.intro ? { intro: s.intro } : {}), items });
+      if (items.length) sections.push({ title: s.title, ...(s.intro ? { intro: s.intro } : {}), items });
     }
     menus[id] = { restaurant: doc.restaurant, title: doc.title, sections };
   }
